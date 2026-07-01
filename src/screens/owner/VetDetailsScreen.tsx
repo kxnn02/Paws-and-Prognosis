@@ -107,6 +107,12 @@ export default function VetDetailsScreen() {
         {/* Contact Actions */}
         <View className="mx-5 mt-6 flex-row gap-3">
           <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('ChatConversation', {
+                threadId: vet.user_id,
+                participantName: vet.name,
+              })
+            }
             className="flex-1 bg-white rounded-btn h-[48px] flex-row items-center justify-center border border-gray-200"
             activeOpacity={0.7}
           >
