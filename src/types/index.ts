@@ -120,6 +120,7 @@ export type OwnerTabParamList = {
 export type OwnerStackParamList = {
   OwnerTabs: undefined;
   VetDetails: { vetId: string };
+  Booking: { vetId: string; vetName: string };
   BookingConfirmation: { appointmentId: string };
   MyPets: undefined;
   AddPet: undefined;

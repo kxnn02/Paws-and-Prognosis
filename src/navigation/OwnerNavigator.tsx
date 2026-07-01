@@ -7,6 +7,7 @@ import CalendarScreen from '../screens/owner/CalendarScreen';
 import ChatListScreen from '../screens/owner/ChatListScreen';
 import ProfileScreen from '../screens/owner/ProfileScreen';
 import VetDetailsScreen from '../screens/owner/VetDetailsScreen';
+import BookingScreen from '../screens/owner/BookingScreen';
 import MyPetsScreen from '../screens/owner/MyPetsScreen';
 import AddPetScreen from '../screens/owner/AddPetScreen';
 import PetProfileScreen from '../screens/owner/PetProfileScreen';
@@ -54,6 +55,7 @@ export default function OwnerNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="OwnerTabs" component={OwnerTabs} />
       <Stack.Screen name="VetDetails" component={VetDetailsScreen} />
+      <Stack.Screen name="Booking" component={BookingScreen} />
       <Stack.Screen name="MyPets" component={MyPetsScreen} />
       <Stack.Screen name="AddPet" component={AddPetScreen} />
       <Stack.Screen name="PetProfile" component={PetProfileScreen} />
