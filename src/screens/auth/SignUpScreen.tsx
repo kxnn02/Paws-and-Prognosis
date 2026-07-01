@@ -43,9 +43,15 @@ export default function SignUpScreen({ navigation }: Props) {
       return;
     }
     setLoading(true);
-    const { error } = await signUp(email, password, name, role);
+    const { error, needsConfirmation } = await signUp(email, password, name, role);
     if (error) {
       Alert.alert('Sign Up Failed', error.message);
+    } else if (needsConfirmation) {
+      Alert.alert(
+        'Check Your Email',
+        'We sent a confirmation link to your email. Please verify it before logging in.',
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+      );
     }
     setLoading(false);
   }

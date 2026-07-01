@@ -9,7 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   role: UserRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string, role: UserRole) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string, role: UserRole) => Promise<{ error: Error | null; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -84,9 +84,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
         });
         if (profileError) return { error: profileError as unknown as Error };
+
+        // If session exists (email confirmation disabled), fetch profile immediately
+        if (data.session) {
+          await fetchProfile(data.user.id);
+        }
       }
 
-      return { error: null };
+      // Return whether email confirmation is needed
+      const needsConfirmation = !!(data.user && !data.session);
+      return { error: null, needsConfirmation };
     } catch (error) {
       return { error: error as Error };
     }
