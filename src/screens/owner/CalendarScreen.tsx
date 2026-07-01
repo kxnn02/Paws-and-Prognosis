@@ -5,10 +5,12 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
+  RefreshControl,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppointments } from '../../hooks/useAppointments';
 import { useRatings } from '../../hooks/useRatings';
@@ -18,12 +20,41 @@ type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function CalendarScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { appointments, loading, getMarkedDates, getAppointmentsForDate, cancelAppointment } =
+  const { appointments, loading, getMarkedDates, getAppointmentsForDate, cancelAppointment, fetchAppointments } =
     useAppointments();
   const { hasRated } = useRatings();
 
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh data when screen gains focus (e.g., after booking)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAppointments();
+    }, [fetchAppointments])
+  );
+
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchAppointments();
+    setRefreshing(false);
+  }
+
+  function handleCancel(appointmentId: string) {
+    Alert.alert(
+      'Cancel Appointment',
+      'Are you sure you want to cancel this appointment?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: () => cancelAppointment(appointmentId),
+        },
+      ]
+    );
+  }
 
   const markedDates = getMarkedDates();
   const dayAppointments = getAppointmentsForDate(selectedDate);
@@ -107,9 +138,7 @@ export default function CalendarScreen() {
         {/* Cancel button for upcoming appointments */}
         {item.status === 'upcoming' && (
           <TouchableOpacity
-            onPress={() => {
-              cancelAppointment(item.id);
-            }}
+            onPress={() => handleCancel(item.id)}
             className="mt-3 ml-11"
             activeOpacity={0.7}
           >
@@ -216,6 +245,9 @@ export default function CalendarScreen() {
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+          }
         />
       </View>
     </View>

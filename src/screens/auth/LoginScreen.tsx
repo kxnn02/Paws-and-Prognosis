@@ -130,8 +130,9 @@ export default function LoginScreen({ navigation }: Props) {
 
               {/* Google Button */}
               <TouchableOpacity
-                className="bg-input-bg rounded-btn h-[52px] flex-row items-center justify-center mt-[10px] shadow-md"
+                className="bg-input-bg rounded-btn h-[52px] flex-row items-center justify-center mt-[10px] shadow-md opacity-70"
                 activeOpacity={0.8}
+                onPress={() => Alert.alert('Coming Soon', 'Google Sign-In requires a development build and will be available in the production version.')}
               >
                 <Image
                   source={require('../../../assets/google-logo.png')}

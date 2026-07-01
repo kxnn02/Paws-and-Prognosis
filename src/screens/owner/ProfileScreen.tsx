@@ -61,12 +61,12 @@ export default function ProfileScreen() {
         <MenuItem
           icon="notifications-outline"
           label="Notifications"
-          onPress={() => {}}
+          onPress={() => Alert.alert('Coming Soon', 'Notifications will be available in a future update.')}
         />
         <MenuItem
           icon="help-circle-outline"
           label="Help & Support"
-          onPress={() => {}}
+          onPress={() => Alert.alert('Help & Support', 'For assistance, email support@pawsandprognosis.com')}
         />
       </View>
 

@@ -17,7 +17,7 @@ import { useAuth } from '../../context/AuthContext';
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
 
   const [name, setName] = useState(profile?.name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
@@ -42,6 +42,7 @@ export default function EditProfileScreen() {
 
       if (error) throw error;
 
+      await refreshProfile();
       Alert.alert('Saved', 'Your profile has been updated.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);

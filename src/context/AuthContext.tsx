@@ -9,6 +9,7 @@ interface AuthContextType {
   profile: Profile | null;
   role: UserRole | null;
   loading: boolean;
+  refreshProfile: () => Promise<void>;
   signUp: (email: string, password: string, name: string, role: UserRole) => Promise<{ error: Error | null; needsConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -114,8 +115,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setRole(null);
   }
 
+  async function refreshProfile() {
+    if (user) {
+      await fetchProfile(user.id);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, role, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, role, loading, refreshProfile, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

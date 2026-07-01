@@ -45,10 +45,10 @@ export default function VetAccountScreen() {
       {/* Menu */}
       <View className="px-5">
         <MenuItem icon="person-circle-outline" label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
-        <MenuItem icon="notifications-outline" label="Notifications" onPress={() => {}} />
-        <MenuItem icon="time-outline" label="Working Hours" onPress={() => {}} />
-        <MenuItem icon="shield-checkmark-outline" label="Privacy & Security" onPress={() => {}} />
-        <MenuItem icon="help-circle-outline" label="Help & Support" onPress={() => {}} />
+        <MenuItem icon="notifications-outline" label="Notifications" onPress={() => Alert.alert('Coming Soon', 'Notifications will be available in a future update.')} />
+        <MenuItem icon="time-outline" label="Working Hours" onPress={() => Alert.alert('Coming Soon', 'Working hours settings will be available in a future update.')} />
+        <MenuItem icon="shield-checkmark-outline" label="Privacy & Security" onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available in a future update.')} />
+        <MenuItem icon="help-circle-outline" label="Help & Support" onPress={() => Alert.alert('Help & Support', 'For assistance, email support@pawsandprognosis.com')} />
       </View>
 
       {/* Logout */}
