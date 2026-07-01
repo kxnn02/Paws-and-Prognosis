@@ -13,6 +13,6 @@ export default function VetAppointmentsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  title: { ...Typography.h2, color: Colors.text, marginBottom: 8 },
-  subtitle: { ...Typography.body, color: Colors.textSecondary, textAlign: 'center' },
+  title: { ...Typography.h2, color: Colors.textDark, marginBottom: 8 },
+  subtitle: { ...Typography.body, color: Colors.textGrey, textAlign: 'center' },
 });

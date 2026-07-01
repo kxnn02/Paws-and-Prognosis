@@ -30,8 +30,8 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  title: { ...Typography.h2, color: Colors.text, marginBottom: 8 },
-  subtitle: { ...Typography.body, color: Colors.textSecondary, marginBottom: Spacing['3xl'] },
+  title: { ...Typography.h2, color: Colors.textDark, marginBottom: 8 },
+  subtitle: { ...Typography.body, color: Colors.textGrey, marginBottom: Spacing['3xl'] },
   logoutButton: { backgroundColor: Colors.error, paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 },
   logoutText: { ...Typography.button, color: '#FFF' },
 });

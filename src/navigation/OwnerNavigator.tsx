@@ -16,7 +16,7 @@ export default function OwnerNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textLight,
+        tabBarInactiveTintColor: Colors.navInactive,
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0,

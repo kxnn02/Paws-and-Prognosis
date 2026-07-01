@@ -71,13 +71,13 @@ export default function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.cream,
+    backgroundColor: Colors.background,
     padding: Spacing.lg,
     justifyContent: 'center',
   },
   brand: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.small,
+    color: Colors.textGrey,
     textAlign: 'left',
     marginBottom: Spacing['3xl'],
   },
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.h2,
-    color: Colors.text,
+    color: Colors.textDark,
     textAlign: 'center',
     marginBottom: Spacing['2xl'],
   },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   googleButton: {
-    backgroundColor: Colors.beige,
+    backgroundColor: '#F5F5F5',
     borderRadius: Radius.sm,
     padding: Spacing.lg,
     alignItems: 'center',
@@ -122,18 +122,18 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     ...Typography.button,
-    color: Colors.text,
+    color: Colors.textDark,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
   },
   footerText: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.small,
+    color: Colors.textGrey,
   },
   link: {
-    ...Typography.bodySmall,
+    ...Typography.small,
     color: Colors.primary,
     fontWeight: '600',
   },

@@ -90,13 +90,13 @@ export default function SignUpScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.cream,
+    backgroundColor: Colors.background,
     padding: Spacing.lg,
     justifyContent: 'center',
   },
   brand: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.small,
+    color: Colors.textGrey,
     marginBottom: Spacing['2xl'],
   },
   card: {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...Typography.h2,
-    color: Colors.text,
+    color: Colors.textDark,
     textAlign: 'center',
     marginBottom: Spacing['2xl'],
   },
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   roleText: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.small,
+    color: Colors.textGrey,
   },
   roleTextActive: {
     color: Colors.primary,
@@ -159,11 +159,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footerText: {
-    ...Typography.bodySmall,
-    color: Colors.textSecondary,
+    ...Typography.small,
+    color: Colors.textGrey,
   },
   link: {
-    ...Typography.bodySmall,
+    ...Typography.small,
     color: Colors.primary,
     fontWeight: '600',
   },
