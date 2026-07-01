@@ -9,15 +9,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ImageBackground,
   Image,
-  Dimensions,
 } from 'react-native';
-import { Colors, Spacing, Radius } from '../../lib/constants';
+import { BlurView } from 'expo-blur';
 import { useAuth } from '../../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface Props {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -47,19 +45,16 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Background cream color */}
-      <View style={styles.backgroundOverlay} />
-
-      {/* Decoration image — paw blobs */}
-      <Image
-        source={require('../../../assets/login-decoration.png')}
-        style={styles.decoration}
-        resizeMode="cover"
-      />
+    <ImageBackground
+      source={require('../../../assets/login-decoration.png')}
+      style={styles.background}
+      imageStyle={styles.backgroundImage}
+    >
+      {/* Cream/Beige overlay */}
+      <View style={styles.overlay} />
 
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
@@ -77,97 +72,96 @@ export default function LoginScreen({ navigation }: Props) {
             <Text style={styles.brandSubtitle}>Veterinary Clinic</Text>
           </View>
 
-          {/* Spacer to push card down */}
+          {/* Push card to bottom */}
           <View style={styles.spacer} />
 
-          {/* Glass Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              Take Care Of{'\n'}Your Pet
-            </Text>
-
-            {/* Email Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Email Address"
-              placeholderTextColor="#AA865D"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            {/* Password Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#AA865D"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            {/* Log In Button */}
-            <TouchableOpacity
-              style={[styles.loginBtn, loading && { opacity: 0.6 }]}
-              onPress={handleLogin}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.loginBtnText}>
-                {loading ? 'Logging in...' : 'Log In'}
+          {/* Glassmorphism Card */}
+          <BlurView intensity={40} tint="light" style={styles.blurCard}>
+            <View style={styles.cardInner}>
+              <Text style={styles.cardTitle}>
+                Take Care Of{'\n'}Your Pet
               </Text>
-            </TouchableOpacity>
 
-            {/* Google Button */}
-            <TouchableOpacity style={styles.googleBtn} activeOpacity={0.8}>
-              <Image
-                source={require('../../../assets/google-logo.png')}
-                style={styles.googleIcon}
-                resizeMode="contain"
+              {/* Email */}
+              <TextInput
+                style={styles.input}
+                placeholder="Email Address"
+                placeholderTextColor="#AA865D"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
               />
-              <Text style={styles.googleBtnText}>Log In With Google</Text>
-            </TouchableOpacity>
 
-            {/* Footer */}
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.footerLink}>Sign In</Text>
+              {/* Password */}
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#AA865D"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              {/* Log In Button */}
+              <TouchableOpacity
+                style={[styles.loginBtn, loading && { opacity: 0.6 }]}
+                onPress={handleLogin}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.loginBtnText}>
+                  {loading ? 'Logging in...' : 'Log In'}
+                </Text>
               </TouchableOpacity>
+
+              {/* Google Button */}
+              <TouchableOpacity style={styles.googleBtn} activeOpacity={0.8}>
+                <Image
+                  source={require('../../../assets/google-logo.png')}
+                  style={styles.googleIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.googleBtnText}>Log In With Google</Text>
+              </TouchableOpacity>
+
+              {/* Footer */}
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                  <Text style={styles.footerLink}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </BlurView>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEF9F4',
   },
-  backgroundOverlay: {
+  backgroundImage: {
+    resizeMode: 'cover',
+    opacity: 0.9,
+  },
+  overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(248, 224, 196, 0.3)',
+    backgroundColor: 'rgba(248, 224, 196, 0.25)',
   },
-  decoration: {
-    position: 'absolute',
-    top: 133,
-    left: -30,
-    width: SCREEN_WIDTH + 60,
-    height: 700,
-    opacity: 1,
-  },
-  keyboardView: {
+  flex: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 34,
   },
+  // Brand
   brandSection: {
     paddingTop: 62,
     paddingLeft: 28,
@@ -196,25 +190,24 @@ const styles = StyleSheet.create({
     color: '#544864',
     marginTop: 2,
   },
+  // Spacer
   spacer: {
     flex: 1,
-    minHeight: 100,
+    minHeight: 80,
   },
-  card: {
+  // Card
+  blurCard: {
     marginHorizontal: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
     borderRadius: 29,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  cardInner: {
     paddingHorizontal: 22,
-    paddingTop: 32,
-    paddingBottom: 24,
-    // Glassmorphism shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.38,
-    shadowRadius: 40,
-    elevation: 12,
+    paddingTop: 28,
+    paddingBottom: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
   cardTitle: {
     fontSize: 28,
@@ -222,24 +215,25 @@ const styles = StyleSheet.create({
     color: '#544864',
     textAlign: 'center',
     lineHeight: 40,
-    marginBottom: 24,
+    marginBottom: 20,
   },
+  // Inputs
   input: {
     backgroundColor: '#F5F5F5',
     borderRadius: 12,
     paddingHorizontal: 16,
-    height: 44,
+    height: 42,
     fontSize: 14,
     fontStyle: 'italic',
     color: '#343434',
-    marginBottom: 12,
-    // Subtle shadow like Figma
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
   },
+  // Buttons
   loginBtn: {
     backgroundColor: '#71924F',
     borderRadius: 12,
@@ -248,12 +242,12 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   loginBtnText: {
     fontSize: 14,
@@ -267,12 +261,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 4,
   },
   googleIcon: {
     width: 20,
@@ -284,10 +278,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#343434',
   },
+  // Footer
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 16,
   },
   footerText: {
     fontSize: 14,
