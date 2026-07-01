@@ -98,12 +98,11 @@ export default function VetDetailsScreen() {
               <Text className="text-white/60 text-xs mt-1">Rating</Text>
             </View>
             <View className="items-center">
-              <Text className="text-white font-bold text-base">50+</Text>
-              <Text className="text-white/60 text-xs mt-1">Patients</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-white font-bold text-base">8 yrs</Text>
-              <Text className="text-white/60 text-xs mt-1">Experience</Text>
+              <View className="flex-row items-center">
+                <Ionicons name="medkit" size={14} color="#7BBD38" />
+                <Text className="text-white font-bold text-base ml-1">{vet.specialty?.split(' ')[0] || 'General'}</Text>
+              </View>
+              <Text className="text-white/60 text-xs mt-1">Specialty</Text>
             </View>
           </View>
         </View>

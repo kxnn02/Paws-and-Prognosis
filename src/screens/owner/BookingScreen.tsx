@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -77,6 +78,7 @@ export default function BookingScreen() {
   const [selectedDate, setSelectedDate] = useState(scheduleDays[0].date);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [notes, setNotes] = useState('');
   const [booking, setBooking] = useState(false);
 
   const selectedDayData = scheduleDays.find((d) => d.date === selectedDate);
@@ -96,7 +98,7 @@ export default function BookingScreen() {
 
     Alert.alert(
       'Confirm Booking',
-      `${vetName}\n\n📅 ${dateFormatted}\n🕐 ${selectedTime}${selectedPetId ? '\n🐾 ' + (pets.find((p) => p.id === selectedPetId)?.name || '') : ''}`,
+      `${vetName}\n\n📅 ${dateFormatted}\n🕐 ${selectedTime}${selectedPetId ? '\n🐾 ' + (pets.find((p) => p.id === selectedPetId)?.name || '') : ''}${notes ? '\n📝 ' + notes : ''}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -108,6 +110,7 @@ export default function BookingScreen() {
               petId: selectedPetId,
               date: selectedDate,
               time: time24,
+              notes: notes.trim() || undefined,
             });
             setBooking(false);
 
@@ -295,6 +298,24 @@ export default function BookingScreen() {
               <Text className="text-sm font-medium text-primary ml-2">Add your first pet</Text>
             </TouchableOpacity>
           )}
+        </View>
+
+        {/* Step 4: Notes (optional) */}
+        <View className="mx-5 mt-6">
+          <Text className="text-lg font-semibold text-heading mb-3">
+            Notes <Text className="text-xs text-grey font-normal">(optional)</Text>
+          </Text>
+          <TextInput
+            className="bg-white rounded-btn px-4 py-3 text-sm text-dark border border-gray-200 min-h-[80px]"
+            placeholder="Describe symptoms or reason for visit..."
+            placeholderTextColor="#A7A7A7"
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+            maxLength={500}
+            textAlignVertical="top"
+          />
+          <Text className="text-[10px] text-grey mt-1 text-right">{notes.length}/500</Text>
         </View>
 
         {/* Summary */}
