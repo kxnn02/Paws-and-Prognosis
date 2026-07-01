@@ -11,6 +11,7 @@ import BookingScreen from '../screens/owner/BookingScreen';
 import MyPetsScreen from '../screens/owner/MyPetsScreen';
 import AddPetScreen from '../screens/owner/AddPetScreen';
 import PetProfileScreen from '../screens/owner/PetProfileScreen';
+import ChatConversationScreen from '../screens/owner/ChatConversationScreen';
 import { Colors } from '../lib/constants';
 import type { OwnerTabParamList, OwnerStackParamList } from '../types';
 
@@ -59,6 +60,7 @@ export default function OwnerNavigator() {
       <Stack.Screen name="MyPets" component={MyPetsScreen} />
       <Stack.Screen name="AddPet" component={AddPetScreen} />
       <Stack.Screen name="PetProfile" component={PetProfileScreen} />
+      <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
     </Stack.Navigator>
   );
 }

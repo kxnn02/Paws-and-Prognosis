@@ -1,16 +1,19 @@
 import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import DashboardScreen from '../screens/vet/DashboardScreen';
 import VetAppointmentsScreen from '../screens/vet/VetAppointmentsScreen';
 import VetChatListScreen from '../screens/vet/VetChatListScreen';
 import VetAccountScreen from '../screens/vet/VetAccountScreen';
+import VetChatConversationScreen from '../screens/vet/VetChatConversationScreen';
 import { Colors } from '../lib/constants';
-import type { VetTabParamList } from '../types';
+import type { VetTabParamList, VetStackParamList } from '../types';
 
 const Tab = createBottomTabNavigator<VetTabParamList>();
+const Stack = createNativeStackNavigator<VetStackParamList>();
 
-export default function VetNavigator() {
+function VetTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -40,5 +43,14 @@ export default function VetNavigator() {
       <Tab.Screen name="VetChat" component={VetChatListScreen} options={{ title: 'Chat' }} />
       <Tab.Screen name="VetAccount" component={VetAccountScreen} options={{ title: 'Account' }} />
     </Tab.Navigator>
+  );
+}
+
+export default function VetNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="VetTabs" component={VetTabs} />
+      <Stack.Screen name="VetChatConversation" component={VetChatConversationScreen} />
+    </Stack.Navigator>
   );
 }

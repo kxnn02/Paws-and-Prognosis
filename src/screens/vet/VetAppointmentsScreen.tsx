@@ -6,25 +6,48 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVetAppointments } from '../../hooks/useVetAppointments';
-import type { Appointment } from '../../types';
+import type { Appointment, VetStackParamList } from '../../types';
+
+type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
+
+type FilterTab = 'all' | 'upcoming' | 'in_progress' | 'completed';
+
+const FILTER_TABS: { key: FilterTab; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'completed', label: 'Done' },
+];
 
 export default function VetAppointmentsScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const {
     loading,
     getMarkedDates,
     getAppointmentsForDate,
     updateAppointmentStatus,
+    fetchAppointments,
   } = useVetAppointments();
 
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [refreshing, setRefreshing] = useState(false);
 
   const markedDates = getMarkedDates();
-  const dayAppointments = getAppointmentsForDate(selectedDate);
+  const allDayAppointments = getAppointmentsForDate(selectedDate);
+
+  // Apply filter
+  const dayAppointments = activeFilter === 'all'
+    ? allDayAppointments
+    : allDayAppointments.filter((a) => a.status === activeFilter);
 
   const calendarMarks = {
     ...markedDates,
@@ -34,6 +57,12 @@ export default function VetAppointmentsScreen() {
       selectedColor: '#71924F',
     },
   };
+
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchAppointments();
+    setRefreshing(false);
+  }
 
   function formatTime(time: string): string {
     const [hoursStr, minutes] = time.split(':');
@@ -99,26 +128,26 @@ export default function VetAppointmentsScreen() {
         </View>
 
         {/* Action buttons */}
-        {item.status === 'upcoming' && (
-          <View className="flex-row gap-2 mt-3 ml-6">
-            <TouchableOpacity
-              onPress={() => handleStatusChange(item, 'in_progress')}
-              className="bg-primary/10 px-3 py-1.5 rounded-btn"
-              activeOpacity={0.7}
-            >
-              <Text className="text-xs font-medium text-primary">Start</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleStatusChange(item, 'cancelled')}
-              className="bg-red-50 px-3 py-1.5 rounded-btn"
-              activeOpacity={0.7}
-            >
-              <Text className="text-xs font-medium text-red-500">Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        {item.status === 'in_progress' && (
-          <View className="flex-row gap-2 mt-3 ml-6">
+        <View className="flex-row gap-2 mt-3 ml-6">
+          {item.status === 'upcoming' && (
+            <>
+              <TouchableOpacity
+                onPress={() => handleStatusChange(item, 'in_progress')}
+                className="bg-primary/10 px-3 py-1.5 rounded-btn"
+                activeOpacity={0.7}
+              >
+                <Text className="text-xs font-medium text-primary">Start</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleStatusChange(item, 'cancelled')}
+                className="bg-red-50 px-3 py-1.5 rounded-btn"
+                activeOpacity={0.7}
+              >
+                <Text className="text-xs font-medium text-red-500">Cancel</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          {item.status === 'in_progress' && (
             <TouchableOpacity
               onPress={() => handleStatusChange(item, 'completed')}
               className="bg-green-50 px-3 py-1.5 rounded-btn"
@@ -126,8 +155,20 @@ export default function VetAppointmentsScreen() {
             >
               <Text className="text-xs font-medium text-green-700">Mark Complete</Text>
             </TouchableOpacity>
-          </View>
-        )}
+          )}
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('VetChatConversation', {
+                threadId: item.owner_id,
+                participantName: (item.owner as unknown as { name: string })?.name || 'Patient',
+              })
+            }
+            className="bg-white px-3 py-1.5 rounded-btn border border-gray-200"
+            activeOpacity={0.7}
+          >
+            <Text className="text-xs font-medium text-dark">Message</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -137,13 +178,15 @@ export default function VetAppointmentsScreen() {
       <View className="items-center pt-10 px-10">
         <Ionicons name="calendar-outline" size={40} color="#9BA1A8" />
         <Text className="text-sm text-grey text-center mt-3">
-          No appointments on this date
+          {activeFilter === 'all'
+            ? 'No appointments on this date'
+            : `No ${activeFilter.replace('_', ' ')} appointments`}
         </Text>
       </View>
     );
   }
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View className="flex-1 bg-beige items-center justify-center">
         <ActivityIndicator size="large" color="#71924F" />
@@ -184,9 +227,29 @@ export default function VetAppointmentsScreen() {
         style={{ marginHorizontal: 12 }}
       />
 
+      {/* Filter Tabs */}
+      <View className="flex-row px-5 mt-3 mb-2 gap-2">
+        {FILTER_TABS.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            onPress={() => setActiveFilter(tab.key)}
+            className={`px-3 py-1.5 rounded-btn ${
+              activeFilter === tab.key ? 'bg-primary' : 'bg-white border border-gray-200'
+            }`}
+            activeOpacity={0.7}
+          >
+            <Text className={`text-xs font-medium ${
+              activeFilter === tab.key ? 'text-white' : 'text-dark'
+            }`}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {/* Day appointments */}
-      <View className="flex-1 mt-4">
-        <View className="px-5 mb-3 flex-row items-center justify-between">
+      <View className="flex-1">
+        <View className="px-5 mb-2 flex-row items-center justify-between">
           <Text className="text-base font-semibold text-heading">
             {selectedDate === today ? "Today's Schedule" : 'Schedule'}
           </Text>
@@ -202,6 +265,9 @@ export default function VetAppointmentsScreen() {
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+          }
         />
       </View>
     </View>
