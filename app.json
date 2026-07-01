@@ -12,7 +12,11 @@
       "backgroundColor": "#FFF8F0"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Paws & Prognosis to access your photos to add pet profile pictures.",
+        "NSCameraUsageDescription": "Allow Paws & Prognosis to use your camera to take pet photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +29,14 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Paws & Prognosis to access your photos to add pet profile pictures.",
+          "cameraPermission": "Allow Paws & Prognosis to use your camera to take pet photos."
+        }
+      ]
     ]
   }
 }
