@@ -45,11 +45,12 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      {/* Decorative circles — mimicking the Figma "Decoration" layer */}
-      <View style={styles.decorCircleLarge} />
-      <View style={styles.decorCircleMedium} />
-      <View style={styles.decorCircleSmall} />
-      <View style={styles.decorBlobShape} />
+      {/* Decoration from Figma — exported PNG with transparency */}
+      <Image
+        source={require('../../../assets/Decoration.png')}
+        style={styles.decoration}
+        resizeMode="cover"
+      />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -142,54 +143,22 @@ export default function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: 'rgba(248, 224, 196, 0.3)', // Cream/Beige Bg from Figma
+    backgroundColor: 'rgba(248, 224, 196, 0.3)',
   },
   flex: {
     flex: 1,
   },
-  // Decorative elements — approximating Figma "Decoration" layer
-  decorBlobShape: {
-    position: 'absolute',
-    top: 134,
-    left: 18,
-    width: 434,
-    height: 696,
-    backgroundColor: 'rgba(113, 146, 79, 0.15)',
-    borderRadius: 200,
-    transform: [{ rotate: '-5deg' }],
-  },
-  decorCircleLarge: {
-    position: 'absolute',
-    top: 260,
-    left: -30,
-    width: 202,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(113, 146, 79, 0.25)',
-  },
-  decorCircleMedium: {
+  decoration: {
     position: 'absolute',
     top: 133,
-    left: 85,
-    width: 130,
-    height: 129,
-    borderRadius: 65,
-    backgroundColor: 'rgba(113, 146, 79, 0.2)',
-  },
-  decorCircleSmall: {
-    position: 'absolute',
-    top: 317,
-    left: 235,
-    width: 24,
-    height: 23,
-    borderRadius: 12,
-    backgroundColor: 'rgba(113, 146, 79, 0.3)',
+    left: -30,
+    width: 482,
+    height: 696,
   },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 34,
   },
-  // Brand
   brandSection: {
     paddingTop: 62,
     paddingLeft: 28,
@@ -218,12 +187,10 @@ const styles = StyleSheet.create({
     color: '#544864',
     marginTop: 2,
   },
-  // Spacer
   spacer: {
     flex: 1,
     minHeight: 80,
   },
-  // Glassmorphism Card
   blurCard: {
     marginHorizontal: 28,
     borderRadius: 29,
@@ -245,7 +212,6 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     marginBottom: 20,
   },
-  // Inputs
   input: {
     backgroundColor: '#F5F5F5',
     borderRadius: 12,
@@ -261,7 +227,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  // Buttons
   loginBtn: {
     backgroundColor: '#71924F',
     borderRadius: 12,
@@ -306,7 +271,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#343434',
   },
-  // Footer
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
