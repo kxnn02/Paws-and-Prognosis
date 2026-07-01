@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -44,45 +43,50 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
-      {/* Decoration from Figma — exported PNG with transparency */}
+    <View className="flex-1 bg-cream">
+      {/* Decoration */}
       <Image
         source={require('../../../assets/Decoration.png')}
-        style={styles.decoration}
+        className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]"
+        resizeMode="contain"
       />
 
       <KeyboardAvoidingView
-        style={styles.flex}
+        className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand — Top Left */}
-          <View style={styles.brandSection}>
-            <View style={styles.brandRow}>
-              <Text style={styles.brandPaws}>Paws</Text>
-              <Text style={styles.brandAnd}> & </Text>
-              <Text style={styles.brandPrognosis}>Prognosis</Text>
+          {/* Brand */}
+          <View className="pt-[62px] pl-[28px]">
+            <View className="flex-row items-baseline">
+              <Text className="text-[30px] font-bold text-[#7A5C4F]">Paws</Text>
+              <Text className="text-[30px] font-bold text-heading"> & </Text>
+              <Text className="text-[30px] font-bold text-primary">Prognosis</Text>
             </View>
-            <Text style={styles.brandSubtitle}>Veterinary Clinic</Text>
+            <Text className="text-[15px] text-heading mt-[2px]">Veterinary Clinic</Text>
           </View>
 
-          {/* Push card to bottom */}
-          <View style={styles.spacer} />
+          {/* Spacer */}
+          <View className="flex-1 min-h-[80px]" />
 
           {/* Glassmorphism Card */}
-          <BlurView intensity={50} tint="light" style={styles.blurCard}>
-            <View style={styles.cardInner}>
-              <Text style={styles.cardTitle}>
+          <BlurView
+            intensity={50}
+            tint="light"
+            className="mx-[28px] rounded-glass overflow-hidden border border-white/80"
+          >
+            <View className="px-[22px] pt-[28px] pb-[20px] bg-white/40">
+              <Text className="text-[28px] font-bold text-heading text-center leading-[40px] mb-[20px]">
                 Take Care Of{'\n'}Your Pet
               </Text>
 
               {/* Email */}
               <TextInput
-                style={styles.input}
+                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-[10px] shadow-sm"
                 placeholder="Email Address"
                 placeholderTextColor="#AA865D"
                 value={email}
@@ -94,7 +98,7 @@ export default function LoginScreen({ navigation }: Props) {
 
               {/* Password */}
               <TextInput
-                style={styles.input}
+                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-[10px] shadow-sm"
                 placeholder="Password"
                 placeholderTextColor="#AA865D"
                 value={password}
@@ -104,185 +108,43 @@ export default function LoginScreen({ navigation }: Props) {
 
               {/* Log In Button */}
               <TouchableOpacity
-                style={[styles.loginBtn, loading && { opacity: 0.6 }]}
+                className={`bg-primary rounded-btn h-[52px] items-center justify-center mt-[6px] border border-primary-border shadow-md ${loading ? 'opacity-60' : ''}`}
                 onPress={handleLogin}
                 disabled={loading}
                 activeOpacity={0.8}
               >
-                <Text style={styles.loginBtnText}>
+                <Text className="text-sm font-semibold text-white">
                   {loading ? 'Logging in...' : 'Log In'}
                 </Text>
               </TouchableOpacity>
 
               {/* Google Button */}
-              <TouchableOpacity style={styles.googleBtn} activeOpacity={0.8}>
+              <TouchableOpacity
+                className="bg-input-bg rounded-btn h-[52px] flex-row items-center justify-center mt-[10px] shadow-md"
+                activeOpacity={0.8}
+              >
                 <Image
                   source={require('../../../assets/google-logo.png')}
-                  style={styles.googleIcon}
+                  className="w-5 h-5 mr-[10px]"
                   resizeMode="contain"
                 />
-                <Text style={styles.googleBtnText}>Log In With Google</Text>
+                <Text className="text-sm font-semibold text-dark">Log In With Google</Text>
               </TouchableOpacity>
 
               {/* Footer */}
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Don't have an account? </Text>
+              <View className="flex-row justify-center mt-[16px]">
+                <Text className="text-sm text-dark">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                  <Text style={styles.footerLink}>Sign In</Text>
+                  <Text className="text-sm font-semibold text-dark">Sign In</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </BlurView>
+
+          {/* Bottom padding */}
+          <View className="h-[34px]" />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: 'rgba(248, 224, 196, 0.3)',
-  },
-  flex: {
-    flex: 1,
-  },
-  decoration: {
-    position: 'absolute',
-    top: 90,
-    left: -30,
-    width: 482,
-    height: 750,
-    resizeMode: 'contain',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 34,
-  },
-  brandSection: {
-    paddingTop: 62,
-    paddingLeft: 28,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  brandPaws: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#7A5C4F',
-  },
-  brandAnd: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#544864',
-  },
-  brandPrognosis: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#71924F',
-  },
-  brandSubtitle: {
-    fontSize: 15,
-    color: '#544864',
-    marginTop: 2,
-  },
-  spacer: {
-    flex: 1,
-    minHeight: 80,
-  },
-  blurCard: {
-    marginHorizontal: 28,
-    borderRadius: 29,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  cardInner: {
-    paddingHorizontal: 22,
-    paddingTop: 28,
-    paddingBottom: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  cardTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#544864',
-    textAlign: 'center',
-    lineHeight: 40,
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 42,
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: '#343434',
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  loginBtn: {
-    backgroundColor: '#71924F',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#7DAE4A',
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  loginBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  googleBtn: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  googleBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#343434',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 16,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#343434',
-  },
-  footerLink: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#343434',
-  },
-});

@@ -4,6 +4,14 @@ inclusion: always
 
 # Coding Standards
 
+## Styling — NativeWind (Tailwind CSS for React Native)
+- Use `className` prop for all styling — NO StyleSheet.create()
+- Design tokens are defined in `tailwind.config.js` under `theme.extend`
+- Custom colors: `primary`, `heading`, `dark`, `grey`, `cream`, `beige`, `input-bg`, `placeholder`
+- Custom radii: `rounded-card` (16px), `rounded-btn` (12px), `rounded-glass` (29px), `rounded-nav` (32px)
+- Use Tailwind utilities: `flex-1`, `items-center`, `justify-center`, `px-4`, `mt-2`, etc.
+- For dynamic styles, use template literals: `className={\`bg-primary \${loading ? 'opacity-60' : ''}\`}`
+
 ## File Naming
 - Components: PascalCase (e.g., `VetCard.tsx`, `BookingModal.tsx`)
 - Hooks: camelCase with `use` prefix (e.g., `useAuth.ts`, `usePets.ts`)
@@ -15,7 +23,7 @@ inclusion: always
 - Use functional components with TypeScript interfaces for props
 - Keep screens thin — extract logic into custom hooks
 - Extract reusable UI into `components/` with clear prop interfaces
-- Use `StyleSheet.create()` for styles, defined at bottom of file
+- Use `className` for styling — no inline style objects unless absolutely necessary
 - Prefer composition over inheritance
 
 ## TypeScript
@@ -39,7 +47,7 @@ inclusion: always
 
 ## Error Handling
 - Wrap async operations in try/catch
-- Display user-friendly error messages via Toast or Alert
+- Display user-friendly error messages via Alert
 - Log errors to console in development
 - Never expose raw database errors to users
 
