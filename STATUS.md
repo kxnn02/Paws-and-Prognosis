@@ -7,92 +7,86 @@
 ## Screens Overview
 
 ### Auth Flow
-| Screen | Status | Owner |
+| Screen | Status | Notes |
 |--------|--------|-------|
-| Splash (loading) | ✅ Complete | — |
-| Login (email/password) | ✅ Complete | — |
-| Sign Up (with role) | ✅ Complete | — |
-| Google OAuth | ❌ Requires dev build | — |
+| Splash (loading) | ✅ Complete | NativeWind styled |
+| Login (email/password) | ✅ Complete | Validation, show/hide password |
+| Sign Up (with role) | ✅ Complete | Email confirmation handling |
+| Google OAuth | ⚠️ UI only | Shows "Coming Soon" — requires dev build |
 
 ### Pet Owner Screens
 | Screen | Status | Notes |
 |--------|--------|-------|
-| Home | ✅ Complete | Banner, categories, search, vet grid |
-| Vet Details | ✅ Complete | Profile card, date/time picker, pet selector, Supabase booking |
-| Calendar | ✅ Complete | react-native-calendars, marked dates, appointment list, cancel |
-| My Pets | ✅ Complete | Pet list cards, empty state, FAB |
-| Add Pet | ✅ Complete | Form + expo-image-picker (camera/gallery), zod validation |
-| Pet Profile | ✅ Complete | Detail view, info grid, delete |
-| Profile | ✅ Complete | User info, menu navigation, logout |
-| Chat List | 🟡 Placeholder | UI only — no realtime yet |
-| Chat Conversation | ❌ Not started | — |
-| Call Screen | ❌ Not started | UI mockup only (no WebRTC) |
+| Home | ✅ Complete | Live vet data from Supabase, search, categories, loading state, empty state |
+| Vet Details | ✅ Complete | Profile card, rating, about, working hours, Message + Contact Clinic |
+| Booking | ✅ Complete | 14-day picker, time slots, pet selector, notes field, summary, Supabase persist |
+| Calendar | ✅ Complete | react-native-calendars, pull-to-refresh, cancel with confirm, rate completed |
+| My Pets | ✅ Complete | Pet list, empty state, FAB |
+| Add Pet | ✅ Complete | expo-image-picker (camera/gallery), react-hook-form + zod validation |
+| Pet Profile | ✅ Complete | Detail view, info grid, delete with confirm |
+| Profile | ✅ Complete | User info, menu (My Pets, Account Info, Notifications, Help) |
+| Chat List | ✅ Complete | Thread list with Supabase Realtime |
+| Chat Conversation | ✅ Complete | Bubbles, auto-scroll, sent indicators, privacy notice |
+| Rating | ✅ Complete | 1-5 stars, updates vet average |
+| Tips | ✅ Complete | Pet care tips and tricks |
+| Edit Profile | ✅ Complete | Name, phone — refreshes AuthContext |
 
 ### Vet Screens
 | Screen | Status | Notes |
 |--------|--------|-------|
-| Dashboard | 🟡 Placeholder | Title text only |
-| Appointments | 🟡 Placeholder | Title text only |
-| Chat List | 🟡 Placeholder | Title text only |
-| Account | 🟡 Placeholder | Title text only |
-| Today's Cases | ❌ Not started | — |
-| Patient Profile | ❌ Not started | — |
+| Dashboard | ✅ Complete | Stats, reminders, today's cases with actions, upcoming, pull-to-refresh |
+| Appointments | ✅ Complete | Calendar, filter tabs, status management, message, pull-to-refresh |
+| Chat List | ✅ Complete | Thread list with Realtime |
+| Chat Conversation | ✅ Complete | Same quality as owner side |
+| Account | ✅ Complete | Profile, Edit Profile, menu with feedback |
 
 ---
 
 ## Integrations
 
-| Integration | Status | Notes |
-|-------------|--------|-------|
-| Supabase Auth (email/password) | ✅ Working | Login + Sign Up |
-| Supabase CRUD (pets table) | ✅ Working | Insert, read, delete |
-| Supabase CRUD (appointments) | ✅ Working | Book, fetch, cancel |
-| Supabase Storage (pet images) | ✅ Working | Upload via expo-image-picker |
-| Supabase Realtime (chat) | ❌ Not started | — |
-| expo-image-picker | ✅ Integrated | Camera + gallery |
-| react-native-calendars | ✅ Integrated | Calendar screen |
-| react-hook-form + zod | ✅ Integrated | Add Pet form |
-| NativeWind v4 | ✅ Throughout | All screens use className |
-| Google OAuth | ❌ Blocked | Requires EAS dev build |
+| Integration | Status |
+|-------------|--------|
+| Supabase Auth (email/password) | ✅ Working |
+| Supabase CRUD (pets, appointments, ratings, reminders) | ✅ Working |
+| Supabase Storage (pet images) | ✅ Working |
+| Supabase Realtime (chat) | ✅ Working |
+| expo-image-picker (camera + gallery) | ✅ Integrated |
+| react-native-calendars | ✅ Integrated |
+| react-hook-form + zod | ✅ Integrated |
+| NativeWind v4 | ✅ Throughout |
+| Contact Clinic (Linking — phone, viber, messenger) | ✅ Working |
+| Google OAuth | ❌ Requires EAS dev build |
 
 ---
 
-## Database Tables
+## Security & Privacy
 
-| Table | RLS | Used By |
-|-------|-----|---------|
-| profiles | ✅ | Auth, Profile screen |
-| pets | ⚠️ Needs policies | My Pets, Add Pet, Pet Profile |
-| appointments | ⚠️ Needs policies | Booking, Calendar |
-| vets | ✅ | Home, Vet Details |
-| messages | ⚠️ Needs policies | Chat (not built yet) |
-| ratings | ⚠️ Needs policies | Rating (not built yet) |
-| reminders | ⚠️ Needs policies | Vet reminders (not built yet) |
-
----
-
-## Remaining Work (Priority Order)
-
-1. **Chat flow** — Realtime messaging (owner ↔ vet) via Supabase Realtime
-2. **Vet Dashboard** — Today's cases, stats, quick actions
-3. **Vet Appointments** — View/manage bookings assigned to them
-4. **Call screen** — UI mockup (video/voice placeholder)
-5. **Rating system** — Post-appointment vet rating
-6. **Notifications/Reminders** — Vet-side reminders display
-7. **Account/Settings** — Edit profile, change password
+- Row Level Security (RLS) on all tables
+- Messages: users can only read/write their own conversations
+- Sender verification: prevents impersonation via RLS INSERT policy
+- Input sanitization: messages capped at 2,000 chars, forms validated with zod
+- No local message persistence beyond React state
+- No secrets or API keys in code (env vars only)
+- Email confirmation flow for account verification
+- Profile updates scoped to authenticated user
 
 ---
 
-## Branch Status
+## Database Tables (all with RLS)
 
-| Branch | Status | Description |
-|--------|--------|-------------|
-| `main` | Protected | Auth + Home screens |
-| `feature/owner-core-screens` | Pushed, awaiting PR | Vet Details, Pets, Calendar, Booking |
+| Table | Policies |
+|-------|----------|
+| profiles | Read own, update own |
+| pets | Full CRUD for own records |
+| vets | Public read for authenticated users |
+| appointments | Owner: read/insert/update own; Vet: read/update assigned |
+| messages | Read where sender or receiver; insert as sender only |
+| ratings | Insert own; public read |
+| reminders | Vet: read/update own |
 
 ---
 
-## Tech Stack Quick Reference
+## Tech Stack
 
 - **Framework:** React Native + Expo SDK 54 (Expo Go compatible)
 - **Language:** TypeScript (strict, no `any`)
@@ -102,3 +96,19 @@
 - **Forms:** react-hook-form + zod
 - **Calendar:** react-native-calendars
 - **Camera:** expo-image-picker
+- **Icons:** @expo/vector-icons (Ionicons)
+
+---
+
+## UX Features
+
+- Pull-to-refresh on all data-heavy screens
+- useFocusEffect for data freshness after navigation
+- Loading spinners for all async operations
+- Confirmation dialogs for destructive actions
+- Empty states with helpful messaging
+- "Coming soon" feedback for unimplemented features
+- Back buttons on all error/not-found states
+- Sent indicators on chat messages
+- Date separators in chat conversations
+- Booking notes for symptom description

@@ -43,7 +43,11 @@ export default function HomeScreen() {
   return (
     <ScrollView className="flex-1 bg-beige" showsVerticalScrollIndicator={false}>
       {/* Banner */}
-      <View className="mx-5 mt-16 rounded-card overflow-hidden">
+      <TouchableOpacity
+        className="mx-5 mt-16 rounded-card overflow-hidden"
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('TipsScreen')}
+      >
         <View className="bg-primary/80 p-5 flex-row items-center justify-between">
           <View className="flex-1 mr-3">
             <Text className="text-white font-bold text-base">
@@ -57,7 +61,7 @@ export default function HomeScreen() {
             <Ionicons name="arrow-forward" size={20} color="#FFF" />
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Categories */}
       <View className="mt-6 px-5">
