@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ImageBackground,
   Image,
+  Dimensions,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../../context/AuthContext';
@@ -45,13 +45,16 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <ImageBackground
-      source={require('../../../assets/login-decoration.png')}
-      style={styles.background}
-      imageStyle={styles.backgroundImage}
-    >
-      {/* Cream/Beige overlay */}
+    <View style={styles.background}>
+      {/* Cream/Beige base */}
       <View style={styles.overlay} />
+
+      {/* Decoration — positioned exactly as in Figma */}
+      <Image
+        source={require('../../../assets/login-decoration.png')}
+        style={styles.decoration}
+        resizeMode="contain"
+      />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -137,22 +140,25 @@ export default function LoginScreen({ navigation }: Props) {
           </BlurView>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: '#FEF9F4',
-  },
-  backgroundImage: {
-    resizeMode: 'cover',
-    opacity: 0.9,
+    backgroundColor: '#FFFFFF',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(248, 224, 196, 0.25)',
+    backgroundColor: 'rgba(248, 224, 196, 0.3)',
+  },
+  decoration: {
+    position: 'absolute',
+    top: 100,
+    left: -30,
+    width: Dimensions.get('window').width + 50,
+    height: 700,
   },
   flex: {
     flex: 1,
