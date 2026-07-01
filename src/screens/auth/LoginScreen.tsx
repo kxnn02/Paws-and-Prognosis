@@ -135,7 +135,7 @@ export default function LoginScreen({ navigation }: Props) {
               <View className="flex-row justify-center mt-[16px]">
                 <Text className="text-sm text-dark">Don't have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                  <Text className="text-sm font-semibold text-dark">Sign In</Text>
+                  <Text className="text-sm font-semibold text-dark">Sign Up</Text>
                 </TouchableOpacity>
               </View>
             </View>
