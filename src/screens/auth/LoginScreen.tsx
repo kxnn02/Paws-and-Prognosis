@@ -10,7 +10,6 @@ import {
   Platform,
   ScrollView,
   Image,
-  Dimensions,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../../context/AuthContext';
@@ -45,16 +44,12 @@ export default function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.background}>
-      {/* Cream/Beige base */}
-      <View style={styles.overlay} />
-
-      {/* Decoration — positioned exactly as in Figma */}
-      <Image
-        source={require('../../../assets/login-decoration.png')}
-        style={styles.decoration}
-        resizeMode="contain"
-      />
+    <View style={styles.screen}>
+      {/* Decorative circles — mimicking the Figma "Decoration" layer */}
+      <View style={styles.decorCircleLarge} />
+      <View style={styles.decorCircleMedium} />
+      <View style={styles.decorCircleSmall} />
+      <View style={styles.decorBlobShape} />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -79,7 +74,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View style={styles.spacer} />
 
           {/* Glassmorphism Card */}
-          <BlurView intensity={40} tint="light" style={styles.blurCard}>
+          <BlurView intensity={50} tint="light" style={styles.blurCard}>
             <View style={styles.cardInner}>
               <Text style={styles.cardTitle}>
                 Take Care Of{'\n'}Your Pet
@@ -145,23 +140,50 @@ export default function LoginScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  background: {
+  screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(248, 224, 196, 0.3)',
-  },
-  decoration: {
-    position: 'absolute',
-    top: 100,
-    left: -30,
-    width: Dimensions.get('window').width + 50,
-    height: 700,
+    backgroundColor: 'rgba(248, 224, 196, 0.3)', // Cream/Beige Bg from Figma
   },
   flex: {
     flex: 1,
+  },
+  // Decorative elements — approximating Figma "Decoration" layer
+  decorBlobShape: {
+    position: 'absolute',
+    top: 134,
+    left: 18,
+    width: 434,
+    height: 696,
+    backgroundColor: 'rgba(113, 146, 79, 0.15)',
+    borderRadius: 200,
+    transform: [{ rotate: '-5deg' }],
+  },
+  decorCircleLarge: {
+    position: 'absolute',
+    top: 260,
+    left: -30,
+    width: 202,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(113, 146, 79, 0.25)',
+  },
+  decorCircleMedium: {
+    position: 'absolute',
+    top: 133,
+    left: 85,
+    width: 130,
+    height: 129,
+    borderRadius: 65,
+    backgroundColor: 'rgba(113, 146, 79, 0.2)',
+  },
+  decorCircleSmall: {
+    position: 'absolute',
+    top: 317,
+    left: 235,
+    width: 24,
+    height: 23,
+    borderRadius: 12,
+    backgroundColor: 'rgba(113, 146, 79, 0.3)',
   },
   scrollContent: {
     flexGrow: 1,
@@ -201,7 +223,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 80,
   },
-  // Card
+  // Glassmorphism Card
   blurCard: {
     marginHorizontal: 28,
     borderRadius: 29,
@@ -213,7 +235,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 28,
     paddingBottom: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   cardTitle: {
     fontSize: 28,
