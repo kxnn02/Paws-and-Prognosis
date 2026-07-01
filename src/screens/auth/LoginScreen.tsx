@@ -33,6 +33,22 @@ export default function LoginScreen({ navigation }: Props) {
       <View style={styles.card}>
         <Text style={styles.title}>Welcome Back!</Text>
 
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
         <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Log In'}</Text>
         </TouchableOpacity>
@@ -48,22 +64,6 @@ export default function LoginScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
       </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
     </View>
   );
 }
