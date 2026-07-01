@@ -22,7 +22,7 @@ main (protected — always deployable)
 - `refactor/<short-description>` — code restructuring without behavior change
 
 ### Rules
-- NEVER push directly to `main`
+- NEVER push directly to `main` (except during initial project setup by the lead)
 - Always create a feature branch from latest `main`
 - One feature/screen per branch (keep PRs small and focused)
 - Pull Request required to merge into `main`

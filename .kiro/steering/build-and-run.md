@@ -6,12 +6,11 @@ inclusion: always
 
 ## Prerequisites
 - Node.js 18+
-- Expo CLI: `npm install -g expo-cli` (or use npx)
-- Android Studio (for dev build) or Expo Go (limited features)
+- Expo Go app on phone (SDK 54 from Play Store)
 - Supabase project created at https://supabase.com
 
 ## Environment Setup
-Create `.env` in project root:
+Create `.env` in project root (copy from `.env.example`):
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
@@ -22,33 +21,26 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 # Install dependencies
 npm install
 
-# Start development (Expo Go - limited, no Google Auth)
+# Start development (Expo Go)
 npx expo start
 
-# Development build (full features)
-npx expo run:android
+# Start with cleared cache (use after config changes like babel/metro/tailwind)
+npx expo start --clear
 
 # Type checking
 npx tsc --noEmit
-
-# Lint
-npx eslint src/
 ```
 
 ## Testing on Device
-- For Expo Go: Scan QR code from `npx expo start`
-- For Dev Build: Install APK on device or use Android emulator
-- Google Auth only works in development build, NOT Expo Go
+- Phone and laptop must be on SAME network
+- If different networks: use phone hotspot or USB tethering
+- Scan QR code with Expo Go app
+- Press `r` in terminal to reload after code changes
 
-## Key npm Scripts (add to package.json)
-```json
-{
-  "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "lint": "eslint src/ --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
-  }
-}
-```
+## When to Use --clear
+Run `npx expo start --clear` after:
+- Changing `babel.config.js`
+- Changing `metro.config.js`
+- Changing `tailwind.config.js`
+- Installing new native packages
+- Seeing stale cache errors

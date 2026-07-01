@@ -11,7 +11,7 @@ fileMatchPattern: "**/lib/supabase*,**/hooks/use*,**/context/Auth*"
 ```sql
 -- Users are managed by Supabase Auth (auth.users)
 -- Profile data stored in public.profiles
-profiles (id uuid PK references auth.users, name text, role text CHECK (role IN ('pet_owner', 'veterinarian')), avatar_url text, phone text, created_at timestamptz)
+profiles (id uuid PK references auth.users, name text, role text CHECK (role IN ('pet_owner', 'veterinarian')), avatar_url text, phone text, email text, created_at timestamptz)
 
 pets (id uuid PK, owner_id uuid FK profiles, name text NOT NULL, species text NOT NULL, breed text NOT NULL, age text, gender text, weight text, color text, country text, card_number text, sterilization_date date, image_url text, created_at timestamptz)
 
