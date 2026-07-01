@@ -97,13 +97,14 @@ src/
 ├── navigation/        # Don't touch unless discussed
 ├── screens/
 │   ├── auth/          # Login, SignUp, Splash
-│   ├── owner/         # Pet Owner screens (Home, Calendar, Chat, Profile, etc.)
-│   └── vet/           # Veterinarian screens (Dashboard, Cases, etc.)
+│   ├── owner/         # Pet Owner screens (Home, VetDetails, Calendar, MyPets, AddPet, PetProfile, Chat, Profile)
+│   └── vet/           # Veterinarian screens (Dashboard, Appointments, Chat, Account)
 ├── components/        # Reusable UI components (cards, buttons, modals)
-├── hooks/             # Custom hooks (useAuth, usePets, etc.)
+├── hooks/             # Custom hooks (usePets, useAppointments)
 ├── lib/               # Supabase client, constants, helpers
 ├── context/           # Global state (AuthContext)
 ├── types/             # TypeScript interfaces
+├── data/              # Mock data (to be replaced with Supabase queries)
 └── assets/            # Images, fonts
 ```
 
@@ -168,6 +169,7 @@ chore(deps): install new library
 | Command | What it does |
 |---------|-------------|
 | `npx expo start` | Start the dev server |
+| `npx expo start --clear` | Start with cleared cache (after config changes) |
 | `npx tsc --noEmit` | Check for TypeScript errors |
 | `git status` | See what files changed |
 | `git pull origin main` | Get latest code from main |
@@ -205,9 +207,28 @@ This shows all type errors. Fix them before pushing.
 
 | Member | Screens | Branch prefix |
 |--------|---------|---------------|
-| Member 1 (Lead) | Auth, Home, VetDetails, Booking | `feature/auth-*`, `feature/home-*`, `feature/booking-*` |
-| Member 2 | MyPets, Calendar, Chat, Account/Settings | `feature/pets-*`, `feature/calendar-*`, `feature/chat-*` |
-| Member 3 | Vet Dashboard, Today's Cases, Vet Calendar, Call screens, Rating | `feature/vet-*`, `feature/call-*`, `feature/rating-*` |
+| Member 1 (Lead) | Auth, Home, VetDetails, Booking, Pets, Calendar | `feature/auth-*`, `feature/home-*`, `feature/booking-*`, `feature/pets-*`, `feature/calendar-*` |
+| Member 2 | Chat (owner + vet), Call screens, Rating | `feature/chat-*`, `feature/call-*`, `feature/rating-*` |
+| Member 3 | Vet Dashboard, Today's Cases, Vet Appointments, Vet Account, Reminders | `feature/vet-*` |
+
+### What's Already Done (don't rebuild these)
+- ✅ Auth flow (Login, SignUp, Splash)
+- ✅ Home screen with vet grid + search
+- ✅ Vet Details with booking (persists to Supabase)
+- ✅ Calendar with appointment list
+- ✅ My Pets, Add Pet (with image picker), Pet Profile
+- ✅ Profile screen with menu
+
+### What Needs Building
+- Chat (realtime messaging owner ↔ vet)
+- Call screen (UI mockup only)
+- Vet Dashboard (stats, today's cases)
+- Vet Appointments (manage bookings)
+- Vet Account screen
+- Rating system (post-appointment)
+- Reminders/Notifications (vet-side)
+
+See [STATUS.md](./STATUS.md) for detailed progress tracking.
 
 ---
 

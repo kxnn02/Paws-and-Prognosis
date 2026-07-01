@@ -1,0 +1,347 @@
+import React, { useState, useMemo } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
+import { usePets } from '../../hooks/usePets';
+import { useAppointments } from '../../hooks/useAppointments';
+import type { OwnerStackParamList } from '../../types';
+
+type BookingRouteProp = RouteProp<OwnerStackParamList, 'Booking'>;
+type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
+
+const TIME_SLOTS = [
+  '09:00 AM',
+  '10:00 AM',
+  '11:00 AM',
+  '01:00 PM',
+  '02:00 PM',
+  '03:00 PM',
+  '04:00 PM',
+];
+
+function generateDays(count: number) {
+  const days: { date: string; dayName: string; dayNumber: number; month: string; monthYear: string }[] = [];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const today = new Date();
+
+  for (let i = 0; i < count; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    days.push({
+      date: d.toISOString().split('T')[0],
+      dayName: dayNames[d.getDay()],
+      dayNumber: d.getDate(),
+      month: monthNames[d.getMonth()],
+      monthYear: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    });
+  }
+  return days;
+}
+
+function convertTo24Hour(time12: string): string {
+  const [time, modifier] = time12.split(' ');
+  const [hoursStr, minutes] = time.split(':');
+  let hours = parseInt(hoursStr, 10);
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  return `${hours.toString().padStart(2, '0')}:${minutes}:00`;
+}
+
+export default function BookingScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<BookingRouteProp>();
+  const { vetId, vetName } = route.params;
+
+  const { pets } = usePets();
+  const { bookAppointment } = useAppointments();
+
+  const scheduleDays = useMemo(() => generateDays(14), []);
+
+  const [selectedDate, setSelectedDate] = useState(scheduleDays[0].date);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [booking, setBooking] = useState(false);
+
+  const selectedDayData = scheduleDays.find((d) => d.date === selectedDate);
+
+  const handleConfirmBooking = async () => {
+    if (!selectedTime) {
+      Alert.alert('Select a Time', 'Please choose a time slot for your appointment.');
+      return;
+    }
+
+    const time24 = convertTo24Hour(selectedTime);
+    const dateFormatted = new Date(selectedDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    Alert.alert(
+      'Confirm Booking',
+      `${vetName}\n\n📅 ${dateFormatted}\n🕐 ${selectedTime}${selectedPetId ? '\n🐾 ' + (pets.find((p) => p.id === selectedPetId)?.name || '') : ''}`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            setBooking(true);
+            const { error } = await bookAppointment({
+              vetId,
+              petId: selectedPetId,
+              date: selectedDate,
+              time: time24,
+            });
+            setBooking(false);
+
+            if (error) {
+              Alert.alert('Booking Failed', error.message);
+            } else {
+              Alert.alert(
+                'Appointment Booked! ✓',
+                `Your appointment with ${vetName} has been confirmed.`,
+                [{ text: 'Done', onPress: () => navigation.popToTop() }]
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Determine if we're showing a month boundary
+  const currentMonthLabel = selectedDayData?.monthYear || '';
+
+  return (
+    <View className="flex-1 bg-beige">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="px-5 pt-14 pb-2 flex-row items-center">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={22} color="#343434" />
+          </TouchableOpacity>
+          <Text className="flex-1 text-center text-lg font-semibold text-heading mr-10">
+            Book Appointment
+          </Text>
+        </View>
+
+        {/* Vet name context */}
+        <View className="mx-5 mt-2 mb-4 bg-primary/10 rounded-btn px-4 py-3 flex-row items-center">
+          <Ionicons name="medical" size={18} color="#71924F" />
+          <Text className="text-sm font-medium text-dark ml-2">{vetName}</Text>
+        </View>
+
+        {/* Step 1: Select Date */}
+        <View className="mx-5">
+          <Text className="text-lg font-semibold text-heading mb-1">Select Date</Text>
+          <Text className="text-xs text-grey mb-3">{currentMonthLabel}</Text>
+
+          {/* Date Picker - 14 days */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+            {scheduleDays.map((day, index) => {
+              const isSelected = selectedDate === day.date;
+              const isToday = index === 0;
+              // Sunday indicator
+              const isSunday = day.dayName === 'Sun';
+
+              return (
+                <TouchableOpacity
+                  key={day.date}
+                  onPress={() => !isSunday && setSelectedDate(day.date)}
+                  disabled={isSunday}
+                  className={`w-[56px] h-[72px] rounded-btn items-center justify-center mr-2 ${
+                    isSunday
+                      ? 'bg-gray-100 opacity-50'
+                      : isSelected
+                        ? 'bg-primary'
+                        : 'bg-white border border-gray-200'
+                  }`}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    className={`text-[10px] font-medium ${
+                      isSunday
+                        ? 'text-grey'
+                        : isSelected
+                          ? 'text-white/70'
+                          : 'text-grey'
+                    }`}
+                  >
+                    {day.dayName}
+                  </Text>
+                  <Text
+                    className={`text-base font-semibold mt-1 ${
+                      isSunday
+                        ? 'text-grey'
+                        : isSelected
+                          ? 'text-white'
+                          : 'text-dark'
+                    }`}
+                  >
+                    {day.dayNumber}
+                  </Text>
+                  {isToday && !isSelected && (
+                    <View className="w-[4px] h-[4px] rounded-full bg-primary mt-1" />
+                  )}
+                  {isToday && isSelected && (
+                    <View className="w-[4px] h-[4px] rounded-full bg-white mt-1" />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* Step 2: Select Time */}
+        <View className="mx-5 mt-5">
+          <Text className="text-lg font-semibold text-heading mb-3">Select Time</Text>
+          <View className="flex-row flex-wrap gap-3">
+            {TIME_SLOTS.map((time) => {
+              const isSelected = selectedTime === time;
+              return (
+                <TouchableOpacity
+                  key={time}
+                  onPress={() => setSelectedTime(time)}
+                  className={`px-5 py-3 rounded-btn ${
+                    isSelected ? 'bg-primary' : 'bg-white border border-gray-200'
+                  }`}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    className={`text-sm font-medium ${
+                      isSelected ? 'text-white' : 'text-dark'
+                    }`}
+                  >
+                    {time}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Step 3: Select Pet */}
+        <View className="mx-5 mt-6">
+          <Text className="text-lg font-semibold text-heading mb-3">
+            Select Pet {pets.length === 0 && '(add a pet first)'}
+          </Text>
+
+          {pets.length > 0 ? (
+            <View className="flex-row flex-wrap gap-3">
+              {pets.map((pet) => {
+                const isSelected = selectedPetId === pet.id;
+                return (
+                  <TouchableOpacity
+                    key={pet.id}
+                    onPress={() => setSelectedPetId(isSelected ? null : pet.id)}
+                    className={`px-4 py-3 rounded-btn flex-row items-center ${
+                      isSelected ? 'bg-primary' : 'bg-white border border-gray-200'
+                    }`}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name="paw"
+                      size={16}
+                      color={isSelected ? '#FFF' : '#71924F'}
+                    />
+                    <Text
+                      className={`text-sm font-medium ml-2 ${
+                        isSelected ? 'text-white' : 'text-dark'
+                      }`}
+                    >
+                      {pet.name}
+                    </Text>
+                    {pet.species && (
+                      <Text
+                        className={`text-xs ml-1 ${
+                          isSelected ? 'text-white/70' : 'text-grey'
+                        }`}
+                      >
+                        ({pet.species})
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AddPet')}
+              className="bg-white rounded-btn px-4 py-3 flex-row items-center border border-dashed border-primary"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="add-circle-outline" size={20} color="#71924F" />
+              <Text className="text-sm font-medium text-primary ml-2">Add your first pet</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Summary */}
+        {selectedTime && (
+          <View className="mx-5 mt-6 bg-white rounded-card p-4 border border-gray-100">
+            <Text className="text-sm font-semibold text-heading mb-2">Booking Summary</Text>
+            <View className="flex-row items-center mb-1">
+              <Ionicons name="calendar-outline" size={14} color="#808080" />
+              <Text className="text-sm text-dark ml-2">
+                {new Date(selectedDate).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </Text>
+            </View>
+            <View className="flex-row items-center mb-1">
+              <Ionicons name="time-outline" size={14} color="#808080" />
+              <Text className="text-sm text-dark ml-2">{selectedTime}</Text>
+            </View>
+            {selectedPetId && (
+              <View className="flex-row items-center">
+                <Ionicons name="paw" size={14} color="#808080" />
+                <Text className="text-sm text-dark ml-2">
+                  {pets.find((p) => p.id === selectedPetId)?.name}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Bottom spacing */}
+        <View className="h-[120px]" />
+      </ScrollView>
+
+      {/* Confirm Button */}
+      <View className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-beige">
+        <TouchableOpacity
+          onPress={handleConfirmBooking}
+          disabled={booking || !selectedTime}
+          className={`h-[52px] rounded-btn items-center justify-center shadow-md ${
+            selectedTime ? 'bg-primary' : 'bg-gray-300'
+          } ${booking ? 'opacity-60' : ''}`}
+          activeOpacity={0.8}
+        >
+          {booking ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text className="text-white text-base font-semibold">
+              {selectedTime ? 'Confirm Booking' : 'Select a time to continue'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}

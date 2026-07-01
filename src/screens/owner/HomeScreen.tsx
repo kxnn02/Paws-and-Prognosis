@@ -6,11 +6,14 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { mockVets } from '../../data/mockVets';
-import type { Vet } from '../../types';
+import type { Vet, OwnerStackParamList } from '../../types';
+
+type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 const CATEGORIES = [
   { id: '1', name: 'Health', icon: 'heart' as const },
@@ -20,6 +23,7 @@ const CATEGORIES = [
 ];
 
 export default function HomeScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -91,7 +95,7 @@ export default function HomeScreen() {
         <Text className="text-xl font-bold text-heading mb-4">Veterinary</Text>
         <View className="flex-row flex-wrap justify-between">
           {filteredVets.map((vet) => (
-            <VetCard key={vet.id} vet={vet} />
+            <VetCard key={vet.id} vet={vet} onPress={() => navigation.navigate('VetDetails', { vetId: vet.id })} />
           ))}
         </View>
       </View>
@@ -102,11 +106,12 @@ export default function HomeScreen() {
   );
 }
 
-function VetCard({ vet }: { vet: Vet }) {
+function VetCard({ vet, onPress }: { vet: Vet; onPress: () => void }) {
   return (
     <TouchableOpacity
       className="bg-primary rounded-card w-[48%] mb-4 pb-4 shadow-md"
       activeOpacity={0.8}
+      onPress={onPress}
     >
       {/* Vet Image */}
       <View className="items-center pt-2">
