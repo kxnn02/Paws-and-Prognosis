@@ -38,7 +38,7 @@ export default function LoginScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {/* Brand */}
+        {/* Brand — Top Left */}
         <View style={styles.brandContainer}>
           <Text style={styles.brandPaws}>Paws</Text>
           <Text style={styles.brandAnd}> & </Text>
@@ -46,15 +46,17 @@ export default function LoginScreen({ navigation }: Props) {
         </View>
         <Text style={styles.brandSubtitle}>Veterinary Clinic</Text>
 
-        {/* Glassmorphism Card */}
+        {/* Spacer — where decorative illustration would go */}
+        <View style={styles.spacer} />
+
+        {/* Glassmorphism Card — Bottom Half */}
         <View style={styles.card}>
           <Text style={styles.title}>Take Care Of{'\n'}Your Pet</Text>
 
-          {/* Inputs */}
-          <Text style={styles.inputLabel}>Email Address</Text>
+          {/* Inputs (functional — not in original Figma but needed) */}
           <TextInput
             style={styles.input}
-            placeholder="Enter your email"
+            placeholder="Email Address"
             placeholderTextColor="#AA865D"
             value={email}
             onChangeText={setEmail}
@@ -63,17 +65,16 @@ export default function LoginScreen({ navigation }: Props) {
             autoCorrect={false}
           />
 
-          <Text style={styles.inputLabel}>Password</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your password"
+            placeholder="Password"
             placeholderTextColor="#AA865D"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
 
-          {/* Login Button */}
+          {/* Log In Button */}
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.buttonDisabled]}
             onPress={handleLogin}
@@ -94,7 +95,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.footerLink}>Sign Up</Text>
+              <Text style={styles.footerLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -111,14 +112,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing['2xl'],
-    paddingTop: 80,
-    paddingBottom: 40,
-    justifyContent: 'center',
+    paddingTop: 62,
+    paddingBottom: 34,
   },
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 4,
   },
   brandPaws: {
     fontSize: 30,
@@ -138,36 +137,36 @@ const styles = StyleSheet.create({
   brandSubtitle: {
     fontSize: 15,
     color: Colors.textHeading,
-    marginBottom: Spacing['4xl'],
+  },
+  spacer: {
+    flex: 1,
+    minHeight: 60,
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: Radius.xl,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.9)',
-    padding: Spacing['2xl'],
+    paddingHorizontal: Spacing['2xl'],
+    paddingVertical: Spacing['3xl'],
     ...Shadow.lg,
   },
   title: {
-    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: '700',
     color: Colors.textHeading,
     textAlign: 'center',
-    marginBottom: Spacing['3xl'],
     lineHeight: 40,
-  },
-  inputLabel: {
-    ...Typography.small,
-    color: Colors.textDark,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing['2xl'],
   },
   input: {
     backgroundColor: '#F5F5F5',
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    height: 44,
     fontSize: 14,
     color: Colors.textDark,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     ...Shadow.sm,
   },
   loginButton: {
@@ -178,7 +177,7 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
+    marginTop: Spacing.sm,
     ...Shadow.sm,
   },
   buttonDisabled: {
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing['2xl'],
+    marginTop: Spacing.md,
     ...Shadow.sm,
   },
   googleButtonText: {
@@ -204,6 +203,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    marginTop: Spacing.xl,
   },
   footerText: {
     ...Typography.small,
