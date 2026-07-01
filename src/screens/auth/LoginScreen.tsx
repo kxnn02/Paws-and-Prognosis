@@ -49,7 +49,6 @@ export default function LoginScreen({ navigation }: Props) {
       <Image
         source={require('../../../assets/Decoration.png')}
         style={styles.decoration}
-        resizeMode="cover"
       />
 
       <KeyboardAvoidingView
@@ -150,10 +149,11 @@ const styles = StyleSheet.create({
   },
   decoration: {
     position: 'absolute',
-    top: 133,
+    top: 90,
     left: -30,
     width: 482,
-    height: 696,
+    height: 750,
+    resizeMode: 'contain',
   },
   scrollContent: {
     flexGrow: 1,
