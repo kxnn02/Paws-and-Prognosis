@@ -126,6 +126,8 @@ export type OwnerStackParamList = {
   AddPet: undefined;
   PetProfile: { petId: string };
   ChatConversation: { threadId: string; participantName: string };
+  Rating: { appointmentId: string; vetId: string; vetName: string };
+  EditProfile: undefined;
   CallScreen: { vetId: string; vetName: string };
   CallEnd: { vetId: string; appointmentId: string };
   AccountInfo: undefined;
@@ -144,6 +146,7 @@ export type VetStackParamList = {
   TodayCases: undefined;
   PatientProfile: { petId: string };
   VetChatConversation: { threadId: string; participantName: string };
+  EditProfile: undefined;
 };
 
 // Category type for home screen

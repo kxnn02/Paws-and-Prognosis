@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { useVetAppointments } from '../../hooks/useVetAppointments';
+import { useReminders } from '../../hooks/useReminders';
 import type { Appointment, VetStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
@@ -29,6 +30,8 @@ export default function DashboardScreen() {
     updateAppointmentStatus,
   } = useVetAppointments();
 
+  const { getUpcoming: getUpcomingReminders, markAsRead } = useReminders();
+
   const [refreshing, setRefreshing] = React.useState(false);
 
   const stats = getStats();
@@ -36,6 +39,7 @@ export default function DashboardScreen() {
   const upcomingCases = getUpcomingAppointments().filter(
     (a) => a.date !== new Date().toISOString().split('T')[0]
   ); // Upcoming excluding today
+  const upcomingReminders = getUpcomingReminders();
 
   async function onRefresh() {
     setRefreshing(true);
@@ -119,6 +123,42 @@ export default function DashboardScreen() {
           </View>
         </View>
       </View>
+
+      {/* Reminders */}
+      {upcomingReminders.length > 0 && (
+        <View className="px-5 mt-6">
+          <Text className="text-lg font-semibold text-heading mb-3">Reminders</Text>
+          {upcomingReminders.slice(0, 3).map((reminder) => (
+            <TouchableOpacity
+              key={reminder.id}
+              onPress={() => markAsRead(reminder.id)}
+              className="bg-white rounded-btn px-4 py-3 mb-2 flex-row items-center shadow-sm border-l-4 border-yellow-400"
+              activeOpacity={0.7}
+            >
+              <View className="w-8 h-8 rounded-full bg-yellow-50 items-center justify-center mr-3">
+                <Ionicons
+                  name={
+                    reminder.type === 'vaccination' ? 'medkit' :
+                    reminder.type === 'vaccine_expiry' ? 'alert-circle' : 'thermometer'
+                  }
+                  size={16}
+                  color="#F59E0B"
+                />
+              </View>
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-dark">{reminder.title}</Text>
+                {reminder.description && (
+                  <Text className="text-xs text-grey mt-0.5" numberOfLines={1}>{reminder.description}</Text>
+                )}
+                <Text className="text-[10px] text-light-grey mt-1">
+                  Due: {new Date(reminder.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Text>
+              </View>
+              <Ionicons name="close-circle-outline" size={18} color="#9BA1A8" />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* Today's Cases */}
       <View className="px-5 mt-6">
