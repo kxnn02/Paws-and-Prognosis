@@ -8,12 +8,19 @@ import {
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppointments } from '../../hooks/useAppointments';
-import type { Appointment } from '../../types';
+import { useRatings } from '../../hooks/useRatings';
+import type { Appointment, OwnerStackParamList } from '../../types';
+
+type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function CalendarScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const { appointments, loading, getMarkedDates, getAppointmentsForDate, cancelAppointment } =
     useAppointments();
+  const { hasRated } = useRatings();
 
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
@@ -108,6 +115,32 @@ export default function CalendarScreen() {
           >
             <Text className="text-xs text-red-500 font-medium">Cancel Appointment</Text>
           </TouchableOpacity>
+        )}
+
+        {/* Rate button for completed appointments */}
+        {item.status === 'completed' && item.vet && !hasRated(item.id) && (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('Rating', {
+                appointmentId: item.id,
+                vetId: item.vet_id,
+                vetName: item.vet?.name || 'Veterinarian',
+              })
+            }
+            className="mt-3 ml-11 bg-yellow-50 self-start px-3 py-1.5 rounded-btn flex-row items-center"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="star-outline" size={14} color="#F59E0B" />
+            <Text className="text-xs font-medium text-yellow-700 ml-1">Rate this visit</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Already rated indicator */}
+        {item.status === 'completed' && hasRated(item.id) && (
+          <View className="mt-3 ml-11 flex-row items-center">
+            <Ionicons name="checkmark-circle" size={14} color="#10B981" />
+            <Text className="text-xs text-green-700 ml-1">Rated</Text>
+          </View>
         )}
       </View>
     );

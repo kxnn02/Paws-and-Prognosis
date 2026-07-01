@@ -139,3 +139,12 @@ export const CATEGORIES = [
 // Bottom tab icon size
 export const TAB_ICON_SIZE = 30;
 export const BOTTOM_NAV_HEIGHT = 94;
+
+// Clinic Contact Info (for Contact Clinic feature)
+export const CLINIC_CONTACT = {
+  name: 'Paws & Prognosis Clinic',
+  phone: '+639171234567',
+  viber: '+639171234567',
+  messenger: 'pawsandprognosis', // Facebook page username
+  address: 'Manila, Philippines',
+};

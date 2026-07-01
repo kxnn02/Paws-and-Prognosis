@@ -1,9 +1,15 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
+import type { VetStackParamList } from '../../types';
+
+type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
 
 export default function VetAccountScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const { profile, signOut } = useAuth();
 
   function handleLogout() {
@@ -38,7 +44,7 @@ export default function VetAccountScreen() {
 
       {/* Menu */}
       <View className="px-5">
-        <MenuItem icon="person-circle-outline" label="Edit Profile" onPress={() => {}} />
+        <MenuItem icon="person-circle-outline" label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
         <MenuItem icon="notifications-outline" label="Notifications" onPress={() => {}} />
         <MenuItem icon="time-outline" label="Working Hours" onPress={() => {}} />
         <MenuItem icon="shield-checkmark-outline" label="Privacy & Security" onPress={() => {}} />

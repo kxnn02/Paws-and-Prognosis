@@ -56,7 +56,7 @@ export default function ProfileScreen() {
         <MenuItem
           icon="person-circle-outline"
           label="Account Info"
-          onPress={() => {}}
+          onPress={() => navigation.navigate('EditProfile')}
         />
         <MenuItem
           icon="notifications-outline"
