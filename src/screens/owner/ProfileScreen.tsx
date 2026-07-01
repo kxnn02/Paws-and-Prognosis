@@ -1,9 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Colors, Typography, Spacing } from '../../lib/constants';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
+import type { OwnerStackParamList } from '../../types';
+
+type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const { profile, signOut } = useAuth();
 
   function handleLogout() {
@@ -18,20 +24,79 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{profile?.name || 'Profile'}</Text>
-      <Text style={styles.subtitle}>{profile?.role === 'pet_owner' ? 'Customer / Client' : 'Veterinarian'}</Text>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Log out</Text>
-      </TouchableOpacity>
+    <View className="flex-1 bg-beige">
+      {/* Header */}
+      <View className="px-5 pt-14 pb-6">
+        <Text className="text-2xl font-bold text-heading">Profile</Text>
+      </View>
+
+      {/* User Info */}
+      <View className="items-center px-5 mb-6">
+        <View className="w-[80px] h-[80px] rounded-full bg-primary/20 items-center justify-center mb-3">
+          <Ionicons name="person" size={36} color="#71924F" />
+        </View>
+        <Text className="text-xl font-semibold text-dark">
+          {profile?.name || 'User'}
+        </Text>
+        <Text className="text-sm text-grey mt-1">
+          {profile?.email || ''}
+        </Text>
+        <Text className="text-xs text-primary mt-1 font-medium">
+          {profile?.role === 'pet_owner' ? 'Pet Owner' : 'Veterinarian'}
+        </Text>
+      </View>
+
+      {/* Menu Items */}
+      <View className="px-5">
+        <MenuItem
+          icon="paw"
+          label="My Pets"
+          onPress={() => navigation.navigate('MyPets')}
+        />
+        <MenuItem
+          icon="person-circle-outline"
+          label="Account Info"
+          onPress={() => {}}
+        />
+        <MenuItem
+          icon="notifications-outline"
+          label="Notifications"
+          onPress={() => {}}
+        />
+        <MenuItem
+          icon="help-circle-outline"
+          label="Help & Support"
+          onPress={() => {}}
+        />
+      </View>
+
+      {/* Logout */}
+      <View className="px-5 mt-8">
+        <TouchableOpacity
+          onPress={handleLogout}
+          className="bg-red-50 rounded-btn h-[48px] flex-row items-center justify-center"
+          activeOpacity={0.8}
+        >
+          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+          <Text className="text-sm font-semibold text-red-500 ml-2">Log Out</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  title: { ...Typography.h2, color: Colors.textDark, marginBottom: 8 },
-  subtitle: { ...Typography.body, color: Colors.textGrey, marginBottom: Spacing['3xl'] },
-  logoutButton: { backgroundColor: Colors.error, paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 },
-  logoutText: { ...Typography.button, color: '#FFF' },
-});
+function MenuItem({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className="bg-white rounded-btn px-4 h-[52px] flex-row items-center mb-3 shadow-sm"
+      activeOpacity={0.7}
+    >
+      <View className="w-8 h-8 rounded-full bg-primary/10 items-center justify-center mr-3">
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color="#71924F" />
+      </View>
+      <Text className="flex-1 text-sm font-medium text-dark">{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color="#9BA1A8" />
+    </TouchableOpacity>
+  );
+}
