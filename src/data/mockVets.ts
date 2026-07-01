@@ -28,7 +28,7 @@ export const mockVets: Vet[] = [
     specialty: 'Veterinary Behavioral',
     bio: 'Focused on preventive care and nutrition for dogs and cats.',
     rating: 4.8,
-    image_url: 'https://images.unsplash.com/photo-1594824476967-48c8b964f137?w=300&h=300&fit=crop&crop=face',
+    image_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=300&fit=crop&crop=face',
     created_at: '2024-01-01',
   },
   {

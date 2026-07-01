@@ -11,6 +11,7 @@ import {
   Image,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types';
@@ -24,6 +25,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) {
@@ -97,14 +99,22 @@ export default function LoginScreen({ navigation }: Props) {
               />
 
               {/* Password */}
-              <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-[10px] shadow-sm"
-                placeholder="Password"
-                placeholderTextColor="#AA865D"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View className="relative mb-[10px]">
+                <TextInput
+                  className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark pr-12 shadow-sm"
+                  placeholder="Password"
+                  placeholderTextColor="#AA865D"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  className="absolute right-3 top-[10px]"
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
+                </TouchableOpacity>
+              </View>
 
               {/* Log In Button */}
               <TouchableOpacity

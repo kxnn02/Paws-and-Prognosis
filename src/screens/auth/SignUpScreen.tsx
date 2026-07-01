@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Colors, Typography, Spacing, Radius, Shadow } from '../../lib/constants';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+} from 'react-native';
+import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList, UserRole } from '../../types';
@@ -14,6 +25,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('pet_owner');
   const [loading, setLoading] = useState(false);
 
@@ -39,223 +51,132 @@ export default function SignUpScreen({ navigation }: Props) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {/* Brand */}
-        <View style={styles.brandContainer}>
-          <Text style={styles.brandPaws}>Paws</Text>
-          <Text style={styles.brandAnd}> & </Text>
-          <Text style={styles.brandPrognosis}>Prognosis</Text>
-        </View>
-        <Text style={styles.brandSubtitle}>Veterinary Clinic</Text>
+    <View className="flex-1 bg-cream">
+      {/* Decoration */}
+      <Image
+        source={require('../../../assets/Decoration.png')}
+        className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]"
+        resizeMode="contain"
+      />
 
-        {/* Glassmorphism Card */}
-        <View style={styles.card}>
-          <Text style={styles.title}>Let's get you and your fur baby started</Text>
-
-          {/* Name */}
-          <Text style={styles.inputLabel}>Your Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="What should we call you?"
-            placeholderTextColor="#AA865D"
-            value={name}
-            onChangeText={setName}
-            autoCorrect={false}
-          />
-
-          {/* Email */}
-          <Text style={styles.inputLabel}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="We'll only use this for important updates."
-            placeholderTextColor="#AA865D"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          {/* Password */}
-          <Text style={styles.inputLabel}>Create a Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Something secure, but easy to remember."
-            placeholderTextColor="#AA865D"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-
-          {/* Role Selection */}
-          <Text style={styles.inputLabel}>I am a...</Text>
-          <View style={styles.roleContainer}>
-            <TouchableOpacity
-              style={[styles.roleButton, role === 'pet_owner' && styles.roleActive]}
-              onPress={() => setRole('pet_owner')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.roleText, role === 'pet_owner' && styles.roleTextActive]}>
-                🐾 Pet Owner
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.roleButton, role === 'veterinarian' && styles.roleActive]}
-              onPress={() => setRole('veterinarian')}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.roleText, role === 'veterinarian' && styles.roleTextActive]}>
-                🩺 Veterinarian
-              </Text>
-            </TouchableOpacity>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Brand */}
+          <View className="pt-[62px] pl-[28px]">
+            <View className="flex-row items-baseline">
+              <Text className="text-[30px] font-bold text-[#7A5C4F]">Paws</Text>
+              <Text className="text-[30px] font-bold text-heading"> & </Text>
+              <Text className="text-[30px] font-bold text-primary">Prognosis</Text>
+            </View>
+            <Text className="text-[15px] text-heading mt-[2px]">Veterinary Clinic</Text>
           </View>
 
-          {/* Sign Up Button */}
-          <TouchableOpacity
-            style={[styles.signUpButton, loading && styles.buttonDisabled]}
-            onPress={handleSignUp}
-            disabled={loading}
-            activeOpacity={0.8}
+          {/* Card */}
+          <BlurView
+            intensity={50}
+            tint="light"
+            className="mx-[28px] mt-6 rounded-glass overflow-hidden border border-white/80"
           >
-            <Text style={styles.signUpButtonText}>
-              {loading ? 'Creating account...' : 'Join the pack!'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View className="px-[22px] pt-[24px] pb-[20px] bg-white/40">
+              <Text className="text-[24px] font-bold text-heading leading-[34px] mb-5">
+                Let's get you and your fur baby started
+              </Text>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already a furparent here? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.footerLink}>Log in</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+              {/* Name */}
+              <Text className="text-sm text-dark mb-1">Your Name</Text>
+              <TextInput
+                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                placeholder="What should we call you?"
+                placeholderTextColor="#AA865D"
+                value={name}
+                onChangeText={setName}
+              />
+
+              {/* Email */}
+              <Text className="text-sm text-dark mb-1">Email Address</Text>
+              <TextInput
+                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                placeholder="We'll only use this for important updates."
+                placeholderTextColor="#AA865D"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              {/* Password */}
+              <Text className="text-sm text-dark mb-1">Create a Password</Text>
+              <View className="relative mb-3">
+                <TextInput
+                  className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark pr-12 shadow-sm"
+                  placeholder="Something secure, but easy to remember."
+                  placeholderTextColor="#AA865D"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  className="absolute right-3 top-[10px]"
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Role */}
+              <Text className="text-sm text-dark mb-2">I am a...</Text>
+              <View className="flex-row gap-2 mb-5">
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-btn items-center shadow-sm ${
+                    role === 'pet_owner' ? 'bg-primary' : 'bg-input-bg'
+                  }`}
+                  onPress={() => setRole('pet_owner')}
+                >
+                  <Text className={`text-sm font-semibold ${role === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
+                    🐾 Pet Owner
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-btn items-center shadow-sm ${
+                    role === 'veterinarian' ? 'bg-primary' : 'bg-input-bg'
+                  }`}
+                  onPress={() => setRole('veterinarian')}
+                >
+                  <Text className={`text-sm font-semibold ${role === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
+                    🩺 Veterinarian
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Submit */}
+              <TouchableOpacity
+                className={`bg-primary rounded-btn h-[52px] items-center justify-center border border-primary-border shadow-md ${loading ? 'opacity-60' : ''}`}
+                onPress={handleSignUp}
+                disabled={loading}
+              >
+                <Text className="text-sm font-semibold text-white">
+                  {loading ? 'Creating account...' : 'Join the pack!'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+
+          {/* Footer */}
+          <View className="flex-row justify-center mt-4 mb-8">
+            <Text className="text-sm text-dark">Already a furparent here? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text className="text-sm font-semibold text-dark">Log in</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing['2xl'],
-    paddingTop: 60,
-    paddingBottom: 40,
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 4,
-  },
-  brandPaws: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#7A5C4F',
-  },
-  brandAnd: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: Colors.textHeading,
-  },
-  brandPrognosis: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  brandSubtitle: {
-    fontSize: 15,
-    color: Colors.textHeading,
-    marginBottom: Spacing['2xl'],
-  },
-  card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: Radius.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-    padding: Spacing['2xl'],
-    ...Shadow.lg,
-  },
-  title: {
-    ...Typography.h1,
-    color: Colors.textHeading,
-    marginBottom: Spacing['2xl'],
-    lineHeight: 40,
-  },
-  inputLabel: {
-    ...Typography.small,
-    color: Colors.textDark,
-    marginBottom: Spacing.xs,
-  },
-  input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    fontSize: 14,
-    fontStyle: 'italic',
-    color: Colors.textDark,
-    marginBottom: Spacing.lg,
-    ...Shadow.sm,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing['2xl'],
-  },
-  roleButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: Radius.md,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    ...Shadow.sm,
-  },
-  roleActive: {
-    backgroundColor: Colors.primary,
-  },
-  roleText: {
-    ...Typography.smallSemiBold,
-    color: Colors.textDark,
-  },
-  roleTextActive: {
-    color: Colors.textWhite,
-  },
-  signUpButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: '#7DAE4A',
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadow.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  signUpButtonText: {
-    ...Typography.button,
-    color: Colors.textWhite,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: Spacing.lg,
-  },
-  footerText: {
-    ...Typography.small,
-    color: Colors.textDark,
-  },
-  footerLink: {
-    ...Typography.smallSemiBold,
-    color: Colors.textDark,
-  },
-});
