@@ -99,11 +99,25 @@ export default function HomeScreen() {
       {/* Veterinary Grid */}
       <View className="px-5 mt-6 mb-6">
         <Text className="text-xl font-bold text-heading mb-4">Veterinary</Text>
-        <View className="flex-row flex-wrap justify-between">
-          {filteredVets.map((vet) => (
-            <VetCard key={vet.id} vet={vet} onPress={() => navigation.navigate('VetDetails', { vetId: vet.id })} />
-          ))}
-        </View>
+
+        {vetsLoading ? (
+          <View className="items-center py-8">
+            <ActivityIndicator size="large" color="#71924F" />
+          </View>
+        ) : filteredVets.length === 0 ? (
+          <View className="items-center py-8">
+            <Ionicons name="search-outline" size={36} color="#9BA1A8" />
+            <Text className="text-sm text-grey mt-3 text-center">
+              {search ? `No vets found for "${search}"` : 'No veterinarians available'}
+            </Text>
+          </View>
+        ) : (
+          <View className="flex-row flex-wrap justify-between">
+            {filteredVets.map((vet) => (
+              <VetCard key={vet.id} vet={vet} onPress={() => navigation.navigate('VetDetails', { vetId: vet.id })} />
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Bottom spacing for tab bar */}

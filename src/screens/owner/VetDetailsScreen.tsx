@@ -34,8 +34,16 @@ export default function VetDetailsScreen() {
 
   if (!vet) {
     return (
-      <View className="flex-1 bg-beige items-center justify-center">
-        <Text className="text-grey text-base">Vet not found</Text>
+      <View className="flex-1 bg-beige items-center justify-center px-8">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="absolute top-14 left-5 w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={22} color="#343434" />
+        </TouchableOpacity>
+        <Ionicons name="alert-circle-outline" size={48} color="#9BA1A8" />
+        <Text className="text-grey text-base mt-3">Vet not found</Text>
       </View>
     );
   }
