@@ -96,9 +96,14 @@ export default function VetChatConversationScreen() {
               {item.content}
             </Text>
           </View>
-          <Text className="text-[10px] text-grey mt-1 mx-1">
-            {formatMessageTime(item.created_at)}
-          </Text>
+          <View className="flex-row items-center mt-1 mx-1">
+            <Text className="text-[10px] text-grey">
+              {formatMessageTime(item.created_at)}
+            </Text>
+            {isMe && (
+              <Ionicons name="checkmark-done" size={12} color="#71924F" style={{ marginLeft: 4 }} />
+            )}
+          </View>
         </View>
       </View>
     );

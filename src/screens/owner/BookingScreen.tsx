@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { usePets } from '../../hooks/usePets';
@@ -62,8 +62,15 @@ export default function BookingScreen() {
   const route = useRoute<BookingRouteProp>();
   const { vetId, vetName } = route.params;
 
-  const { pets } = usePets();
+  const { pets, fetchPets } = usePets();
   const { bookAppointment } = useAppointments();
+
+  // Refetch pets when screen regains focus (e.g., after adding a pet)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPets();
+    }, [fetchPets])
+  );
 
   const scheduleDays = useMemo(() => generateDays(14), []);
 
