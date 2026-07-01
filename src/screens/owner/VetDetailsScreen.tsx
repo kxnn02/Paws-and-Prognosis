@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+import { useVets } from '../../hooks/useVets';
 import { mockVets } from '../../data/mockVets';
 import type { OwnerStackParamList } from '../../types';
 
@@ -21,7 +22,9 @@ export default function VetDetailsScreen() {
   const route = useRoute<VetDetailsRouteProp>();
   const { vetId } = route.params;
 
-  const vet = mockVets.find((v) => v.id === vetId);
+  const { vets: supabaseVets } = useVets();
+  const allVets = supabaseVets.length > 0 ? supabaseVets : mockVets;
+  const vet = allVets.find((v) => v.id === vetId);
 
   if (!vet) {
     return (

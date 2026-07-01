@@ -6,10 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useVets } from '../../hooks/useVets';
 import { mockVets } from '../../data/mockVets';
 import type { Vet, OwnerStackParamList } from '../../types';
 
@@ -24,15 +26,19 @@ const CATEGORIES = [
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { vets: supabaseVets, loading: vetsLoading } = useVets();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
+  // Use real vets from Supabase, fall back to mock if none exist yet
+  const allVets = supabaseVets.length > 0 ? supabaseVets : mockVets;
+
   const filteredVets = search
-    ? mockVets.filter((v) =>
+    ? allVets.filter((v) =>
         v.name.toLowerCase().includes(search.toLowerCase()) ||
         v.specialty.toLowerCase().includes(search.toLowerCase())
       )
-    : mockVets;
+    : allVets;
 
   return (
     <ScrollView className="flex-1 bg-beige" showsVerticalScrollIndicator={false}>
