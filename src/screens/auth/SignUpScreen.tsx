@@ -16,7 +16,25 @@ import { useAuth } from '../../context/AuthContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList, UserRole } from '../../types';
 
-interface Props {
+// BlurView doesn't work well on web — use a plain View fallback
+function GlassCard({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === 'web') {
+    return (
+      <View className="mx-[28px] mt-6 rounded-glass overflow-hidden border border-white/80 bg-white/60">
+        {children}
+      </View>
+    );
+  }
+  return (
+    <BlurView
+      intensity={50}
+      tint="light"
+      className="mx-[28px] mt-6 rounded-glass overflow-hidden border border-white/80"
+    >
+      {children}
+    </BlurView>
+  );
+}interface Props {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
 }
 
@@ -59,11 +77,13 @@ export default function SignUpScreen({ navigation }: Props) {
   return (
     <View className="flex-1 bg-cream">
       {/* Decoration */}
-      <Image
-        source={require('../../../assets/Decoration.png')}
-        className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]"
-        resizeMode="contain"
-      />
+      <View pointerEvents="none" className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]">
+        <Image
+          source={require('../../../assets/Decoration.png')}
+          className="w-full h-full"
+          resizeMode="contain"
+        />
+      </View>
 
       <KeyboardAvoidingView
         className="flex-1"
@@ -85,11 +105,7 @@ export default function SignUpScreen({ navigation }: Props) {
           </View>
 
           {/* Card */}
-          <BlurView
-            intensity={50}
-            tint="light"
-            className="mx-[28px] mt-6 rounded-glass overflow-hidden border border-white/80"
-          >
+          <GlassCard>
             <View className="px-[22px] pt-[24px] pb-[20px] bg-white/40">
               <Text className="text-[24px] font-bold text-heading leading-[34px] mb-5">
                 Let's get you and your fur baby started
@@ -172,7 +188,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </BlurView>
+          </GlassCard>
 
           {/* Footer */}
           <View className="flex-row justify-center mt-4 mb-8">
