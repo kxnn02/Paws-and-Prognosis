@@ -91,6 +91,25 @@ export function useVetAppointments() {
     }
   }
 
+  async function addNotes(appointmentId: string, notes: string) {
+    try {
+      const { error: updateError } = await supabase
+        .from('appointments')
+        .update({ notes })
+        .eq('id', appointmentId);
+
+      if (updateError) throw updateError;
+
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === appointmentId ? { ...a, notes } : a))
+      );
+      return { error: null };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to add notes';
+      return { error: new Error(message) };
+    }
+  }
+
   // Get today's appointments
   function getTodayAppointments() {
     const today = new Date().toISOString().split('T')[0];
@@ -141,6 +160,7 @@ export function useVetAppointments() {
     error,
     fetchAppointments,
     updateAppointmentStatus,
+    addNotes,
     getTodayAppointments,
     getUpcomingAppointments,
     getAppointmentsForDate,

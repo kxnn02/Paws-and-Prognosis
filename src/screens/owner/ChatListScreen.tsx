@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +17,14 @@ type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function ChatListScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { threads, loading } = useChatThreads();
+  const { threads, loading, fetchThreads } = useChatThreads();
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchThreads();
+    setRefreshing(false);
+  }
 
   function formatTime(dateStr: string) {
     const date = new Date(dateStr);
@@ -87,8 +95,15 @@ export default function ChatListScreen() {
         </View>
         <Text className="text-lg font-semibold text-heading text-center">No messages yet</Text>
         <Text className="text-sm text-grey text-center mt-2">
-          Start a conversation after booking an appointment with a vet.
+          Start a conversation by messaging a vet from their profile page.
         </Text>
+        <TouchableOpacity
+          onPress={() => navigation.getParent()?.navigate('Home')}
+          className="mt-4 bg-primary px-5 py-2.5 rounded-btn"
+          activeOpacity={0.8}
+        >
+          <Text className="text-sm font-medium text-white">Find a Vet</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -116,6 +131,9 @@ export default function ChatListScreen() {
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={{ paddingTop: 4, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+        }
       />
     </View>
   );
