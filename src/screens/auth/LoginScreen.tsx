@@ -20,6 +20,26 @@ interface Props {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 }
 
+// BlurView doesn't work well on web — use a plain View fallback
+function GlassCard({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === 'web') {
+    return (
+      <View className="mx-[28px] rounded-glass overflow-hidden border border-white/80 bg-white/60">
+        {children}
+      </View>
+    );
+  }
+  return (
+    <BlurView
+      intensity={50}
+      tint="light"
+      className="mx-[28px] rounded-glass overflow-hidden border border-white/80"
+    >
+      {children}
+    </BlurView>
+  );
+}
+
 export default function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
@@ -47,11 +67,13 @@ export default function LoginScreen({ navigation }: Props) {
   return (
     <View className="flex-1 bg-cream">
       {/* Decoration */}
-      <Image
-        source={require('../../../assets/Decoration.png')}
-        className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]"
-        resizeMode="contain"
-      />
+      <View pointerEvents="none" className="absolute top-[90px] left-[-30px] w-[482px] h-[750px]">
+        <Image
+          source={require('../../../assets/Decoration.png')}
+          className="w-full h-full"
+          resizeMode="contain"
+        />
+      </View>
 
       <KeyboardAvoidingView
         className="flex-1"
@@ -76,11 +98,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View className="flex-1 min-h-[80px]" />
 
           {/* Glassmorphism Card */}
-          <BlurView
-            intensity={50}
-            tint="light"
-            className="mx-[28px] rounded-glass overflow-hidden border border-white/80"
-          >
+          <GlassCard>
             <View className="px-[22px] pt-[28px] pb-[20px] bg-white/40">
               <Text className="text-[28px] font-bold text-heading text-center leading-[40px] mb-[20px]">
                 Take Care Of{'\n'}Your Pet
@@ -150,7 +168,7 @@ export default function LoginScreen({ navigation }: Props) {
                 </TouchableOpacity>
               </View>
             </View>
-          </BlurView>
+          </GlassCard>
 
           {/* Bottom padding */}
           <View className="h-[34px]" />

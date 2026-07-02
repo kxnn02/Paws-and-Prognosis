@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Web-specific fixes for React Native Web + NativeWind */
+@layer base {
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Fix TextInput not being clickable/typable on web */
+  input, textarea {
+    outline: none;
+    -webkit-appearance: none;
+    pointer-events: auto !important;
+  }
+
+  /* Fix TouchableOpacity/Pressable not responding to clicks */
+  [role="button"] {
+    cursor: pointer;
+    pointer-events: auto !important;
+  }
+
+  /* Fix ScrollView blocking interactions */
+  [data-testid] {
+    pointer-events: auto;
+  }
+
+  /* Ensure all interactive elements are clickable */
+  a, button, [role="link"], [tabindex] {
+    pointer-events: auto !important;
+    cursor: pointer;
+  }
+
+  /* Ensure text is selectable and inputs work */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fix BlurView blocking pointer events on web */
+  [style*="backdrop-filter"], [style*="-webkit-backdrop-filter"] {
+    pointer-events: auto !important;
+  }
+}
