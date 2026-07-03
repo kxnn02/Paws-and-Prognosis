@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import type { VetStackParamList } from '../../types';
 
@@ -10,7 +12,46 @@ type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
 
 export default function VetAccountScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { profile, signOut } = useAuth();
+  const { profile, user, signOut, refreshProfile } = useAuth();
+
+  async function handleAvatarPick() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Required', 'Please allow photo library access.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets[0] && user) {
+      try {
+        const uri = result.assets[0].uri;
+        const fileExt = uri.split('.').pop() || 'jpg';
+        const fileName = `${user.id}/avatar.${fileExt}`;
+
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const arrayBuffer = await new Response(blob).arrayBuffer();
+
+        await supabase.storage.from('pet-images').upload(fileName, arrayBuffer, {
+          contentType: `image/${fileExt}`,
+          upsert: true,
+        });
+
+        const { data: urlData } = supabase.storage.from('pet-images').getPublicUrl(fileName);
+
+        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', user.id);
+        await refreshProfile();
+      } catch {
+        Alert.alert('Error', 'Failed to upload photo.');
+      }
+    }
+  }
 
   function handleLogout() {
     Alert.alert(
@@ -32,9 +73,18 @@ export default function VetAccountScreen() {
 
       {/* Profile Info */}
       <View className="items-center px-5 mb-6">
-        <View className="w-[80px] h-[80px] rounded-full bg-primary/20 items-center justify-center mb-3">
-          <Ionicons name="medical" size={36} color="#71924F" />
-        </View>
+        <TouchableOpacity onPress={handleAvatarPick} activeOpacity={0.8}>
+          <View className="w-[80px] h-[80px] rounded-full bg-primary/20 items-center justify-center mb-3 overflow-hidden">
+            {profile?.avatar_url ? (
+              <Image source={{ uri: profile.avatar_url }} className="w-full h-full" resizeMode="cover" />
+            ) : (
+              <Ionicons name="medical" size={36} color="#71924F" />
+            )}
+          </View>
+          <View className="absolute bottom-2 right-0 w-6 h-6 rounded-full bg-primary items-center justify-center border-2 border-white">
+            <Ionicons name="camera" size={12} color="#FFF" />
+          </View>
+        </TouchableOpacity>
         <Text className="text-xl font-semibold text-dark">
           {profile?.name || 'Doctor'}
         </Text>

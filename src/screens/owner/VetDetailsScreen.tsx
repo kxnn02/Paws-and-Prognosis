@@ -14,7 +14,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useVets } from '../../hooks/useVets';
-import { mockVets } from '../../data/mockVets';
 import { CLINIC_CONTACT } from '../../lib/constants';
 import type { OwnerStackParamList } from '../../types';
 
@@ -27,8 +26,7 @@ export default function VetDetailsScreen() {
   const { vetId } = route.params;
 
   const { vets: supabaseVets } = useVets();
-  const allVets = supabaseVets.length > 0 ? supabaseVets : mockVets;
-  const vet = allVets.find((v) => v.id === vetId);
+  const vet = supabaseVets.find((v) => v.id === vetId);
 
   const [showContact, setShowContact] = useState(false);
 
