@@ -33,6 +33,7 @@ export default function VetAppointmentsScreen() {
     getMarkedDates,
     getAppointmentsForDate,
     updateAppointmentStatus,
+    addNotes,
     fetchAppointments,
   } = useVetAppointments();
 
@@ -88,6 +89,27 @@ export default function VetAppointmentsScreen() {
           },
         },
       ]
+    );
+  }
+
+  function handleAddNotes(appointment: Appointment) {
+    Alert.prompt(
+      'Add Notes',
+      'Add diagnosis, prescription, or follow-up notes:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Save',
+          onPress: async (text?: string) => {
+            if (text?.trim()) {
+              const { error } = await addNotes(appointment.id, text.trim());
+              if (error) Alert.alert('Error', error.message);
+            }
+          },
+        },
+      ],
+      'plain-text',
+      appointment.notes || ''
     );
   }
 
@@ -167,6 +189,15 @@ export default function VetAppointmentsScreen() {
             activeOpacity={0.7}
           >
             <Text className="text-xs font-medium text-dark">Message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleAddNotes(item)}
+            className="bg-white px-3 py-1.5 rounded-btn border border-gray-200"
+            activeOpacity={0.7}
+          >
+            <Text className="text-xs font-medium text-dark">
+              {item.notes ? 'Edit Notes' : 'Add Notes'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -26,9 +27,10 @@ const CATEGORIES = [
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { vets: supabaseVets, loading: vetsLoading } = useVets();
+  const { vets: supabaseVets, loading: vetsLoading, fetchVets } = useVets();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Use real vets from Supabase, fall back to mock if none exist yet
   const allVets = supabaseVets.length > 0 ? supabaseVets : mockVets;
@@ -40,8 +42,20 @@ export default function HomeScreen() {
       )
     : allVets;
 
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchVets();
+    setRefreshing(false);
+  }
+
   return (
-    <ScrollView className="flex-1 bg-beige" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      className="flex-1 bg-beige"
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+      }
+    >
       {/* Banner */}
       <TouchableOpacity
         className="mx-5 mt-16 rounded-card overflow-hidden"
