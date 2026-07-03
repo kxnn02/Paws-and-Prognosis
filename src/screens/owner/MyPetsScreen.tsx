@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePets } from '../../hooks/usePets';
 import type { Pet, OwnerStackParamList } from '../../types';
@@ -17,7 +18,21 @@ type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function MyPetsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { pets, loading } = usePets();
+  const { pets, loading, fetchPets } = usePets();
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Refresh pets when screen gains focus (e.g., after adding/deleting)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPets();
+    }, [fetchPets])
+  );
+
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchPets();
+    setRefreshing(false);
+  }
 
   function renderPetCard({ item }: { item: Pet }) {
     return (
@@ -106,6 +121,9 @@ export default function MyPetsScreen() {
           ListEmptyComponent={renderEmpty}
           contentContainerStyle={{ paddingTop: 8, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+          }
         />
       )}
 

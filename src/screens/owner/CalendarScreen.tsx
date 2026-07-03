@@ -23,17 +23,18 @@ export default function CalendarScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { appointments, loading, getMarkedDates, getAppointmentsForDate, cancelAppointment, fetchAppointments } =
     useAppointments();
-  const { hasRated } = useRatings();
+  const { hasRated, fetchRatings } = useRatings();
 
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Refresh data when screen gains focus (e.g., after booking)
+  // Refresh data when screen gains focus (e.g., after booking or rating)
   useFocusEffect(
     React.useCallback(() => {
       fetchAppointments();
-    }, [fetchAppointments])
+      fetchRatings();
+    }, [fetchAppointments, fetchRatings])
   );
 
   async function onRefresh() {
@@ -151,13 +152,27 @@ export default function CalendarScreen() {
 
         {/* Cancel button for upcoming appointments */}
         {item.status === 'upcoming' && (
-          <TouchableOpacity
-            onPress={() => handleCancel(item.id)}
-            className="mt-3 ml-11"
-            activeOpacity={0.7}
-          >
-            <Text className="text-xs text-red-500 font-medium">Cancel Appointment</Text>
-          </TouchableOpacity>
+          <View className="flex-row gap-3 mt-3 ml-11">
+            <TouchableOpacity
+              onPress={() => handleCancel(item.id)}
+              activeOpacity={0.7}
+            >
+              <Text className="text-xs text-red-500 font-medium">Cancel</Text>
+            </TouchableOpacity>
+            {item.vet && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('ChatConversation', {
+                    threadId: item.vet!.user_id,
+                    participantName: item.vet!.name,
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Text className="text-xs text-primary font-medium">Message Vet</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
 
         {/* Rate button for completed appointments */}

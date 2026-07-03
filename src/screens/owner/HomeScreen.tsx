@@ -28,7 +28,7 @@ const CATEGORIES = [
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { profile } = useAuth();
-  const { vets: supabaseVets, loading: vetsLoading, fetchVets } = useVets();
+  const { vets: supabaseVets, loading: vetsLoading, fetchVets, error: vetsError } = useVets();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -36,12 +36,26 @@ export default function HomeScreen() {
   // Use real vets from Supabase
   const allVets = supabaseVets;
 
-  const filteredVets = search
-    ? allVets.filter((v) =>
-        v.name.toLowerCase().includes(search.toLowerCase()) ||
-        v.specialty.toLowerCase().includes(search.toLowerCase())
-      )
-    : allVets;
+  // Map category names to specialty keywords
+  const categoryFilter: Record<string, string[]> = {
+    '1': ['health', 'general', 'behavioral', 'surgery', 'internal'],
+    '2': ['grooming', 'dermatology'],
+    '3': ['nutrition', 'diet'],
+    '4': ['boarding', 'hospitalization'],
+  };
+
+  const filteredVets = allVets.filter((v) => {
+    const matchesSearch = !search ||
+      v.name.toLowerCase().includes(search.toLowerCase()) ||
+      v.specialty.toLowerCase().includes(search.toLowerCase());
+
+    const matchesCategory = !activeCategory ||
+      categoryFilter[activeCategory]?.some((keyword) =>
+        v.specialty.toLowerCase().includes(keyword)
+      );
+
+    return matchesSearch && matchesCategory;
+  });
 
   async function onRefresh() {
     setRefreshing(true);
@@ -128,6 +142,16 @@ export default function HomeScreen() {
         {vetsLoading ? (
           <View className="items-center py-8">
             <ActivityIndicator size="large" color="#71924F" />
+          </View>
+        ) : vetsError ? (
+          <View className="items-center py-8">
+            <Ionicons name="cloud-offline-outline" size={36} color="#9BA1A8" />
+            <Text className="text-sm text-grey mt-3 text-center">
+              Could not load veterinarians
+            </Text>
+            <TouchableOpacity onPress={onRefresh} className="mt-3 bg-primary/10 px-4 py-2 rounded-btn">
+              <Text className="text-xs font-medium text-primary">Try Again</Text>
+            </TouchableOpacity>
           </View>
         ) : filteredVets.length === 0 ? (
           <View className="items-center py-8">
