@@ -7,6 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,6 +45,12 @@ export default function VetAppointmentsScreen() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [notesModal, setNotesModal] = useState<{ visible: boolean; appointmentId: string; currentNotes: string }>({
+    visible: false,
+    appointmentId: '',
+    currentNotes: '',
+  });
+  const [notesInput, setNotesInput] = useState('');
 
   const markedDates = getMarkedDates();
   const allDayAppointments = getAppointmentsForDate(selectedDate);
@@ -93,24 +103,17 @@ export default function VetAppointmentsScreen() {
   }
 
   function handleAddNotes(appointment: Appointment) {
-    Alert.prompt(
-      'Add Notes',
-      'Add diagnosis, prescription, or follow-up notes:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Save',
-          onPress: async (text?: string) => {
-            if (text?.trim()) {
-              const { error } = await addNotes(appointment.id, text.trim());
-              if (error) Alert.alert('Error', error.message);
-            }
-          },
-        },
-      ],
-      'plain-text',
-      appointment.notes || ''
-    );
+    setNotesInput(appointment.notes || '');
+    setNotesModal({ visible: true, appointmentId: appointment.id, currentNotes: appointment.notes || '' });
+  }
+
+  async function handleSaveNotes() {
+    if (notesInput.trim()) {
+      const { error } = await addNotes(notesModal.appointmentId, notesInput.trim());
+      if (error) Alert.alert('Error', error.message);
+    }
+    setNotesModal({ visible: false, appointmentId: '', currentNotes: '' });
+    setNotesInput('');
   }
 
   function renderAppointment({ item }: { item: Appointment }) {
@@ -301,6 +304,57 @@ export default function VetAppointmentsScreen() {
           }
         />
       </View>
+
+      {/* Notes Modal */}
+      <Modal
+        visible={notesModal.visible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setNotesModal({ visible: false, appointmentId: '', currentNotes: '' })}
+      >
+        <KeyboardAvoidingView
+          className="flex-1"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <TouchableOpacity
+            className="flex-1 bg-black/40"
+            activeOpacity={1}
+            onPress={() => setNotesModal({ visible: false, appointmentId: '', currentNotes: '' })}
+          />
+          <View className="bg-white rounded-t-[24px] px-5 pt-6 pb-8">
+            <Text className="text-lg font-semibold text-heading mb-1">Appointment Notes</Text>
+            <Text className="text-xs text-grey mb-4">Add diagnosis, prescription, or follow-up notes</Text>
+            <TextInput
+              className="bg-input-bg rounded-btn px-4 py-3 text-sm text-dark min-h-[120px] border border-gray-200"
+              placeholder="Enter notes here..."
+              placeholderTextColor="#A7A7A7"
+              value={notesInput}
+              onChangeText={setNotesInput}
+              multiline
+              textAlignVertical="top"
+              maxLength={1000}
+              autoFocus
+            />
+            <Text className="text-[10px] text-grey mt-1 text-right">{notesInput.length}/1000</Text>
+            <View className="flex-row gap-3 mt-4">
+              <TouchableOpacity
+                onPress={() => setNotesModal({ visible: false, appointmentId: '', currentNotes: '' })}
+                className="flex-1 h-[44px] rounded-btn border border-gray-200 items-center justify-center"
+                activeOpacity={0.7}
+              >
+                <Text className="text-sm font-medium text-dark">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSaveNotes}
+                className="flex-1 h-[44px] rounded-btn bg-primary items-center justify-center"
+                activeOpacity={0.8}
+              >
+                <Text className="text-sm font-medium text-white">Save Notes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }

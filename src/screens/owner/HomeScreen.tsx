@@ -13,7 +13,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVets } from '../../hooks/useVets';
-import { mockVets } from '../../data/mockVets';
 import type { Vet, OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
@@ -32,8 +31,8 @@ export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Use real vets from Supabase, fall back to mock if none exist yet
-  const allVets = supabaseVets.length > 0 ? supabaseVets : mockVets;
+  // Use real vets from Supabase
+  const allVets = supabaseVets;
 
   const filteredVets = search
     ? allVets.filter((v) =>

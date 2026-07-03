@@ -121,16 +121,12 @@ export type OwnerStackParamList = {
   OwnerTabs: undefined;
   VetDetails: { vetId: string };
   Booking: { vetId: string; vetName: string };
-  BookingConfirmation: { appointmentId: string };
   MyPets: undefined;
   AddPet: undefined;
   PetProfile: { petId: string };
   ChatConversation: { threadId: string; participantName: string };
   Rating: { appointmentId: string; vetId: string; vetName: string };
   EditProfile: undefined;
-  CallScreen: { vetId: string; vetName: string };
-  CallEnd: { vetId: string; appointmentId: string };
-  AccountInfo: undefined;
   TipsScreen: undefined;
 };
 
@@ -143,8 +139,6 @@ export type VetTabParamList = {
 
 export type VetStackParamList = {
   VetTabs: undefined;
-  TodayCases: undefined;
-  PatientProfile: { petId: string };
   VetChatConversation: { threadId: string; participantName: string };
   EditProfile: undefined;
 };
