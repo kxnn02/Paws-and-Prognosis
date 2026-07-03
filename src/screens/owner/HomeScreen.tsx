@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVets } from '../../hooks/useVets';
+import { useAuth } from '../../context/AuthContext';
 import type { Vet, OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
@@ -26,6 +27,7 @@ const CATEGORIES = [
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { profile } = useAuth();
   const { vets: supabaseVets, loading: vetsLoading, fetchVets } = useVets();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -55,9 +57,15 @@ export default function HomeScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
       }
     >
+      {/* Greeting */}
+      <View className="px-5 mt-14 mb-2">
+        <Text className="text-sm text-grey">Hello,</Text>
+        <Text className="text-xl font-bold text-heading">{profile?.name || 'Pet Parent'} 👋</Text>
+      </View>
+
       {/* Banner */}
       <TouchableOpacity
-        className="mx-5 mt-16 rounded-card overflow-hidden"
+        className="mx-5 mt-2 rounded-card overflow-hidden"
         activeOpacity={0.8}
         onPress={() => navigation.navigate('TipsScreen')}
       >

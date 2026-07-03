@@ -14,6 +14,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { usePets } from '../../hooks/usePets';
 import { useAppointments } from '../../hooks/useAppointments';
+import { formatOwnerNotes } from '../../lib/notesHelper';
 import type { OwnerStackParamList } from '../../types';
 
 type BookingRouteProp = RouteProp<OwnerStackParamList, 'Booking'>;
@@ -89,6 +90,11 @@ export default function BookingScreen() {
       return;
     }
 
+    if (!selectedPetId && pets.length > 0) {
+      Alert.alert('Select a Pet', 'Please select which pet this appointment is for.');
+      return;
+    }
+
     const time24 = convertTo24Hour(selectedTime);
     const dateFormatted = new Date(selectedDate).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -110,7 +116,7 @@ export default function BookingScreen() {
               petId: selectedPetId,
               date: selectedDate,
               time: time24,
-              notes: notes.trim() || undefined,
+              notes: notes.trim() ? formatOwnerNotes(notes.trim()) : undefined,
             });
             setBooking(false);
 

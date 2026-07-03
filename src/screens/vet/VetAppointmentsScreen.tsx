@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVetAppointments } from '../../hooks/useVetAppointments';
+import { parseNotes } from '../../lib/notesHelper';
 import type { Appointment, VetStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
@@ -103,7 +104,8 @@ export default function VetAppointmentsScreen() {
   }
 
   function handleAddNotes(appointment: Appointment) {
-    setNotesInput(appointment.notes || '');
+    const parsed = parseNotes(appointment.notes);
+    setNotesInput(parsed.vet);
     setNotesModal({ visible: true, appointmentId: appointment.id, currentNotes: appointment.notes || '' });
   }
 
@@ -139,6 +141,11 @@ export default function VetAppointmentsScreen() {
           <Text className="text-sm text-dark font-medium">
             {(item.owner as unknown as { name: string })?.name || 'Pet Owner'}
           </Text>
+          {(item.owner as unknown as { email?: string })?.email && (
+            <Text className="text-[10px] text-grey mt-0.5">
+              {(item.owner as unknown as { email: string }).email}
+            </Text>
+          )}
           {item.pet && (
             <View className="flex-row items-center mt-1">
               <Ionicons name="paw" size={12} color="#808080" />
@@ -147,9 +154,19 @@ export default function VetAppointmentsScreen() {
               </Text>
             </View>
           )}
-          {item.notes && (
-            <Text className="text-xs text-grey mt-1 italic">Note: {item.notes}</Text>
-          )}
+          {(() => {
+            const notes = parseNotes(item.notes);
+            return (
+              <>
+                {notes.owner ? (
+                  <Text className="text-xs text-grey mt-1 italic">Reason: {notes.owner}</Text>
+                ) : null}
+                {notes.vet ? (
+                  <Text className="text-xs text-primary mt-1 font-medium">Dx: {notes.vet}</Text>
+                ) : null}
+              </>
+            );
+          })()}
         </View>
 
         {/* Action buttons */}
@@ -199,7 +216,7 @@ export default function VetAppointmentsScreen() {
             activeOpacity={0.7}
           >
             <Text className="text-xs font-medium text-dark">
-              {item.notes ? 'Edit Notes' : 'Add Notes'}
+              {parseNotes(item.notes).vet ? 'Edit Notes' : 'Add Notes'}
             </Text>
           </TouchableOpacity>
         </View>

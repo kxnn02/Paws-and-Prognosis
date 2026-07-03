@@ -278,6 +278,11 @@ function DashboardAppointmentCard({
         <Text className="text-sm font-medium text-dark">
           {(appointment.owner as unknown as { name: string })?.name || 'Pet Owner'}
         </Text>
+        {(appointment.owner as unknown as { phone?: string })?.phone && (
+          <Text className="text-[10px] text-grey mt-0.5">
+            📞 {(appointment.owner as unknown as { phone: string }).phone}
+          </Text>
+        )}
         {appointment.pet && (
           <View className="flex-row items-center mt-1">
             <Ionicons name="paw" size={12} color="#808080" />

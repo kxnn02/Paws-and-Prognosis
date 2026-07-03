@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { formatVetNotes } from '../lib/notesHelper';
 import type { Appointment } from '../types';
 
 export function useVetAppointments() {
@@ -91,17 +92,21 @@ export function useVetAppointments() {
     }
   }
 
-  async function addNotes(appointmentId: string, notes: string) {
+  async function addNotes(appointmentId: string, vetNotes: string) {
     try {
+      // Find current appointment to preserve owner notes
+      const currentAppointment = appointments.find((a) => a.id === appointmentId);
+      const formattedNotes = formatVetNotes(currentAppointment?.notes || null, vetNotes);
+
       const { error: updateError } = await supabase
         .from('appointments')
-        .update({ notes })
+        .update({ notes: formattedNotes })
         .eq('id', appointmentId);
 
       if (updateError) throw updateError;
 
       setAppointments((prev) =>
-        prev.map((a) => (a.id === appointmentId ? { ...a, notes } : a))
+        prev.map((a) => (a.id === appointmentId ? { ...a, notes: formattedNotes } : a))
       );
       return { error: null };
     } catch (err) {
