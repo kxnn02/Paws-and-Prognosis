@@ -84,6 +84,7 @@ export default function HomeScreen() {
           source={require('../../../assets/logo-transparent.png')}
           className="w-[52px] h-[52px]"
           resizeMode="contain"
+          style={{ transform: [{ scale: 1.5 }] }}
         />
       </View>
 

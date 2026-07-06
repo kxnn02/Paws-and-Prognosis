@@ -67,6 +67,7 @@ export default function LoginScreen({ navigation }: Props) {
               source={require('../../../assets/logo-transparent.png')}
               className="w-[180px] h-[180px]"
               resizeMode="contain"
+              style={{ transform: [{ scale: 1.5 }] }}
             />
           </View>
 

@@ -104,6 +104,7 @@ export default function ForgotPasswordScreen() {
             source={require('../../../assets/logo-transparent.png')}
             className="w-[110px] h-[110px] self-center mb-4"
             resizeMode="contain"
+            style={{ transform: [{ scale: 1.4 }] }}
           />
           <Text className="text-2xl font-bold text-heading">Forgot Password</Text>
           <Text className="text-sm text-grey mt-2 leading-5">

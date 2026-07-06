@@ -7,6 +7,7 @@ export default function SplashScreen() {
         source={require('../../../assets/logo-transparent.png')}
         className="w-[220px] h-[220px]"
         resizeMode="contain"
+        style={{ transform: [{ scale: 1.6 }] }}
       />
       <ActivityIndicator size="large" color="#71924F" className="mt-6" />
     </View>

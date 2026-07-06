@@ -79,6 +79,7 @@ export default function SignUpScreen({ navigation }: Props) {
               source={require('../../../assets/logo-transparent.png')}
               className="w-[150px] h-[150px]"
               resizeMode="contain"
+              style={{ transform: [{ scale: 1.5 }] }}
             />
           </View>
 
