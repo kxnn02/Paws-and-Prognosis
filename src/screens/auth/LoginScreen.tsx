@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View className="pt-[50px] items-center">
             <Image
               source={require('../../../assets/logo-transparent.png')}
-              className="w-[140px] h-[140px]"
+              className="w-[180px] h-[180px]"
               resizeMode="contain"
             />
           </View>

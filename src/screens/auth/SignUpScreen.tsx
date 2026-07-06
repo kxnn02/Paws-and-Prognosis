@@ -77,7 +77,7 @@ export default function SignUpScreen({ navigation }: Props) {
           <View className="pt-[50px] items-center">
             <Image
               source={require('../../../assets/logo-transparent.png')}
-              className="w-[120px] h-[120px]"
+              className="w-[150px] h-[150px]"
               resizeMode="contain"
             />
           </View>

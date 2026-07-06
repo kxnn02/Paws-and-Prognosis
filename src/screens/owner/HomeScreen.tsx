@@ -82,7 +82,7 @@ export default function HomeScreen() {
         </View>
         <Image
           source={require('../../../assets/logo-transparent.png')}
-          className="w-[44px] h-[44px]"
+          className="w-[52px] h-[52px]"
           resizeMode="contain"
         />
       </View>
