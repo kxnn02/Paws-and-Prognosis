@@ -60,6 +60,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
+      if (error && error.code === 'PGRST116') {
+        // Profile doesn't exist yet (e.g., email confirmation flow where INSERT failed)
+        // This will be resolved when the user completes onboarding or admin seeds data
+        console.warn('Profile not found for user:', userId);
+        setProfile(null);
+        setRole(null);
+        return;
+      }
+
       if (error) throw error;
 
       setProfile(data as Profile);
@@ -73,7 +82,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signUp(email: string, password: string, name: string, userRole: UserRole) {
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name, role: userRole },
+        },
+      });
       if (error) return { error };
 
       // Create profile
@@ -85,6 +100,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
         });
         if (profileError) return { error: profileError as unknown as Error };
+
+        // If registering as a vet, also create the vets table entry
+        if (userRole === 'veterinarian') {
+          const { error: vetError } = await supabase.from('vets').insert({
+            user_id: data.user.id,
+            name,
+            specialty: 'General Practice',
+            bio: null,
+            rating: 0,
+            image_url: null,
+          });
+          if (vetError) {
+            console.error('Error creating vet record:', vetError);
+            // Non-fatal: profile was created, vet record can be fixed later
+          }
+        }
 
         // If session exists (email confirmation disabled), fetch profile immediately
         if (data.session) {
@@ -102,8 +133,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error };
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { error };
+
+      // After successful login, check if profile exists
+      // (It might not if signup failed to insert due to RLS during email confirmation flow)
+      if (data.user) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (!existingProfile) {
+          // Profile missing — create it now (user is authenticated, RLS will allow)
+          const userName = data.user.user_metadata?.name || email.split('@')[0];
+          const userRole = (data.user.user_metadata?.role as UserRole) || 'pet_owner';
+
+          await supabase.from('profiles').insert({
+            id: data.user.id,
+            name: userName,
+            role: userRole,
+            email,
+          });
+
+          // Also create vet record if role is veterinarian
+          if (userRole === 'veterinarian') {
+            await supabase.from('vets').insert({
+              user_id: data.user.id,
+              name: userName,
+              specialty: 'General Practice',
+              bio: null,
+              rating: 0,
+              image_url: null,
+            });
+          }
+        }
+      }
+
+      return { error: null };
     } catch (error) {
       return { error: error as Error };
     }

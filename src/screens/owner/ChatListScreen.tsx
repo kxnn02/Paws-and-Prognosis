@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   FlatList,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useChatThreads } from '../../hooks/useChat';
+import { formatRelativeTime } from '../../lib/formatters';
+import Avatar from '../../components/Avatar';
+import { ChatThreadSkeleton } from '../../components/Skeleton';
 import type { ChatThread, OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
@@ -19,26 +22,19 @@ export default function ChatListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { threads, loading, fetchThreads } = useChatThreads();
   const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+
+  // Filter threads by search query
+  const filteredThreads = useMemo(() => {
+    if (!search.trim()) return threads;
+    const query = search.toLowerCase();
+    return threads.filter((t) => t.participant.name.toLowerCase().includes(query));
+  }, [threads, search]);
 
   async function onRefresh() {
     setRefreshing(true);
     await fetchThreads();
     setRefreshing(false);
-  }
-
-  function formatTime(dateStr: string) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    } else if (diffDays === 1) {
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
-    }
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   function renderThread({ item }: { item: ChatThread }) {
@@ -53,29 +49,27 @@ export default function ChatListScreen() {
         className="bg-white mx-5 mb-3 rounded-card p-4 flex-row items-center shadow-sm"
         activeOpacity={0.7}
       >
-        {/* Avatar */}
-        <View className="w-[48px] h-[48px] rounded-full bg-primary/15 items-center justify-center mr-3">
-          <Ionicons
-            name={item.participant.role === 'veterinarian' ? 'medical' : 'person'}
-            size={22}
-            color="#71924F"
-          />
-        </View>
+        <Avatar
+          uri={item.participant.avatar_url}
+          name={item.participant.name}
+          size={48}
+          fallbackIcon={item.participant.role === 'veterinarian' ? 'medical' : 'person'}
+        />
 
-        {/* Content */}
-        <View className="flex-1 mr-2">
+        <View className="flex-1 ml-3 mr-2">
           <View className="flex-row items-center justify-between">
             <Text className="text-sm font-semibold text-dark" numberOfLines={1}>
               {item.participant.name}
             </Text>
-            <Text className="text-[10px] text-grey">{formatTime(item.lastMessageTime)}</Text>
+            <Text className="text-[10px] text-grey">
+              {formatRelativeTime(item.lastMessageTime)}
+            </Text>
           </View>
           <Text className="text-xs text-grey mt-1" numberOfLines={1}>
             {item.lastMessage}
           </Text>
         </View>
 
-        {/* Unread badge */}
         {item.unreadCount > 0 && (
           <View className="w-5 h-5 rounded-full bg-primary items-center justify-center">
             <Text className="text-[10px] text-white font-bold">
@@ -88,6 +82,14 @@ export default function ChatListScreen() {
   }
 
   function renderEmpty() {
+    if (search.trim()) {
+      return (
+        <View className="items-center pt-20">
+          <Ionicons name="search-outline" size={36} color="#D1D5DB" />
+          <Text className="text-sm text-grey mt-3">No conversations matching "{search}"</Text>
+        </View>
+      );
+    }
     return (
       <View className="flex-1 items-center justify-center px-10 pt-20">
         <View className="w-[80px] h-[80px] rounded-full bg-primary/10 items-center justify-center mb-4">
@@ -110,8 +112,13 @@ export default function ChatListScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-beige items-center justify-center">
-        <ActivityIndicator size="large" color="#71924F" />
+      <View className="flex-1 bg-beige">
+        <View className="px-5 pt-14 pb-4">
+          <Text className="text-2xl font-bold text-heading">Messages</Text>
+        </View>
+        {[1, 2, 3, 4].map((i) => (
+          <ChatThreadSkeleton key={i} />
+        ))}
       </View>
     );
   }
@@ -119,13 +126,33 @@ export default function ChatListScreen() {
   return (
     <View className="flex-1 bg-beige">
       {/* Header */}
-      <View className="px-5 pt-14 pb-4">
+      <View className="px-5 pt-14 pb-2">
         <Text className="text-2xl font-bold text-heading">Messages</Text>
         <Text className="text-xs text-grey mt-1">Your conversations are end-to-end private</Text>
       </View>
 
+      {/* Search Bar */}
+      {threads.length > 0 && (
+        <View className="mx-5 mt-2 mb-2 flex-row items-center bg-white rounded-btn h-[42px] px-4 border border-gray-100">
+          <Ionicons name="search" size={18} color="#9BA1A8" />
+          <TextInput
+            className="flex-1 ml-2 text-sm text-dark"
+            placeholder="Search conversations..."
+            placeholderTextColor="#A7A7A7"
+            value={search}
+            onChangeText={setSearch}
+            maxLength={50}
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={18} color="#9BA1A8" />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       <FlatList
-        data={threads}
+        data={filteredThreads}
         keyExtractor={(item) => item.id}
         renderItem={renderThread}
         ListEmptyComponent={renderEmpty}

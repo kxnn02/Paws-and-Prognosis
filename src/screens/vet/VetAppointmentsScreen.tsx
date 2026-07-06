@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVetAppointments } from '../../hooks/useVetAppointments';
 import { parseNotes } from '../../lib/notesHelper';
+import { calendarTheme } from '../../lib/calendarTheme';
 import type { Appointment, VetStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
@@ -257,24 +258,7 @@ export default function VetAppointmentsScreen() {
         current={selectedDate}
         onDayPress={(day: { dateString: string }) => setSelectedDate(day.dateString)}
         markedDates={calendarMarks}
-        theme={{
-          backgroundColor: '#FEF9F4',
-          calendarBackground: '#FEF9F4',
-          textSectionTitleColor: '#808080',
-          selectedDayBackgroundColor: '#71924F',
-          selectedDayTextColor: '#FFFFFF',
-          todayTextColor: '#71924F',
-          dayTextColor: '#343434',
-          textDisabledColor: '#D1D5DB',
-          dotColor: '#71924F',
-          selectedDotColor: '#FFFFFF',
-          arrowColor: '#71924F',
-          monthTextColor: '#544864',
-          textMonthFontWeight: '600',
-          textDayFontSize: 14,
-          textMonthFontSize: 16,
-          textDayHeaderFontSize: 12,
-        }}
+        theme={calendarTheme}
         style={{ marginHorizontal: 12 }}
       />
 
@@ -331,7 +315,7 @@ export default function VetAppointmentsScreen() {
       >
         <KeyboardAvoidingView
           className="flex-1"
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior="padding"
         >
           <TouchableOpacity
             className="flex-1 bg-black/40"

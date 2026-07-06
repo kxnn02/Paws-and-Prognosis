@@ -31,7 +31,6 @@ export function useChatThreads() {
     try {
       setLoading(true);
 
-      // Fetch all messages involving this user
       const { data: messages, error } = await supabase
         .from('messages')
         .select('*')
@@ -69,10 +68,10 @@ export function useChatThreads() {
       // Build thread list
       const threadList: ChatThread[] = Array.from(threadMap.entries()).map(
         ([partnerId, { messages: msgs }]) => {
-          const lastMsg = msgs[0]; // Already sorted desc
+          const lastMsg = msgs[0];
           const unread = msgs.filter(
-            (m) => m.receiver_id === user.id && m.sender_id === partnerId
-          ).length; // Simplified unread count
+            (m) => m.receiver_id === user.id && m.sender_id === partnerId && !m.read_at
+          ).length;
 
           const partner = profileMap.get(partnerId);
 
@@ -94,7 +93,6 @@ export function useChatThreads() {
         }
       );
 
-      // Sort by most recent message
       threadList.sort(
         (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
       );
@@ -126,7 +124,7 @@ export function useChatThreads() {
           filter: `receiver_id=eq.${user.id}`,
         },
         () => {
-          fetchThreads(); // Refresh thread list on new incoming message
+          fetchThreads();
         }
       )
       .subscribe();
@@ -144,7 +142,10 @@ export function useChatMessages(partnerId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [partnerTyping, setPartnerTyping] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const lastSendRef = useRef<number>(0);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchMessages = useCallback(async () => {
     if (!user || !partnerId) {
@@ -156,8 +157,6 @@ export function useChatMessages(partnerId: string) {
     try {
       setLoading(true);
 
-      // Fetch conversation between user and partner
-      // RLS ensures only authorized messages are returned
       const { data, error } = await supabase
         .from('messages')
         .select('*')
@@ -168,6 +167,9 @@ export function useChatMessages(partnerId: string) {
 
       if (error) throw error;
       setMessages((data as Message[]) || []);
+
+      // Mark received messages as read
+      markMessagesAsRead();
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
@@ -175,11 +177,28 @@ export function useChatMessages(partnerId: string) {
     }
   }, [user, partnerId]);
 
+  // Mark incoming messages as read
+  async function markMessagesAsRead() {
+    if (!user || !partnerId) return;
+
+    try {
+      await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('sender_id', partnerId)
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+    } catch (err) {
+      // Non-critical — don't block UX
+      console.error('Error marking messages as read:', err);
+    }
+  }
+
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  // Realtime subscription for live messages
+  // Realtime subscription for live messages + typing
   useEffect(() => {
     if (!user || !partnerId) return;
 
@@ -194,21 +213,50 @@ export function useChatMessages(partnerId: string) {
         },
         (payload) => {
           const newMsg = payload.new as Message;
-          // Only add if it's part of this conversation
           const isRelevant =
             (newMsg.sender_id === user.id && newMsg.receiver_id === partnerId) ||
             (newMsg.sender_id === partnerId && newMsg.receiver_id === user.id);
 
           if (isRelevant) {
             setMessages((prev) => {
-              // Prevent duplicates (in case we inserted it ourselves)
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
+
+            // Mark as read if it's from the partner
+            if (newMsg.sender_id === partnerId) {
+              markMessagesAsRead();
+            }
           }
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updated.id ? updated : m))
+          );
+        }
+      )
+      // Presence for typing indicator
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const partnerPresence = Object.values(state).flat().find(
+          (p: Record<string, unknown>) => p.user_id === partnerId && p.typing
+        );
+        setPartnerTyping(!!partnerPresence);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ user_id: user.id, typing: false });
+        }
+      });
 
     channelRef.current = channel;
 
@@ -217,14 +265,36 @@ export function useChatMessages(partnerId: string) {
     };
   }, [user, partnerId]);
 
+  // Broadcast typing state
+  function setTyping(isTyping: boolean) {
+    if (!channelRef.current || !user) return;
+    channelRef.current.track({ user_id: user.id, typing: isTyping });
+
+    // Auto-stop after 3 seconds
+    if (isTyping) {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        channelRef.current?.track({ user_id: user.id, typing: false });
+      }, 3000);
+    }
+  }
+
   async function sendMessage(content: string) {
     if (!user || !partnerId || !content.trim()) return { error: new Error('Invalid input') };
 
-    // Input sanitization — strip excessive whitespace, limit length
+    // Rate limiting: prevent sends within 500ms
+    const now = Date.now();
+    if (now - lastSendRef.current < 500) {
+      return { error: new Error('Please wait before sending another message') };
+    }
+    lastSendRef.current = now;
+
+    // Input sanitization
     const sanitized = content.trim().slice(0, 2000);
 
     try {
       setSending(true);
+      setTyping(false);
 
       const { data, error } = await supabase
         .from('messages')
@@ -238,7 +308,6 @@ export function useChatMessages(partnerId: string) {
 
       if (error) throw error;
 
-      // Optimistically add to local state (Realtime will also deliver it)
       setMessages((prev) => {
         if (prev.some((m) => m.id === (data as Message).id)) return prev;
         return [...prev, data as Message];
@@ -253,5 +322,5 @@ export function useChatMessages(partnerId: string) {
     }
   }
 
-  return { messages, loading, sending, sendMessage, fetchMessages };
+  return { messages, loading, sending, sendMessage, fetchMessages, partnerTyping, setTyping };
 }

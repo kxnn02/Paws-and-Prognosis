@@ -27,6 +27,7 @@ export function useReminders() {
         .single();
 
       if (!vetData) {
+        // Vet record doesn't exist yet — silently return empty
         setReminders([]);
         setLoading(false);
         return;

@@ -19,6 +19,7 @@ export interface Pet {
   species: string;
   breed: string;
   age: string | null;
+  birthdate: string | null;
   gender: string | null;
   weight: string | null;
   color: string | null;
@@ -67,6 +68,7 @@ export interface Message {
   receiver_id: string;
   appointment_id: string | null;
   content: string;
+  read_at: string | null;
   created_at: string;
 }
 
@@ -108,6 +110,7 @@ export type AuthStackParamList = {
   Splash: undefined;
   Login: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
 };
 
 export type OwnerTabParamList = {
@@ -123,11 +126,13 @@ export type OwnerStackParamList = {
   Booking: { vetId: string; vetName: string };
   MyPets: undefined;
   AddPet: undefined;
+  EditPet: { petId: string };
   PetProfile: { petId: string };
   ChatConversation: { threadId: string; participantName: string };
   Rating: { appointmentId: string; vetId: string; vetName: string };
   EditProfile: undefined;
   TipsScreen: undefined;
+  Reschedule: { appointmentId: string; vetName: string };
 };
 
 export type VetTabParamList = {
