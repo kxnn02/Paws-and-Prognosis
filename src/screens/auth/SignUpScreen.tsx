@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Image,
 } from 'react-native';
@@ -74,14 +73,13 @@ export default function SignUpScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Brand */}
-          <View className="pt-[62px] pl-[28px]">
-            <View className="flex-row items-baseline">
-              <Text className="text-[30px] font-bold text-[#7A5C4F]">Paws</Text>
-              <Text className="text-[30px] font-bold text-heading"> & </Text>
-              <Text className="text-[30px] font-bold text-primary">Prognosis</Text>
-            </View>
-            <Text className="text-[15px] text-heading mt-[2px]">Veterinary Clinic</Text>
+          {/* Brand Logo */}
+          <View className="pt-[50px] items-center">
+            <Image
+              source={require('../../../assets/logo-transparent.png')}
+              className="w-[120px] h-[120px]"
+              resizeMode="contain"
+            />
           </View>
 
           {/* Card */}

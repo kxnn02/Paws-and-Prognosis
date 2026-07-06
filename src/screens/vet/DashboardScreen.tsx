@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -82,11 +83,18 @@ export default function DashboardScreen() {
       }
     >
       {/* Header */}
-      <View className="px-5 pt-14 pb-2">
-        <Text className="text-sm text-grey">Welcome back,</Text>
-        <Text className="text-2xl font-bold text-heading">
-          {profile?.name || 'Doctor'} 👋
-        </Text>
+      <View className="px-5 pt-14 pb-2 flex-row items-center justify-between">
+        <View>
+          <Text className="text-sm text-grey">Welcome back,</Text>
+          <Text className="text-2xl font-bold text-heading">
+            {profile?.name || 'Doctor'} 👋
+          </Text>
+        </View>
+        <Image
+          source={require('../../../assets/logo-transparent.png')}
+          className="w-[44px] h-[44px]"
+          resizeMode="contain"
+        />
       </View>
 
       {/* Stats Cards */}
