@@ -14,6 +14,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useVets } from '../../hooks/useVets';
+import { useFavoriteVets } from '../../hooks/useFavoriteVets';
+import { useVetWorkingHours } from '../../hooks/useVetWorkingHours';
 import { CLINIC_CONTACT } from '../../lib/constants';
 import type { OwnerStackParamList } from '../../types';
 
@@ -27,6 +29,8 @@ export default function VetDetailsScreen() {
 
   const { vets: supabaseVets } = useVets();
   const vet = supabaseVets.find((v) => v.id === vetId);
+  const { isFavorite, toggleFavorite } = useFavoriteVets();
+  const { hours } = useVetWorkingHours(vetId);
 
   const [showContact, setShowContact] = useState(false);
 
@@ -72,9 +76,20 @@ export default function VetDetailsScreen() {
           >
             <Ionicons name="arrow-back" size={22} color="#343434" />
           </TouchableOpacity>
-          <Text className="flex-1 text-center text-lg font-semibold text-heading mr-10">
+          <Text className="flex-1 text-center text-lg font-semibold text-heading">
             Vet Details
           </Text>
+          <TouchableOpacity
+            onPress={() => toggleFavorite(vetId)}
+            className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={isFavorite(vetId) ? 'heart' : 'heart-outline'}
+              size={22}
+              color={isFavorite(vetId) ? '#EF4444' : '#343434'}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Vet Profile Card */}
@@ -117,18 +132,18 @@ export default function VetDetailsScreen() {
         <View className="mx-5 mt-6">
           <Text className="text-lg font-semibold text-heading mb-3">Working Hours</Text>
           <View className="bg-white rounded-card p-4">
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-dark">Monday - Friday</Text>
-              <Text className="text-sm font-medium text-primary">9:00 AM - 4:00 PM</Text>
-            </View>
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-sm text-dark">Saturday</Text>
-              <Text className="text-sm font-medium text-primary">9:00 AM - 12:00 PM</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-sm text-dark">Sunday</Text>
-              <Text className="text-sm font-medium text-grey">Closed</Text>
-            </View>
+            {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => {
+              const label = day.charAt(0).toUpperCase() + day.slice(1);
+              const value = hours[day];
+              return (
+                <View key={day} className="flex-row justify-between mb-2">
+                  <Text className="text-sm text-dark">{label}</Text>
+                  <Text className={`text-sm font-medium ${value ? 'text-primary' : 'text-grey'}`}>
+                    {value || 'Closed'}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 

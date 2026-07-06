@@ -1,57 +1,20 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useAvatarUpload } from '../../hooks/useAvatarUpload';
+import MenuItem from '../../components/MenuItem';
+import Avatar from '../../components/Avatar';
 import type { OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { profile, user, signOut, refreshProfile } = useAuth();
-
-  async function handleAvatarPick() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow photo library access.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-
-    if (!result.canceled && result.assets[0] && user) {
-      try {
-        const uri = result.assets[0].uri;
-        const fileExt = uri.split('.').pop() || 'jpg';
-        const fileName = `${user.id}/avatar.${fileExt}`;
-
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const arrayBuffer = await new Response(blob).arrayBuffer();
-
-        await supabase.storage.from('pet-images').upload(fileName, arrayBuffer, {
-          contentType: `image/${fileExt}`,
-          upsert: true,
-        });
-
-        const { data: urlData } = supabase.storage.from('pet-images').getPublicUrl(fileName);
-
-        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', user.id);
-        await refreshProfile();
-      } catch {
-        Alert.alert('Error', 'Failed to upload photo.');
-      }
-    }
-  }
+  const { profile, signOut } = useAuth();
+  const { pickAndUploadAvatar } = useAvatarUpload();
 
   function handleLogout() {
     Alert.alert(
@@ -73,27 +36,19 @@ export default function ProfileScreen() {
 
       {/* User Info */}
       <View className="items-center px-5 mb-6">
-        <TouchableOpacity onPress={handleAvatarPick} activeOpacity={0.8}>
-          <View className="w-[80px] h-[80px] rounded-full bg-primary/20 items-center justify-center mb-3 overflow-hidden">
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} className="w-full h-full" resizeMode="cover" />
-            ) : (
-              <Ionicons name="person" size={36} color="#71924F" />
-            )}
-          </View>
-          <View className="absolute bottom-2 right-0 w-6 h-6 rounded-full bg-primary items-center justify-center border-2 border-white">
+        <TouchableOpacity onPress={pickAndUploadAvatar} activeOpacity={0.8}>
+          <Avatar uri={profile?.avatar_url} name={profile?.name} size={80} />
+          <View className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary items-center justify-center border-2 border-white">
             <Ionicons name="camera" size={12} color="#FFF" />
           </View>
         </TouchableOpacity>
-        <Text className="text-xl font-semibold text-dark">
+        <Text className="text-xl font-semibold text-dark mt-3">
           {profile?.name || 'User'}
         </Text>
         <Text className="text-sm text-grey mt-1">
           {profile?.email || ''}
         </Text>
-        <Text className="text-xs text-primary mt-1 font-medium">
-          {profile?.role === 'pet_owner' ? 'Pet Owner' : 'Veterinarian'}
-        </Text>
+        <Text className="text-xs text-primary mt-1 font-medium">Pet Owner</Text>
       </View>
 
       {/* Menu Items */}
@@ -132,21 +87,5 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
     </View>
-  );
-}
-
-function MenuItem({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className="bg-white rounded-btn px-4 h-[52px] flex-row items-center mb-3 shadow-sm"
-      activeOpacity={0.7}
-    >
-      <View className="w-8 h-8 rounded-full bg-primary/10 items-center justify-center mr-3">
-        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={18} color="#71924F" />
-      </View>
-      <Text className="flex-1 text-sm font-medium text-dark">{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color="#9BA1A8" />
-    </TouchableOpacity>
   );
 }

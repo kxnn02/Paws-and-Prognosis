@@ -21,11 +21,37 @@ export function useVetAppointments() {
       .eq('user_id', user.id)
       .single();
 
-    if (vetError || !data) {
-      console.error('Could not resolve vet record:', vetError);
+    if (!vetError && data) {
+      return data.id as string;
+    }
+
+    // Vet record doesn't exist yet — auto-create for existing veterinarian users
+    console.warn('Vet record missing, attempting to create...');
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+
+    const { data: newVet, error: insertError } = await supabase
+      .from('vets')
+      .insert({
+        user_id: user.id,
+        name: profileData?.name || 'Veterinarian',
+        specialty: 'General Practice',
+        bio: null,
+        rating: 0,
+        image_url: null,
+      })
+      .select('id')
+      .single();
+
+    if (insertError || !newVet) {
+      console.error('Could not create vet record:', insertError);
       return null;
     }
-    return data.id as string;
+
+    return newVet.id as string;
   }, [user]);
 
   const fetchAppointments = useCallback(async () => {

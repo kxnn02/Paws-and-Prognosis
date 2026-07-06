@@ -14,6 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVets } from '../../hooks/useVets';
 import { useAuth } from '../../context/AuthContext';
+import { useFavoriteVets } from '../../hooks/useFavoriteVets';
+import { VetCardSkeleton } from '../../components/Skeleton';
 import type { Vet, OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
@@ -29,6 +31,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { profile } = useAuth();
   const { vets: supabaseVets, loading: vetsLoading, fetchVets, error: vetsError } = useVets();
+  const { isFavorite, toggleFavorite } = useFavoriteVets();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -140,8 +143,10 @@ export default function HomeScreen() {
         <Text className="text-xl font-bold text-heading mb-4">Veterinary</Text>
 
         {vetsLoading ? (
-          <View className="items-center py-8">
-            <ActivityIndicator size="large" color="#71924F" />
+          <View className="flex-row flex-wrap justify-between">
+            {[1, 2, 3, 4].map((i) => (
+              <VetCardSkeleton key={i} />
+            ))}
           </View>
         ) : vetsError ? (
           <View className="items-center py-8">
@@ -163,7 +168,13 @@ export default function HomeScreen() {
         ) : (
           <View className="flex-row flex-wrap justify-between">
             {filteredVets.map((vet) => (
-              <VetCard key={vet.id} vet={vet} onPress={() => navigation.navigate('VetDetails', { vetId: vet.id })} />
+              <VetCard
+                key={vet.id}
+                vet={vet}
+                isFav={isFavorite(vet.id)}
+                onFavToggle={() => toggleFavorite(vet.id)}
+                onPress={() => navigation.navigate('VetDetails', { vetId: vet.id })}
+              />
             ))}
           </View>
         )}
@@ -175,13 +186,26 @@ export default function HomeScreen() {
   );
 }
 
-function VetCard({ vet, onPress }: { vet: Vet; onPress: () => void }) {
+function VetCard({ vet, isFav, onFavToggle, onPress }: { vet: Vet; isFav: boolean; onFavToggle: () => void; onPress: () => void }) {
   return (
     <TouchableOpacity
       className="bg-primary rounded-card w-[48%] mb-4 pb-4 shadow-md"
       activeOpacity={0.8}
       onPress={onPress}
     >
+      {/* Favorite Button */}
+      <TouchableOpacity
+        onPress={onFavToggle}
+        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/30 items-center justify-center"
+        activeOpacity={0.7}
+      >
+        <Ionicons
+          name={isFav ? 'heart' : 'heart-outline'}
+          size={16}
+          color={isFav ? '#EF4444' : '#FFF'}
+        />
+      </TouchableOpacity>
+
       {/* Vet Image */}
       <View className="items-center pt-2">
         <Image

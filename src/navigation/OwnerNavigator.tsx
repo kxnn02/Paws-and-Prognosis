@@ -10,9 +10,11 @@ import VetDetailsScreen from '../screens/owner/VetDetailsScreen';
 import BookingScreen from '../screens/owner/BookingScreen';
 import MyPetsScreen from '../screens/owner/MyPetsScreen';
 import AddPetScreen from '../screens/owner/AddPetScreen';
+import EditPetScreen from '../screens/owner/EditPetScreen';
 import PetProfileScreen from '../screens/owner/PetProfileScreen';
 import ChatConversationScreen from '../screens/owner/ChatConversationScreen';
 import RatingScreen from '../screens/owner/RatingScreen';
+import RescheduleScreen from '../screens/owner/RescheduleScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
 import TipsScreen from '../screens/owner/TipsScreen';
 import { Colors } from '../lib/constants';
@@ -62,9 +64,11 @@ export default function OwnerNavigator() {
       <Stack.Screen name="Booking" component={BookingScreen} />
       <Stack.Screen name="MyPets" component={MyPetsScreen} />
       <Stack.Screen name="AddPet" component={AddPetScreen} />
+      <Stack.Screen name="EditPet" component={EditPetScreen} />
       <Stack.Screen name="PetProfile" component={PetProfileScreen} />
       <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
       <Stack.Screen name="Rating" component={RatingScreen} />
+      <Stack.Screen name="Reschedule" component={RescheduleScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="TipsScreen" component={TipsScreen} />
     </Stack.Navigator>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { usePets } from '../../hooks/usePets';
 import { useAppointments } from '../../hooks/useAppointments';
+import { supabase } from '../../lib/supabase';
 import { formatOwnerNotes } from '../../lib/notesHelper';
 import type { OwnerStackParamList } from '../../types';
 
@@ -81,6 +82,29 @@ export default function BookingScreen() {
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [booking, setBooking] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // Fetch booked slots for the selected date and this vet
+  useEffect(() => {
+    async function fetchBookedSlots() {
+      const { data } = await supabase
+        .from('appointments')
+        .select('time')
+        .eq('vet_id', vetId)
+        .eq('date', selectedDate)
+        .neq('status', 'cancelled');
+
+      if (data) {
+        setBookedSlots(data.map((a: { time: string }) => a.time));
+      }
+    }
+    fetchBookedSlots();
+  }, [selectedDate, vetId]);
+
+  function isSlotBooked(slot: string): boolean {
+    const time24 = convertTo24Hour(slot);
+    return bookedSlots.some((b) => b.startsWith(time24.slice(0, 5)));
+  }
 
   const selectedDayData = scheduleDays.find((d) => d.date === selectedDate);
 
@@ -228,18 +252,28 @@ export default function BookingScreen() {
           <View className="flex-row flex-wrap gap-3">
             {TIME_SLOTS.map((time) => {
               const isSelected = selectedTime === time;
+              const booked = isSlotBooked(time);
               return (
                 <TouchableOpacity
                   key={time}
-                  onPress={() => setSelectedTime(time)}
+                  onPress={() => !booked && setSelectedTime(time)}
+                  disabled={booked}
                   className={`px-5 py-3 rounded-btn ${
-                    isSelected ? 'bg-primary' : 'bg-white border border-gray-200'
+                    booked
+                      ? 'bg-gray-100 opacity-50'
+                      : isSelected
+                        ? 'bg-primary'
+                        : 'bg-white border border-gray-200'
                   }`}
                   activeOpacity={0.7}
                 >
                   <Text
                     className={`text-sm font-medium ${
-                      isSelected ? 'text-white' : 'text-dark'
+                      booked
+                        ? 'text-grey line-through'
+                        : isSelected
+                          ? 'text-white'
+                          : 'text-dark'
                     }`}
                   >
                     {time}

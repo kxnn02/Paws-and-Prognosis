@@ -67,7 +67,7 @@ export default function SignUpScreen({ navigation }: Props) {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -103,6 +103,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 placeholderTextColor="#AA865D"
                 value={name}
                 onChangeText={setName}
+                maxLength={50}
               />
 
               {/* Email */}
@@ -115,6 +116,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                maxLength={100}
               />
 
               {/* Password */}
@@ -127,6 +129,7 @@ export default function SignUpScreen({ navigation }: Props) {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  maxLength={72}
                 />
                 <TouchableOpacity
                   className="absolute right-3 top-[10px]"

@@ -13,33 +13,41 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { usePets } from '../../hooks/usePets';
+import { supabase } from '../../lib/supabase';
 import type { OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
+type EditPetRouteProp = RouteProp<OwnerStackParamList, 'EditPet'>;
 
 const petSchema = z.object({
-  name: z.string().min(1, 'Pet name is required'),
+  name: z.string().min(1, 'Pet name is required').max(50, 'Name too long'),
   species: z.string().min(1, 'Species is required'),
-  breed: z.string().min(1, 'Breed is required'),
-  age: z.string().optional(),
-  gender: z.string().optional(),
-  weight: z.string().optional(),
-  color: z.string().optional(),
+  breed: z.string().min(1, 'Breed is required').max(50, 'Breed too long'),
+  age: z.string().max(20).optional(),
+  gender: z.string().max(10).optional(),
+  weight: z.string().max(20).optional(),
+  color: z.string().max(30).optional(),
 });
 
 type PetFormData = z.infer<typeof petSchema>;
 
 const SPECIES_OPTIONS = ['Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Other'];
 
-export default function AddPetScreen() {
+export default function EditPetScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { addPet, uploadPetImage } = usePets();
+  const route = useRoute<EditPetRouteProp>();
+  const { petId } = route.params;
+
+  const { pets, fetchPets, uploadPetImage } = usePets();
+  const pet = pets.find((p) => p.id === petId);
+
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -50,20 +58,32 @@ export default function AddPetScreen() {
   } = useForm<PetFormData>({
     resolver: zodResolver(petSchema),
     defaultValues: {
-      name: '',
-      species: '',
-      breed: '',
-      age: '',
-      gender: '',
-      weight: '',
-      color: '',
+      name: pet?.name || '',
+      species: pet?.species || '',
+      breed: pet?.breed || '',
+      age: pet?.age || '',
+      gender: pet?.gender || '',
+      weight: pet?.weight || '',
+      color: pet?.color || '',
     },
   });
+
+  if (!pet) {
+    return (
+      <View className="flex-1 bg-beige items-center justify-center">
+        <Ionicons name="alert-circle-outline" size={48} color="#9BA1A8" />
+        <Text className="text-grey text-base mt-3">Pet not found</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} className="mt-4 bg-primary/10 px-4 py-2 rounded-btn">
+          <Text className="text-primary font-medium text-sm">Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow access to your photo library to add a pet photo.');
+      Alert.alert('Permission Required', 'Please allow access to your photo library.');
       return;
     }
 
@@ -82,7 +102,7 @@ export default function AddPetScreen() {
   async function takePhoto() {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please allow camera access to take a pet photo.');
+      Alert.alert('Permission Required', 'Please allow camera access.');
       return;
     }
 
@@ -98,7 +118,7 @@ export default function AddPetScreen() {
   }
 
   function showImageOptions() {
-    Alert.alert('Add Photo', 'Choose an option', [
+    Alert.alert('Change Photo', 'Choose an option', [
       { text: 'Camera', onPress: takePhoto },
       { text: 'Photo Library', onPress: pickImage },
       { text: 'Cancel', style: 'cancel' },
@@ -108,40 +128,39 @@ export default function AddPetScreen() {
   async function onSubmit(data: PetFormData) {
     setSubmitting(true);
     try {
-      const { error, pet } = await addPet({
-        name: data.name,
-        species: data.species,
-        breed: data.breed,
-        age: data.age || null,
-        birthdate: null,
-        gender: data.gender || null,
-        weight: data.weight || null,
-        color: data.color || null,
-        country: null,
-        card_number: null,
-        sterilization_date: null,
-        image_url: null,
-      });
+      const { error } = await supabase
+        .from('pets')
+        .update({
+          name: data.name.trim(),
+          species: data.species,
+          breed: data.breed.trim(),
+          age: data.age?.trim() || null,
+          gender: data.gender?.trim() || null,
+          weight: data.weight?.trim() || null,
+          color: data.color?.trim() || null,
+        })
+        .eq('id', petId);
 
-      if (error) {
-        Alert.alert('Error', error.message);
-        return;
+      if (error) throw error;
+
+      // Upload new image if selected
+      if (imageUri) {
+        await uploadPetImage(petId, imageUri);
       }
 
-      // Upload image if selected
-      if (imageUri && pet) {
-        await uploadPetImage(pet.id, imageUri);
-      }
-
-      Alert.alert('Success', `${data.name} has been added!`, [
+      await fetchPets();
+      Alert.alert('Updated', `${data.name}'s info has been saved.`, [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (err) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      const message = err instanceof Error ? err.message : 'Failed to update pet';
+      Alert.alert('Error', message);
     } finally {
       setSubmitting(false);
     }
   }
+
+  const displayImage = imageUri || pet.image_url;
 
   return (
     <View className="flex-1 bg-beige">
@@ -155,7 +174,7 @@ export default function AddPetScreen() {
           <Ionicons name="arrow-back" size={22} color="#343434" />
         </TouchableOpacity>
         <Text className="flex-1 text-center text-lg font-semibold text-heading mr-10">
-          Add Pet
+          Edit Pet
         </Text>
       </View>
 
@@ -169,19 +188,15 @@ export default function AddPetScreen() {
           contentContainerStyle={{ paddingBottom: 120 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Image Picker */}
+          {/* Image */}
           <TouchableOpacity
             onPress={showImageOptions}
             className="self-center mt-4 mb-6"
             activeOpacity={0.8}
           >
             <View className="w-[120px] h-[120px] rounded-full overflow-hidden bg-input-bg border-[3px] border-primary-border items-center justify-center">
-              {imageUri ? (
-                <Image
-                  source={{ uri: imageUri }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
+              {displayImage ? (
+                <Image source={{ uri: displayImage }} className="w-full h-full" resizeMode="cover" />
               ) : (
                 <View className="items-center">
                   <Ionicons name="camera" size={32} color="#71924F" />
@@ -189,21 +204,13 @@ export default function AddPetScreen() {
                 </View>
               )}
             </View>
-            {imageUri && (
-              <View className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary items-center justify-center border-2 border-white">
-                <Ionicons name="pencil" size={14} color="#FFF" />
-              </View>
-            )}
+            <View className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary items-center justify-center border-2 border-white">
+              <Ionicons name="pencil" size={14} color="#FFF" />
+            </View>
           </TouchableOpacity>
 
           {/* Form Fields */}
-          <FormField
-            label="Pet Name"
-            name="name"
-            control={control}
-            placeholder="e.g. Max"
-            error={errors.name?.message}
-          />
+          <FormField label="Pet Name" name="name" control={control} placeholder="e.g. Max" error={errors.name?.message} />
 
           {/* Species Selector */}
           <Text className="text-sm font-medium text-dark mb-2 mt-4">Species</Text>
@@ -221,9 +228,7 @@ export default function AddPetScreen() {
                     }`}
                     activeOpacity={0.7}
                   >
-                    <Text
-                      className={`text-sm ${value === sp ? 'text-white font-medium' : 'text-dark'}`}
-                    >
+                    <Text className={`text-sm ${value === sp ? 'text-white font-medium' : 'text-dark'}`}>
                       {sp}
                     </Text>
                   </TouchableOpacity>
@@ -231,63 +236,31 @@ export default function AddPetScreen() {
               </View>
             )}
           />
-          {errors.species && (
-            <Text className="text-xs text-red-500 mt-1">{errors.species.message}</Text>
-          )}
+          {errors.species && <Text className="text-xs text-red-500 mt-1">{errors.species.message}</Text>}
 
-          <FormField
-            label="Breed"
-            name="breed"
-            control={control}
-            placeholder="e.g. Golden Retriever"
-            error={errors.breed?.message}
-          />
+          <FormField label="Breed" name="breed" control={control} placeholder="e.g. Golden Retriever" error={errors.breed?.message} />
 
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <FormField
-                label="Age"
-                name="age"
-                control={control}
-                placeholder="e.g. 2 years"
-                error={errors.age?.message}
-              />
+              <FormField label="Age" name="age" control={control} placeholder="e.g. 2 years" error={errors.age?.message} />
             </View>
             <View className="flex-1">
-              <FormField
-                label="Gender"
-                name="gender"
-                control={control}
-                placeholder="Male / Female"
-                error={errors.gender?.message}
-              />
+              <FormField label="Gender" name="gender" control={control} placeholder="Male / Female" error={errors.gender?.message} />
             </View>
           </View>
 
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <FormField
-                label="Weight"
-                name="weight"
-                control={control}
-                placeholder="e.g. 12 kg"
-                error={errors.weight?.message}
-              />
+              <FormField label="Weight" name="weight" control={control} placeholder="e.g. 12 kg" error={errors.weight?.message} />
             </View>
             <View className="flex-1">
-              <FormField
-                label="Color"
-                name="color"
-                control={control}
-                placeholder="e.g. Golden"
-                error={errors.color?.message}
-              />
+              <FormField label="Color" name="color" control={control} placeholder="e.g. Golden" error={errors.color?.message} />
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Submit Button */}
+      {/* Save Button */}
       <View className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-beige">
         <TouchableOpacity
           onPress={handleSubmit(onSubmit)}
@@ -298,7 +271,7 @@ export default function AddPetScreen() {
           {submitting ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text className="text-white text-base font-semibold">Add Pet</Text>
+            <Text className="text-white text-base font-semibold">Save Changes</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -306,7 +279,6 @@ export default function AddPetScreen() {
   );
 }
 
-// Reusable form field component
 interface FormFieldProps {
   label: string;
   name: string;
@@ -330,6 +302,7 @@ function FormField({ label, name, control, placeholder, error }: FormFieldProps)
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            maxLength={50}
           />
         )}
       />

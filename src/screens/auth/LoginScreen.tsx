@@ -55,7 +55,7 @@ export default function LoginScreen({ navigation }: Props) {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -96,6 +96,7 @@ export default function LoginScreen({ navigation }: Props) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                maxLength={100}
               />
 
               {/* Password */}
@@ -107,6 +108,7 @@ export default function LoginScreen({ navigation }: Props) {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  maxLength={72}
                 />
                 <TouchableOpacity
                   className="absolute right-3 top-[10px]"
@@ -126,6 +128,15 @@ export default function LoginScreen({ navigation }: Props) {
                 <Text className="text-sm font-semibold text-white">
                   {loading ? 'Logging in...' : 'Log In'}
                 </Text>
+              </TouchableOpacity>
+
+              {/* Forgot Password */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword')}
+                className="self-end mt-2"
+                activeOpacity={0.7}
+              >
+                <Text className="text-xs text-grey">Forgot Password?</Text>
               </TouchableOpacity>
 
               {/* Google Button */}
