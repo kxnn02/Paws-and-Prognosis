@@ -1,32 +1,20 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Colors, Radius, Shadow, Spacing } from '../lib/constants';
+import { View } from 'react-native';
 
 interface CardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
   variant?: 'default' | 'glass';
+  className?: string;
 }
 
-export default function Card({ children, style, variant = 'default' }: CardProps) {
+export default function Card({ children, variant = 'default', className = '' }: CardProps) {
+  const baseClasses = variant === 'glass'
+    ? 'bg-white/50 border border-white/80 rounded-glass p-5'
+    : 'bg-white rounded-card p-5 shadow-md';
+
   return (
-    <View style={[styles.base, variant === 'glass' && styles.glass, style]}>
+    <View className={`${baseClasses} ${className}`} accessibilityRole="summary">
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: Colors.card,
-    borderRadius: Radius.lg,
-    padding: Spacing['2xl'],
-    ...Shadow.md,
-  },
-  glass: {
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: Radius.xl,
-  },
-});

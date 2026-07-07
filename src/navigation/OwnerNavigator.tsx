@@ -17,6 +17,7 @@ import RatingScreen from '../screens/owner/RatingScreen';
 import RescheduleScreen from '../screens/owner/RescheduleScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
 import TipsScreen from '../screens/owner/TipsScreen';
+import ChatTabIcon from '../components/ChatTabIcon';
 import { Colors } from '../lib/constants';
 import type { OwnerTabParamList, OwnerStackParamList } from '../types';
 
@@ -39,10 +40,11 @@ function OwnerTabs() {
           paddingTop: 8,
         },
         tabBarIcon: ({ color, size }) => {
+          if (route.name === 'Chat') {
+            return <ChatTabIcon color={color} size={size} />;
+          }
           let iconName: keyof typeof Ionicons.glyphMap = 'home-outline';
-          if (route.name === 'Home') iconName = 'home-outline';
-          else if (route.name === 'Calendar') iconName = 'calendar-outline';
-          else if (route.name === 'Chat') iconName = 'chatbubble-outline';
+          if (route.name === 'Calendar') iconName = 'calendar-outline';
           else if (route.name === 'Profile') iconName = 'person-outline';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
