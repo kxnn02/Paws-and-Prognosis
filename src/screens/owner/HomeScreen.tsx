@@ -74,10 +74,18 @@ export default function HomeScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
       }
     >
-      {/* Greeting */}
-      <View className="px-5 mt-14 mb-2">
-        <Text className="text-sm text-grey">Hello,</Text>
-        <Text className="text-xl font-bold text-heading">{profile?.name || 'Pet Parent'} 👋</Text>
+      {/* Header with Logo */}
+      <View className="px-5 mt-14 mb-2 flex-row items-center justify-between">
+        <View>
+          <Text className="text-sm text-grey">Hello,</Text>
+          <Text className="text-xl font-bold text-heading">{profile?.name || 'Pet Parent'} 👋</Text>
+        </View>
+        <Image
+          source={require('../../../assets/logo-transparent.png')}
+          className="w-[52px] h-[52px]"
+          resizeMode="contain"
+          style={{ transform: [{ scale: 1.5 }] }}
+        />
       </View>
 
       {/* Banner */}

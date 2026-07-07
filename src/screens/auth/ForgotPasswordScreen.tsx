@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -100,6 +100,11 @@ export default function ForgotPasswordScreen() {
         behavior="padding"
       >
         <View className="flex-1 px-7 pt-6">
+          <Image
+            source={require('../../../assets/logo-transparent.png')}
+            className="w-[154px] h-[154px] self-center mb-4"
+            resizeMode="contain"
+          />
           <Text className="text-2xl font-bold text-heading">Forgot Password</Text>
           <Text className="text-sm text-grey mt-2 leading-5">
             Enter the email address associated with your account and we'll send you a link to
