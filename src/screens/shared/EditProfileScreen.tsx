@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -14,18 +13,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/Toast';
+import { editProfileSchema } from '../../lib/schemas';
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const { profile, user, refreshProfile } = useAuth();
+  const { showToast } = useToast();
 
   const [name, setName] = useState(profile?.name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Name cannot be empty.');
+    const result = editProfileSchema.safeParse({ name: name.trim(), phone: phone.trim() });
+    if (!result.success) {
+      showToast(result.error.errors[0].message, 'warning');
       return;
     }
     if (!user) return;
@@ -43,12 +46,11 @@ export default function EditProfileScreen() {
       if (error) throw error;
 
       await refreshProfile();
-      Alert.alert('Saved', 'Your profile has been updated.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      showToast('Profile updated successfully!', 'success');
+      navigation.goBack();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to update profile';
-      Alert.alert('Error', message);
+      showToast(message, 'error');
     } finally {
       setSaving(false);
     }

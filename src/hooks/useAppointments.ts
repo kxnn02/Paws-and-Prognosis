@@ -3,6 +3,21 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import type { Appointment } from '../types';
 
+/**
+ * Hook for managing pet owner appointments.
+ *
+ * Provides CRUD operations for appointments with automatic
+ * state management and Supabase integration.
+ *
+ * @returns appointments - Array of all user appointments
+ * @returns loading - Whether initial fetch is in progress
+ * @returns error - Error message if fetch failed
+ * @returns fetchAppointments - Manual refresh function
+ * @returns bookAppointment - Create a new appointment
+ * @returns cancelAppointment - Cancel an existing appointment
+ * @returns getAppointmentsForDate - Filter appointments by date
+ * @returns getMarkedDates - Get calendar marker data
+ */
 export function useAppointments() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);

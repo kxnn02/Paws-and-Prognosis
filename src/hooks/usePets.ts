@@ -1,8 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { cache } from '../lib/cache';
 import type { Pet } from '../types';
 
+/**
+ * Hook for managing the current user's pets.
+ *
+ * Provides CRUD operations for pet records with automatic
+ * state management, Supabase integration, and image uploads
+ * via Supabase Storage.
+ *
+ * @returns pets - Array of all user's pets
+ * @returns loading - Whether initial fetch is in progress
+ * @returns error - Error message if fetch failed
+ * @returns fetchPets - Manual refresh function
+ * @returns addPet - Create a new pet record
+ * @returns deletePet - Remove a pet by ID
+ * @returns uploadPetImage - Upload and attach an image to a pet
+ */
 export function usePets() {
   const { user } = useAuth();
   const [pets, setPets] = useState<Pet[]>([]);
@@ -17,9 +33,18 @@ export function usePets() {
     }
 
     try {
-      setLoading(true);
       setError(null);
 
+      // Load cached data immediately for instant display
+      const cached = await cache.get<Pet[]>(`pets_${user.id}`);
+      if (cached) {
+        setPets(cached);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
+      // Fetch fresh data from Supabase
       const { data, error: fetchError } = await supabase
         .from('pets')
         .select('*')
@@ -28,6 +53,9 @@ export function usePets() {
 
       if (fetchError) throw fetchError;
       setPets((data as Pet[]) || []);
+
+      // Update cache with fresh data
+      await cache.set(`pets_${user.id}`, (data as Pet[]) || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch pets';
       setError(message);

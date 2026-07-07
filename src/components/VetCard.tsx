@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Typography, Radius, Shadow, Spacing } from '../lib/constants';
 import type { Vet } from '../types';
 
 interface VetCardProps {
@@ -11,73 +10,34 @@ interface VetCardProps {
 
 export default function VetCard({ vet, onPress }: VetCardProps) {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.imageContainer}>
+    <TouchableOpacity
+      className="bg-primary rounded-card w-[48%] pb-4 mb-4 shadow-md"
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={`${vet.name}, ${vet.specialty}, rated ${vet.rating} stars`}
+      accessibilityHint="Opens veterinarian details"
+    >
+      <View className="items-center pt-2">
         <Image
-          source={{ uri: vet.image_url || 'https://via.placeholder.com/150' }}
-          style={styles.image}
+          source={{ uri: vet.image_url || undefined }}
+          className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
+          accessibilityRole="image"
+          accessibilityLabel={`Photo of ${vet.name}`}
         />
       </View>
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>{vet.name}</Text>
-        <Text style={styles.specialty} numberOfLines={1}>{vet.specialty}</Text>
-        <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
-            <Ionicons name="star" size={13} color={Colors.primaryBorder} />
-            <Text style={styles.metaText}>{vet.rating}</Text>
-          </View>
+      <View className="px-3 mt-2">
+        <Text className="text-[13px] font-semibold text-white" numberOfLines={1}>
+          {vet.name}
+        </Text>
+        <Text className="text-[11px] text-dark mt-[2px]" numberOfLines={1}>
+          {vet.specialty}
+        </Text>
+        <View className="flex-row items-center mt-1">
+          <Ionicons name="star" size={12} color="#7BBD38" />
+          <Text className="text-[11px] text-dark ml-1">{vet.rating}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.lg,
-    width: '48%',
-    paddingBottom: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadow.md,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    paddingTop: Spacing.sm,
-  },
-  image: {
-    width: 150,
-    height: 150,
-    borderRadius: Radius.full,
-    borderWidth: 3,
-    borderColor: Colors.primaryBorder,
-  },
-  info: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.sm,
-  },
-  name: {
-    ...Typography.smallSemiBold,
-    color: '#F5F5F5',
-  },
-  specialty: {
-    ...Typography.caption,
-    color: Colors.textDark,
-    marginTop: 2,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.xs,
-    gap: Spacing.lg,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    ...Typography.caption,
-    color: Colors.textDark,
-  },
-});

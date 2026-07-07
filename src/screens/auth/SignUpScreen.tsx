@@ -12,6 +12,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { signUpSchema } from '../../lib/schemas';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList, UserRole } from '../../types';
 
@@ -29,16 +30,9 @@ export default function SignUpScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleSignUp() {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
-      return;
-    }
-    if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+    const result = signUpSchema.safeParse({ name, email, password, role });
+    if (!result.success) {
+      Alert.alert('Error', result.error.errors[0].message);
       return;
     }
     setLoading(true);
@@ -77,9 +71,8 @@ export default function SignUpScreen({ navigation }: Props) {
           <View className="pt-[50px] items-center">
             <Image
               source={require('../../../assets/logo-transparent.png')}
-              className="w-[150px] h-[150px]"
+              className="w-[225px] h-[225px]"
               resizeMode="contain"
-              style={{ transform: [{ scale: 1.5 }] }}
             />
           </View>
 

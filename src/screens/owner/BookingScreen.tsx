@@ -84,6 +84,25 @@ export default function BookingScreen() {
   const [booking, setBooking] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
+  // Warn before leaving with unsaved booking selections
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!selectedTime) return; // No selection, allow leave
+
+      e.preventDefault();
+      Alert.alert(
+        'Discard Booking?',
+        'You have an unfinished booking. Are you sure you want to leave?',
+        [
+          { text: 'Stay', style: 'cancel' },
+          { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, selectedTime]);
+
   // Fetch booked slots for the selected date and this vet
   useEffect(() => {
     async function fetchBookedSlots() {

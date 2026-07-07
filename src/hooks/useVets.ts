@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { cache } from '../lib/cache';
 import type { Vet } from '../types';
 
 const PAGE_SIZE = 20;
@@ -18,7 +19,14 @@ export function useVets() {
   const fetchVets = useCallback(async (reset = true) => {
     try {
       if (reset) {
-        setLoading(true);
+        // Load cached data immediately for instant display
+        const cached = await cache.get<Vet[]>('vets_all');
+        if (cached) {
+          setVets(cached);
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
         setPage(0);
       } else {
         setLoadingMore(true);
@@ -41,6 +49,8 @@ export function useVets() {
 
       if (reset) {
         setVets(newVets);
+        // Update cache with fresh data
+        await cache.set('vets_all', newVets);
       } else {
         setVets((prev) => [...prev, ...newVets]);
       }

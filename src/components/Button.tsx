@@ -1,6 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
-import { Colors, Typography, Radius, Shadow, Spacing } from '../lib/constants';
+import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 
 interface ButtonProps {
   title: string;
@@ -8,80 +7,50 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'google';
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
+  className?: string;
 }
 
-export default function Button({ title, onPress, variant = 'primary', loading = false, disabled = false, style }: ButtonProps) {
-  const buttonStyle = [
-    styles.base,
-    variant === 'primary' && styles.primary,
-    variant === 'secondary' && styles.secondary,
-    variant === 'outline' && styles.outline,
-    variant === 'google' && styles.google,
-    disabled && styles.disabled,
-    style,
-  ];
+export default function Button({
+  title,
+  onPress,
+  variant = 'primary',
+  loading = false,
+  disabled = false,
+  className = '',
+}: ButtonProps) {
+  const baseClasses = 'h-[52px] rounded-btn items-center justify-center shadow-sm';
 
-  const textStyle = [
-    styles.text,
-    variant === 'primary' && styles.textPrimary,
-    variant === 'secondary' && styles.textSecondary,
-    variant === 'outline' && styles.textOutline,
-    variant === 'google' && styles.textGoogle,
-  ];
+  const variantClasses = {
+    primary: 'bg-primary border border-primary-border',
+    secondary: 'bg-primary-light',
+    outline: 'bg-transparent border border-primary',
+    google: 'bg-input-bg',
+  };
+
+  const textClasses = {
+    primary: 'text-white',
+    secondary: 'text-primary',
+    outline: 'text-primary',
+    google: 'text-dark',
+  };
+
+  const disabledClass = disabled || loading ? 'opacity-60' : '';
 
   return (
-    <TouchableOpacity style={buttonStyle} onPress={onPress} disabled={disabled || loading} activeOpacity={0.8}>
+    <TouchableOpacity
+      className={`${baseClasses} ${variantClasses[variant]} ${disabledClass} ${className}`}
+      onPress={onPress}
+      disabled={disabled || loading}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: disabled || loading }}
+    >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#FFF' : Colors.primary} />
+        <ActivityIndicator color={variant === 'primary' ? '#FFF' : '#71924F'} />
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <Text className={`text-sm font-semibold ${textClasses[variant]}`}>{title}</Text>
       )}
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    height: 52,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadow.sm,
-  },
-  primary: {
-    backgroundColor: Colors.primary,
-    borderWidth: 1,
-    borderColor: Colors.primaryBorder,
-  },
-  secondary: {
-    backgroundColor: Colors.primaryLight,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  google: {
-    backgroundColor: '#F5F5F5',
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  text: {
-    ...Typography.button,
-    textAlign: 'center',
-  },
-  textPrimary: {
-    color: Colors.textWhite,
-  },
-  textSecondary: {
-    color: Colors.primary,
-  },
-  textOutline: {
-    color: Colors.primary,
-  },
-  textGoogle: {
-    color: Colors.textDark,
-  },
-});

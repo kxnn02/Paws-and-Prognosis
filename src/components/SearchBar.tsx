@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Spacing } from '../lib/constants';
 
 interface SearchBarProps {
   value: string;
@@ -11,41 +10,19 @@ interface SearchBarProps {
 
 export default function SearchBar({ value, onChangeText, placeholder = 'Search' }: SearchBarProps) {
   return (
-    <View style={styles.container}>
+    <View className="flex-row items-center bg-white border border-primary-light rounded-btn h-[52px] px-4">
       <TextInput
-        style={styles.input}
+        className="flex-1 text-base text-dark"
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={Colors.textPlaceholder}
+        placeholderTextColor="#A7A7A7"
+        accessibilityRole="search"
+        accessibilityLabel={placeholder}
+        returnKeyType="search"
       />
-      <View style={styles.divider} />
-      <Ionicons name="search" size={24} color={Colors.textPlaceholder} />
+      <View className="w-[1px] h-6 bg-gray-200 mx-3" />
+      <Ionicons name="search" size={22} color="#A7A7A7" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.borderGreen,
-    borderRadius: Radius.md,
-    height: 56,
-    paddingHorizontal: Spacing.lg,
-  },
-  input: {
-    flex: 1,
-    fontSize: 18,
-    color: Colors.textDark,
-    fontWeight: '500',
-  },
-  divider: {
-    width: 1,
-    height: 24,
-    backgroundColor: Colors.border,
-    marginHorizontal: Spacing.md,
-  },
-});

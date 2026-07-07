@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -47,7 +47,7 @@ export default function HomeScreen() {
     '4': ['boarding', 'hospitalization'],
   };
 
-  const filteredVets = allVets.filter((v) => {
+  const filteredVets = useMemo(() => allVets.filter((v) => {
     const matchesSearch = !search ||
       v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.specialty.toLowerCase().includes(search.toLowerCase());
@@ -58,7 +58,7 @@ export default function HomeScreen() {
       );
 
     return matchesSearch && matchesCategory;
-  });
+  }), [allVets, search, activeCategory]);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -82,9 +82,8 @@ export default function HomeScreen() {
         </View>
         <Image
           source={require('../../../assets/logo-transparent.png')}
-          className="w-[52px] h-[52px]"
+          className="w-[78px] h-[78px]"
           resizeMode="contain"
-          style={{ transform: [{ scale: 1.5 }] }}
         />
       </View>
 
@@ -194,7 +193,7 @@ export default function HomeScreen() {
   );
 }
 
-function VetCard({ vet, isFav, onFavToggle, onPress }: { vet: Vet; isFav: boolean; onFavToggle: () => void; onPress: () => void }) {
+const VetCard = React.memo(function VetCard({ vet, isFav, onFavToggle, onPress }: { vet: Vet; isFav: boolean; onFavToggle: () => void; onPress: () => void }) {
   return (
     <TouchableOpacity
       className="bg-primary rounded-card w-[48%] mb-4 pb-4 shadow-md"
@@ -237,4 +236,4 @@ function VetCard({ vet, isFav, onFavToggle, onPress }: { vet: Vet; isFav: boolea
       </View>
     </TouchableOpacity>
   );
-}
+});

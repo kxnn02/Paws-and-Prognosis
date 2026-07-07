@@ -7,16 +7,9 @@ interface AvatarProps {
   uri?: string | null;
   name?: string | null;
   size?: number;
-  /** Fallback icon if no name available */
   fallbackIcon?: keyof typeof Ionicons.glyphMap;
 }
 
-/**
- * Avatar component with:
- * 1. Image (if uri provided)
- * 2. Initials (if name provided but no uri)
- * 3. Icon fallback (if neither)
- */
 export default function Avatar({
   uri,
   name,
@@ -31,6 +24,8 @@ export default function Avatar({
     <View
       className="rounded-full bg-primary/15 items-center justify-center overflow-hidden"
       style={{ width: size, height: size }}
+      accessibilityRole="image"
+      accessibilityLabel={name ? `Avatar of ${name}` : 'User avatar'}
     >
       {uri ? (
         <Image

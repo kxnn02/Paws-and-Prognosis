@@ -12,6 +12,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
+import { loginSchema } from '../../lib/schemas';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types';
 
@@ -27,12 +28,9 @@ export default function LoginScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin() {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      Alert.alert('Error', result.error.errors[0].message);
       return;
     }
     setLoading(true);
@@ -65,9 +63,8 @@ export default function LoginScreen({ navigation }: Props) {
           <View className="pt-[50px] items-center">
             <Image
               source={require('../../../assets/logo-transparent.png')}
-              className="w-[180px] h-[180px]"
+              className="w-[270px] h-[270px]"
               resizeMode="contain"
-              style={{ transform: [{ scale: 1.5 }] }}
             />
           </View>
 
@@ -96,6 +93,7 @@ export default function LoginScreen({ navigation }: Props) {
                 autoCapitalize="none"
                 autoCorrect={false}
                 maxLength={100}
+                accessibilityLabel="Email address"
               />
 
               {/* Password */}
@@ -108,10 +106,13 @@ export default function LoginScreen({ navigation }: Props) {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   maxLength={72}
+                  accessibilityLabel="Password"
                 />
                 <TouchableOpacity
                   className="absolute right-3 top-[10px]"
                   onPress={() => setShowPassword(!showPassword)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Toggle password visibility"
                 >
                   <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
                 </TouchableOpacity>
@@ -123,6 +124,9 @@ export default function LoginScreen({ navigation }: Props) {
                 onPress={handleLogin}
                 disabled={loading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Log in"
+                accessibilityState={{ disabled: loading }}
               >
                 <Text className="text-sm font-semibold text-white">
                   {loading ? 'Logging in...' : 'Log In'}
@@ -134,6 +138,7 @@ export default function LoginScreen({ navigation }: Props) {
                 onPress={() => navigation.navigate('ForgotPassword')}
                 className="self-end mt-2"
                 activeOpacity={0.7}
+                accessibilityRole="link"
               >
                 <Text className="text-xs text-grey">Forgot Password?</Text>
               </TouchableOpacity>
@@ -143,6 +148,8 @@ export default function LoginScreen({ navigation }: Props) {
                 className="bg-input-bg rounded-btn h-[52px] flex-row items-center justify-center mt-[10px] shadow-md opacity-70"
                 activeOpacity={0.8}
                 onPress={() => Alert.alert('Coming Soon', 'Google Sign-In requires a development build and will be available in the production version.')}
+                accessibilityRole="button"
+                accessibilityLabel="Log in with Google"
               >
                 <Image
                   source={require('../../../assets/google-logo.png')}
@@ -155,7 +162,7 @@ export default function LoginScreen({ navigation }: Props) {
               {/* Footer */}
               <View className="flex-row justify-center mt-[16px]">
                 <Text className="text-sm text-dark">Don't have an account? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUp')} accessibilityRole="link">
                   <Text className="text-sm font-semibold text-dark">Sign Up</Text>
                 </TouchableOpacity>
               </View>

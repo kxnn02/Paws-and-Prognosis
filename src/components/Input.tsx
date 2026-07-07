@@ -1,51 +1,33 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
-import { Colors, Typography, Radius, Spacing } from '../lib/constants';
+import React, { forwardRef } from 'react';
+import { View, Text, TextInput, TextInputProps } from 'react-native';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  containerClassName?: string;
 }
 
-export default function Input({ label, error, style, ...props }: InputProps) {
+const Input = forwardRef<TextInput, InputProps>(({ label, error, containerClassName = '', ...props }, ref) => {
   return (
-    <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View className={`mb-4 ${containerClassName}`}>
+      {label && (
+        <Text className="text-sm font-semibold text-dark mb-1">{label}</Text>
+      )}
       <TextInput
-        style={[styles.input, error && styles.inputError, style]}
-        placeholderTextColor={Colors.textPlaceholder}
+        ref={ref}
+        className={`bg-input-bg border rounded-btn px-4 py-3 text-sm text-dark ${
+          error ? 'border-red-500' : 'border-gray-200'
+        }`}
+        placeholderTextColor="#AA865D"
+        accessibilityLabel={label || props.placeholder}
         {...props}
       />
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && (
+        <Text className="text-xs text-red-500 mt-1">{error}</Text>
+      )}
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: Spacing.md,
-  },
-  label: {
-    ...Typography.smallSemiBold,
-    color: Colors.textDark,
-    marginBottom: Spacing.xs,
-  },
-  input: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    fontSize: 14,
-    color: Colors.textDark,
-  },
-  inputError: {
-    borderColor: Colors.error,
-  },
-  error: {
-    ...Typography.caption,
-    color: Colors.error,
-    marginTop: Spacing.xs,
-  },
 });
+
+Input.displayName = 'Input';
+export default Input;
