@@ -92,9 +92,8 @@ export default function DashboardScreen() {
         </View>
         <Image
           source={require('../../../assets/logo-transparent.png')}
-          className="w-[52px] h-[52px]"
+          className="w-[78px] h-[78px]"
           resizeMode="contain"
-          style={{ transform: [{ scale: 1.5 }] }}
         />
       </View>
 

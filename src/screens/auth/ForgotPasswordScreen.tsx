@@ -102,9 +102,8 @@ export default function ForgotPasswordScreen() {
         <View className="flex-1 px-7 pt-6">
           <Image
             source={require('../../../assets/logo-transparent.png')}
-            className="w-[110px] h-[110px] self-center mb-4"
+            className="w-[154px] h-[154px] self-center mb-4"
             resizeMode="contain"
-            style={{ transform: [{ scale: 1.4 }] }}
           />
           <Text className="text-2xl font-bold text-heading">Forgot Password</Text>
           <Text className="text-sm text-grey mt-2 leading-5">
