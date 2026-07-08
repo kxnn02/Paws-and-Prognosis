@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { cache } from '../lib/cache';
 import type { Vet } from '../types';
@@ -14,7 +14,7 @@ export function useVets() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(0);
+  const pageRef = useRef(0);
 
   const fetchVets = useCallback(async (reset = true) => {
     try {
@@ -22,18 +22,18 @@ export function useVets() {
         // Load cached data immediately for instant display
         const cached = await cache.get<Vet[]>('vets_all');
         if (cached) {
-          setVets(cached);
+          setVets(cached.data);
           setLoading(false);
         } else {
           setLoading(true);
         }
-        setPage(0);
+        pageRef.current = 0;
       } else {
         setLoadingMore(true);
       }
       setError(null);
 
-      const currentPage = reset ? 0 : page;
+      const currentPage = reset ? 0 : pageRef.current;
       const from = currentPage * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
@@ -56,7 +56,7 @@ export function useVets() {
       }
 
       setHasMore(newVets.length === PAGE_SIZE);
-      if (!reset) setPage((p) => p + 1);
+      if (!reset) pageRef.current += 1;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch vets';
       setError(message);
@@ -65,11 +65,11 @@ export function useVets() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [page]);
+  }, []);
 
   useEffect(() => {
     fetchVets(true);
-  }, []);
+  }, [fetchVets]);
 
   const loadMore = useCallback(() => {
     if (!loadingMore && hasMore) {

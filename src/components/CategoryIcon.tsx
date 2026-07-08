@@ -14,7 +14,7 @@ export default function CategoryIcon({ name, icon, isActive = false, onPress }: 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.iconCircle, isActive && styles.iconCircleActive]}>
-        <Ionicons name={icon as any} size={37} color={Colors.textWhite} />
+        <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={37} color={Colors.textWhite} />
       </View>
       <Text style={styles.label}>{name}</Text>
     </TouchableOpacity>

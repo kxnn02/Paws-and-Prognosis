@@ -14,21 +14,15 @@ interface CacheEntry<T> {
  * Used to show stale data while fresh data loads.
  */
 export const cache = {
-  async get<T>(key: string): Promise<T | null> {
+  async get<T>(key: string): Promise<{ data: T; isStale: boolean } | null> {
     try {
       const raw = await AsyncStorage.getItem(CACHE_PREFIX + key);
       if (!raw) return null;
 
       const entry: CacheEntry<T> = JSON.parse(raw);
-      const isExpired = Date.now() - entry.timestamp > entry.ttl;
+      const isStale = Date.now() - entry.timestamp > entry.ttl;
 
-      if (isExpired) {
-        // Return stale data but mark for refresh
-        // Caller can decide to use it or not
-        return entry.data;
-      }
-
-      return entry.data;
+      return { data: entry.data, isStale };
     } catch {
       return null;
     }

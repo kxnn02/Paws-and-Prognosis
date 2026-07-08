@@ -38,7 +38,7 @@ export function usePets() {
       // Load cached data immediately for instant display
       const cached = await cache.get<Pet[]>(`pets_${user.id}`);
       if (cached) {
-        setPets(cached);
+        setPets(cached.data);
         setLoading(false);
       } else {
         setLoading(true);

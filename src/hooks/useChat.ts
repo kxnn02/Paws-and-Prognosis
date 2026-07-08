@@ -147,6 +147,23 @@ export function useChatMessages(partnerId: string) {
   const lastSendRef = useRef<number>(0);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Mark incoming messages as read
+  const markMessagesAsRead = useCallback(async () => {
+    if (!user || !partnerId) return;
+
+    try {
+      await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('sender_id', partnerId)
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+    } catch (err) {
+      // Non-critical — don't block UX
+      console.error('Error marking messages as read:', err);
+    }
+  }, [user, partnerId]);
+
   const fetchMessages = useCallback(async () => {
     if (!user || !partnerId) {
       setMessages([]);
@@ -175,24 +192,7 @@ export function useChatMessages(partnerId: string) {
     } finally {
       setLoading(false);
     }
-  }, [user, partnerId]);
-
-  // Mark incoming messages as read
-  async function markMessagesAsRead() {
-    if (!user || !partnerId) return;
-
-    try {
-      await supabase
-        .from('messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('sender_id', partnerId)
-        .eq('receiver_id', user.id)
-        .is('read_at', null);
-    } catch (err) {
-      // Non-critical — don't block UX
-      console.error('Error marking messages as read:', err);
-    }
-  }
+  }, [user, partnerId, markMessagesAsRead]);
 
   useEffect(() => {
     fetchMessages();
@@ -263,7 +263,7 @@ export function useChatMessages(partnerId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, partnerId]);
+  }, [user, partnerId, markMessagesAsRead]);
 
   // Broadcast typing state
   function setTyping(isTyping: boolean) {
