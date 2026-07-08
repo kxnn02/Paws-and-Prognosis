@@ -171,7 +171,7 @@ export default function DashboardScreen() {
       {/* Today's Cases */}
       <View className="px-5 mt-6">
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-lg font-semibold text-heading">Today's Cases</Text>
+          <Text className="text-lg font-semibold text-heading">Today{"'"}s Cases</Text>
           <Text className="text-xs text-grey">{todayCases.length} appointments</Text>
         </View>
 

@@ -315,7 +315,7 @@ export default function VetAppointmentsScreen() {
       >
         <KeyboardAvoidingView
           className="flex-1"
-          behavior="padding"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <TouchableOpacity
             className="flex-1 bg-black/40"

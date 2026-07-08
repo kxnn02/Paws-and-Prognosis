@@ -80,7 +80,7 @@ export default function VetChatListScreen() {
       return (
         <View className="items-center pt-20">
           <Ionicons name="search-outline" size={36} color="#D1D5DB" />
-          <Text className="text-sm text-grey mt-3">No conversations matching "{search}"</Text>
+          <Text className="text-sm text-grey mt-3">No conversations matching {`"${search}"`}</Text>
         </View>
       );
     }
