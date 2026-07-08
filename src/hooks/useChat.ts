@@ -113,7 +113,7 @@ export function useChatThreads() {
   useEffect(() => {
     if (!user) return;
 
-    const channelName = `threads-listener-${user.id}`;
+    const channelName = `threads-${user.id}-${Date.now()}`;
     const channel = supabase
       .channel(channelName)
       .on(
