@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Image,
+  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,6 +26,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('pet_owner');
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,10 @@ export default function SignUpScreen({ navigation }: Props) {
     const result = signUpSchema.safeParse({ name, email, password, role });
     if (!result.success) {
       Alert.alert('Error', result.error.errors[0].message);
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
     setLoading(true);
@@ -60,7 +66,7 @@ export default function SignUpScreen({ navigation }: Props) {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -84,7 +90,7 @@ export default function SignUpScreen({ navigation }: Props) {
           >
             <View className="px-[22px] pt-[24px] pb-[20px] bg-white/40">
               <Text className="text-[24px] font-bold text-heading leading-[34px] mb-5">
-                Let's get you and your fur baby started
+                Let{"'"}s get you and your fur baby started
               </Text>
 
               {/* Name */}
@@ -130,6 +136,18 @@ export default function SignUpScreen({ navigation }: Props) {
                   <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
                 </TouchableOpacity>
               </View>
+
+              {/* Confirm Password */}
+              <Text className="text-sm text-dark mb-1">Confirm Password</Text>
+              <TextInput
+                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                placeholder="Type your password again."
+                placeholderTextColor="#AA865D"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showPassword}
+                maxLength={72}
+              />
 
               {/* Role */}
               <Text className="text-sm text-dark mb-2">I am a...</Text>

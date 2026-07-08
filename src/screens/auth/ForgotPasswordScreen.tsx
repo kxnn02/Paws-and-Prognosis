@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -56,11 +57,11 @@ export default function ForgotPasswordScreen() {
         </View>
         <Text className="text-xl font-bold text-heading text-center">Check Your Email</Text>
         <Text className="text-sm text-grey text-center mt-3 leading-5">
-          We've sent a password reset link to{'\n'}
+          We{"'"}ve sent a password reset link to{'\n'}
           <Text className="font-medium text-dark">{email.trim()}</Text>
         </Text>
         <Text className="text-xs text-grey text-center mt-4">
-          Didn't receive it? Check your spam folder or try again.
+          Didn{"'"}t receive it? Check your spam folder or try again.
         </Text>
 
         <TouchableOpacity
@@ -97,7 +98,7 @@ export default function ForgotPasswordScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View className="flex-1 px-7 pt-6">
           <Image
@@ -107,7 +108,7 @@ export default function ForgotPasswordScreen() {
           />
           <Text className="text-2xl font-bold text-heading">Forgot Password</Text>
           <Text className="text-sm text-grey mt-2 leading-5">
-            Enter the email address associated with your account and we'll send you a link to
+            Enter the email address associated with your account and we{"'"}ll send you a link to
             reset your password.
           </Text>
 

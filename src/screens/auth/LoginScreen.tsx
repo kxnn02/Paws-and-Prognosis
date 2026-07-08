@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Image,
+  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,17 +29,23 @@ export default function LoginScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin() {
-    const result = loginSchema.safeParse({ email, password });
+    const result = loginSchema.safeParse({ email: email.trim(), password });
     if (!result.success) {
       Alert.alert('Error', result.error.errors[0].message);
       return;
     }
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      Alert.alert('Login Failed', error.message);
+    try {
+      const { error } = await signIn(email.trim(), password);
+      if (error) {
+        Alert.alert('Login Failed', error.message);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      Alert.alert('Login Failed', message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -52,7 +59,7 @@ export default function LoginScreen({ navigation }: Props) {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -161,7 +168,7 @@ export default function LoginScreen({ navigation }: Props) {
 
               {/* Footer */}
               <View className="flex-row justify-center mt-[16px]">
-                <Text className="text-sm text-dark">Don't have an account? </Text>
+                <Text className="text-sm text-dark">Don{"'"}t have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')} accessibilityRole="link">
                   <Text className="text-sm font-semibold text-dark">Sign Up</Text>
                 </TouchableOpacity>
