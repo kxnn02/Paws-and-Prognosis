@@ -6,10 +6,11 @@ A veterinary clinic appointment and care management mobile app built with React 
 
 ## About
 
-Paws & Prognosis connects pet owners with veterinarians for appointment scheduling, pet health management, and real-time communication. The app supports two user roles:
+Paws & Prognosis connects pet owners with veterinarians for appointment scheduling, pet health management, and real-time communication.
 
-- **Pet Owner** — browse vets, book appointments, manage pets, view calendar, chat with vets
-- **Veterinarian** — manage appointments, view patient cases, communicate with pet owners
+**User Roles:**
+- **Pet Owner** — browse vets, book appointments, manage pets, view calendar, chat with vets, rate visits
+- **Veterinarian** — manage appointments, view patient cases, communicate with pet owners, track reminders
 
 ---
 
@@ -18,15 +19,16 @@ Paws & Prognosis connects pet owners with veterinarians for appointment scheduli
 | Layer | Technology |
 |-------|-----------|
 | Framework | React Native + Expo SDK 54 |
-| Language | TypeScript |
+| Language | TypeScript (strict) |
 | Styling | NativeWind v4 (Tailwind CSS for RN) |
-| Navigation | React Navigation 6 |
+| Navigation | React Navigation 6 (native-stack + bottom-tabs) |
 | Backend | Supabase (PostgreSQL, Auth, Realtime, Storage) |
 | Forms | react-hook-form + zod |
 | Calendar | react-native-calendars |
 | Camera | expo-image-picker |
 | Icons | @expo/vector-icons (Ionicons) |
 | Blur Effects | expo-blur |
+| Animations | react-native-reanimated |
 
 ---
 
@@ -41,32 +43,22 @@ Paws & Prognosis connects pet owners with veterinarians for appointment scheduli
 ### Installation
 
 ```bash
-# Clone the repo
 git clone https://github.com/kxnn02/Paws-and-Prognosis.git
 cd Paws-and-Prognosis
-
-# Install dependencies
 npm install
-
-# Set up environment variables
 cp .env.example .env
-# Fill in your Supabase URL and anon key
+# Fill in your Supabase URL and anon key in .env
 ```
 
 ### Running the App
 
 ```bash
-# Start development server
-npx expo start
-
-# Start with cleared cache (after config changes)
-npx expo start --clear
-
-# Type check
-npx tsc --noEmit
+npx expo start           # Start development server
+npx expo start --clear   # Start with cleared cache
+npx tsc --noEmit         # Type check
 ```
 
-Scan the QR code with Expo Go on your phone. Your phone and laptop must be on the same network.
+Scan the QR code with Expo Go on your phone. Phone and laptop must be on the same network.
 
 ---
 
@@ -74,18 +66,120 @@ Scan the QR code with Expo Go on your phone. Your phone and laptop must be on th
 
 ```
 src/
-├── navigation/        # Stack and tab navigators
+├── navigation/        # Stack and tab navigators (Auth, Owner, Vet)
 ├── screens/
-│   ├── auth/          # Login, SignUp, Splash
-│   ├── owner/         # Home, VetDetails, Calendar, MyPets, AddPet, PetProfile, Chat, Profile
-│   └── vet/           # Dashboard, Appointments, Chat, Account
-├── components/        # Reusable UI (Button, Card, VetCard, SearchBar, etc.)
-├── hooks/             # Custom hooks (usePets, useAppointments)
-├── lib/               # Supabase client, constants, helpers
+│   ├── auth/          # Login, SignUp, ForgotPassword, Splash
+│   ├── owner/         # Home, VetDetails, Booking, Calendar, MyPets, AddPet,
+│   │                  # EditPet, PetProfile, ChatList, Profile, Rating, Tips, Reschedule
+│   ├── vet/           # Dashboard, Appointments, ChatList, Account
+│   └── shared/        # SharedChatConversation, EditProfile
+├── components/        # Reusable UI (Button, Card, VetCard, SearchBar, Avatar, etc.)
+├── hooks/             # Custom hooks (usePets, useAppointments, useChat, useVets, etc.)
+├── lib/               # Supabase client, schemas, constants, helpers, formatters
 ├── context/           # AuthContext
 ├── types/             # TypeScript interfaces
-└── data/              # Mock data (temporary)
+└── __tests__/         # Unit tests (formatters, notesHelper)
 ```
+
+---
+
+## Database Schema
+
+```mermaid
+erDiagram
+    profiles {
+        uuid id PK
+        text name
+        text role "pet_owner | veterinarian"
+        text avatar_url
+        text phone
+        text email
+        timestamptz created_at
+    }
+
+    pets {
+        uuid id PK
+        uuid owner_id FK
+        text name
+        text species
+        text breed
+        text age
+        text gender
+        text weight
+        text color
+        text country
+        text card_number
+        date sterilization_date
+        text image_url
+        timestamptz created_at
+    }
+
+    vets {
+        uuid id PK
+        uuid user_id FK
+        text name
+        text specialty
+        text bio
+        numeric rating "1-5"
+        text image_url
+        timestamptz created_at
+    }
+
+    appointments {
+        uuid id PK
+        uuid pet_id FK
+        uuid vet_id FK
+        uuid owner_id FK
+        date date
+        time time
+        text status "upcoming | in_progress | completed | cancelled"
+        text notes
+        timestamptz created_at
+    }
+
+    messages {
+        uuid id PK
+        uuid sender_id FK
+        uuid receiver_id FK
+        uuid appointment_id FK "nullable"
+        text content
+        timestamptz created_at
+    }
+
+    ratings {
+        uuid id PK
+        uuid appointment_id FK
+        uuid owner_id FK
+        uuid vet_id FK
+        integer score "1-5"
+        timestamptz created_at
+    }
+
+    reminders {
+        uuid id PK
+        uuid vet_id FK
+        text type "vaccination | vaccine_expiry | temperature"
+        text title
+        text description
+        date due_date
+        boolean is_read
+        timestamptz created_at
+    }
+
+    profiles ||--o{ pets : "owns"
+    profiles ||--o| vets : "is a"
+    profiles ||--o{ appointments : "books"
+    vets ||--o{ appointments : "assigned to"
+    pets ||--o{ appointments : "for"
+    profiles ||--o{ messages : "sends"
+    profiles ||--o{ messages : "receives"
+    appointments ||--o| ratings : "rated"
+    profiles ||--o{ ratings : "gives"
+    vets ||--o{ ratings : "receives"
+    vets ||--o{ reminders : "has"
+```
+
+All tables use **Row Level Security (RLS)** — users can only access their own data.
 
 ---
 
@@ -102,38 +196,30 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 ---
 
-## Database Schema
+## Features
 
-The app uses Supabase with the following tables:
+### Pet Owner
+- Browse and search vets by specialty
+- Book appointments with 14-day date picker and time slots
+- Manage pets (add/edit/delete with photo upload)
+- Calendar view of all appointments
+- Real-time chat with veterinarians
+- Rate completed appointments
+- Reschedule or cancel bookings
+- Pet care tips
 
-- `profiles` — User profiles (linked to auth.users)
-- `pets` — Pet records (owner_id → profiles)
-- `vets` — Veterinarian details (user_id → profiles)
-- `appointments` — Booking records (owner, vet, pet, date, time, status)
-- `messages` — Chat messages between users
-- `ratings` — Post-appointment vet ratings
-- `reminders` — Vet-side notifications
+### Veterinarian
+- Dashboard with stats, today's cases, reminders
+- Appointment management with status updates
+- Real-time chat with pet owners
+- Profile and account management
 
-All tables use Row Level Security (RLS) to ensure users can only access their own data.
-
----
-
-## Git Workflow
-
-We use **GitHub Flow** with protected `main` branch:
-
-```bash
-# Create feature branch
-git checkout -b feature/my-feature
-
-# Commit with conventional format
-git commit -m "feat(scope): description"
-
-# Push and open PR
-git push -u origin feature/my-feature
-```
-
-See [TEAM-SETUP-GUIDE.md](./TEAM-SETUP-GUIDE.md) for full workflow details.
+### Security
+- Row Level Security on all tables
+- Email/password authentication with confirmation
+- Sender verification prevents message impersonation
+- Input validation with zod schemas
+- No secrets in code (env vars only)
 
 ---
 
@@ -143,25 +229,50 @@ See [TEAM-SETUP-GUIDE.md](./TEAM-SETUP-GUIDE.md) for full workflow details.
 |---------|-------------|
 | `npm start` | Start Expo dev server |
 | `npm run typecheck` | Run TypeScript compiler check |
-| `npm run lint` | Run ESLint on src/ |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests |
 
 ---
 
 ## Design System
 
-Colors and tokens are defined in `tailwind.config.js`:
+Defined in `tailwind.config.js`:
 
-- **Primary:** `#71924F` (green)
-- **Accent:** `#7BBD38` (bright green)
-- **Background:** `#FEF9F4` (warm beige)
-- **Headings:** `#544864` (dark purple)
-- **Body text:** `#343434`
+| Token | Value | Usage |
+|-------|-------|-------|
+| Primary | `#71924F` | CTAs, active states |
+| Accent | `#7BBD38` | Bright green accents |
+| Background | `#FEF9F4` | Warm beige |
+| Heading | `#544864` | Dark purple headings |
+| Body | `#343434` | Body text |
+| Input BG | `#F5F5F5` | Form fields |
+| Placeholder | `#AA865D` | Input placeholders |
+
+---
+
+## Git Workflow
+
+GitHub Flow with protected `main` branch:
+
+```bash
+git checkout -b feature/my-feature    # Create branch
+git commit -m "feat(scope): description"  # Conventional commits
+git push -u origin feature/my-feature     # Push and open PR
+```
+
+See [TEAM-SETUP-GUIDE.md](./TEAM-SETUP-GUIDE.md) for full workflow details.
+
+---
+
+## Test Accounts
+
+See [TEST-ACCOUNTS.md](./TEST-ACCOUNTS.md) for working login credentials (vet and pet owner accounts).
 
 ---
 
 ## Team
 
-See [TEAM-SETUP-GUIDE.md](./TEAM-SETUP-GUIDE.md) for setup instructions and team assignments.
+See [TEAM-SETUP-GUIDE.md](./TEAM-SETUP-GUIDE.md) for setup instructions and team workflow.
 
 ---
 

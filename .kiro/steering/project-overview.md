@@ -27,15 +27,17 @@ A veterinary clinic appointment & care mobile app built with React Native (Expo)
 src/
 ├── navigation/        # Navigator configs (AuthStack, OwnerTabs, VetTabs)
 ├── screens/
-│   ├── auth/          # Login, SignUp, Splash
-│   ├── owner/         # Home, VetDetails, Booking, Calendar, Chat, MyPets, PetProfile, Account
-│   └── vet/           # Dashboard, TodayCases, Appointments, PatientProfile, Chat, Account
+│   ├── auth/          # Login, SignUp, ForgotPassword, Splash
+│   ├── owner/         # Home, VetDetails, Booking, Calendar, MyPets, AddPet, EditPet,
+│   │                  # PetProfile, ChatList, Profile, Rating, Tips, Reschedule
+│   ├── vet/           # Dashboard, Appointments, ChatList, Account
+│   └── shared/        # SharedChatConversation, EditProfile
 ├── components/        # Reusable UI: cards, buttons, modals, inputs
-├── hooks/             # Custom hooks (useAuth, usePets, useAppointments, useChat)
-├── lib/               # Supabase client, helpers, constants
-├── context/           # AuthContext, ThemeContext
+├── hooks/             # Custom hooks (usePets, useAppointments, useChat, useVets, etc.)
+├── lib/               # Supabase client, helpers, constants, schemas, formatters
+├── context/           # AuthContext
 ├── types/             # TypeScript interfaces and types
-└── assets/            # Images, fonts, illustrations
+└── __tests__/         # Unit tests (formatters, notesHelper)
 ```
 
 ## Config Files
