@@ -113,8 +113,9 @@ export function useChatThreads() {
   useEffect(() => {
     if (!user) return;
 
+    const channelName = `threads-listener-${user.id}`;
     const channel = supabase
-      .channel('threads-listener')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -132,7 +133,8 @@ export function useChatThreads() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchThreads]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return { threads, loading, fetchThreads };
 }
@@ -263,7 +265,8 @@ export function useChatMessages(partnerId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, partnerId, markMessagesAsRead]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, partnerId]);
 
   // Broadcast typing state
   function setTyping(isTyping: boolean) {
