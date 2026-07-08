@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -83,11 +83,12 @@ export default function BookingScreen() {
   const [notes, setNotes] = useState('');
   const [booking, setBooking] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const bookingCompleteRef = useRef(false);
 
   // Warn before leaving with unsaved booking selections
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      if (!selectedTime) return; // No selection, allow leave
+      if (!selectedTime || bookingCompleteRef.current) return; // No selection or booking done, allow leave
 
       e.preventDefault();
       Alert.alert(
@@ -166,6 +167,7 @@ export default function BookingScreen() {
             if (error) {
               Alert.alert('Booking Failed', error.message);
             } else {
+              bookingCompleteRef.current = true;
               Alert.alert(
                 'Appointment Booked! ✓',
                 `Your appointment with ${vetName} has been confirmed.`,
