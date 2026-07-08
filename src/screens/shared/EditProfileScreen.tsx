@@ -74,7 +74,7 @@ export default function EditProfileScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView className="flex-1 px-5" keyboardShouldPersistTaps="handled">
           {/* Avatar placeholder */}

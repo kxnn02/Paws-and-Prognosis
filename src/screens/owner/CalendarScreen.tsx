@@ -22,7 +22,7 @@ type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 
 export default function CalendarScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { appointments, loading, getMarkedDates, getAppointmentsForDate, cancelAppointment, fetchAppointments } =
+  const { loading, getMarkedDates, getAppointmentsForDate, cancelAppointment, fetchAppointments } =
     useAppointments();
   const { hasRated, fetchRatings } = useRatings();
 
@@ -138,11 +138,11 @@ export default function CalendarScreen() {
             return (
               <>
                 {notes.owner ? (
-                  <Text className="text-xs text-grey mt-1 italic">"{notes.owner}"</Text>
+                  <Text className="text-xs text-grey mt-1 italic">{`"${notes.owner}"`}</Text>
                 ) : null}
                 {notes.vet ? (
                   <View className="mt-2 bg-green-50 rounded-btn px-3 py-2">
-                    <Text className="text-[10px] text-green-700 font-medium mb-0.5">Vet's Notes:</Text>
+                    <Text className="text-[10px] text-green-700 font-medium mb-0.5">Vet{"'"}s Notes:</Text>
                     <Text className="text-xs text-dark">{notes.vet}</Text>
                   </View>
                 ) : null}
@@ -151,9 +151,20 @@ export default function CalendarScreen() {
           })()}
         </View>
 
-        {/* Cancel button for upcoming appointments */}
+        {/* Cancel/Reschedule buttons for upcoming appointments */}
         {item.status === 'upcoming' && (
           <View className="flex-row gap-3 mt-3 ml-11">
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('Reschedule', {
+                  appointmentId: item.id,
+                  vetName: item.vet?.name || 'Veterinarian',
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Text className="text-xs text-primary font-medium">Reschedule</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => handleCancel(item.id)}
               activeOpacity={0.7}

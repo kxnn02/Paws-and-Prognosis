@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Alert, AppState } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,20 @@ import { useAuth } from '../context/AuthContext';
 export function useSessionMonitor() {
   const { session, signOut } = useAuth();
   const appState = useRef(AppState.currentState);
+
+  const handleSessionExpired = useCallback(() => {
+    Alert.alert(
+      'Session Expired',
+      'Your session has expired. Please log in again.',
+      [
+        {
+          text: 'Log In',
+          onPress: () => signOut(),
+        },
+      ],
+      { cancelable: false }
+    );
+  }, [signOut]);
 
   useEffect(() => {
     // Check on app foreground
@@ -27,7 +41,7 @@ export function useSessionMonitor() {
     });
 
     return () => subscription.remove();
-  }, [session]);
+  }, [session, handleSessionExpired]);
 
   useEffect(() => {
     // Listen for TOKEN_REFRESHED failures
@@ -42,18 +56,4 @@ export function useSessionMonitor() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  function handleSessionExpired() {
-    Alert.alert(
-      'Session Expired',
-      'Your session has expired. Please log in again.',
-      [
-        {
-          text: 'Log In',
-          onPress: () => signOut(),
-        },
-      ],
-      { cancelable: false }
-    );
-  }
 }

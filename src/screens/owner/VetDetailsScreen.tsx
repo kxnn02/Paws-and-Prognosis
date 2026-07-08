@@ -95,7 +95,7 @@ export default function VetDetailsScreen() {
         {/* Vet Profile Card */}
         <View className="mx-5 bg-primary rounded-card p-5 items-center">
           <Image
-            source={{ uri: vet.image_url || '' }}
+            source={{ uri: vet.image_url || undefined }}
             className="w-[120px] h-[120px] rounded-full border-[3px] border-primary-border"
           />
           <Text className="text-white text-xl font-bold mt-3">{vet.name}</Text>

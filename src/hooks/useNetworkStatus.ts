@@ -3,12 +3,14 @@ import { AppState } from 'react-native';
 
 /**
  * Lightweight network status hook for Expo Go.
- * Periodically checks connectivity by attempting a HEAD request.
+ * Checks connectivity on app foreground and at intervals.
+ * Uses longer intervals when connected (60s) and shorter when disconnected (15s).
  */
 export function useNetworkStatus() {
   const [isConnected, setIsConnected] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
   const appState = useRef(AppState.currentState);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   async function checkConnectivity() {
     setIsChecking(true);
@@ -39,14 +41,18 @@ export function useNetworkStatus() {
       appState.current = nextAppState;
     });
 
-    // Periodic check every 30 seconds
-    const interval = setInterval(checkConnectivity, 30000);
+    // Adaptive interval: 60s when connected, 15s when disconnected
+    function startInterval() {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(checkConnectivity, isConnected ? 60000 : 15000);
+    }
+    startInterval();
 
     return () => {
       subscription.remove();
-      clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, []);
+  }, [isConnected]);
 
   return { isConnected, isChecking, checkConnectivity };
 }

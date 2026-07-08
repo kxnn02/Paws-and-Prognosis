@@ -161,7 +161,7 @@ export default function AddPetScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
           className="flex-1 px-5"

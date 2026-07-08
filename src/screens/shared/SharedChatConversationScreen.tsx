@@ -7,12 +7,12 @@ import {
   FlatList,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { useChatMessages } from '../../hooks/useChat';
-import { getInitials } from '../../lib/formatters';
 import type { Message } from '../../types';
 
 interface ChatConversationParams {
@@ -120,7 +120,7 @@ export default function SharedChatConversationScreen({
             </Text>
             {isMe && (
               <Ionicons
-                name={item.read_at ? 'checkmark-done' : 'checkmark-done'}
+                name={item.read_at ? 'checkmark-done' : 'checkmark'}
                 size={12}
                 color={item.read_at ? '#71924F' : '#9BA1A8'}
                 style={{ marginLeft: 4 }}
@@ -152,9 +152,7 @@ export default function SharedChatConversationScreen({
           <Ionicons name="arrow-back" size={22} color="#343434" />
         </TouchableOpacity>
         <View className="w-9 h-9 rounded-full bg-primary/15 items-center justify-center mr-3">
-          <Text className="text-xs font-bold text-primary">
-            {getInitials(participantName)}
-          </Text>
+          <Ionicons name={headerIcon} size={16} color="#71924F" />
         </View>
         <View className="flex-1">
           <Text className="text-base font-semibold text-dark">{participantName}</Text>
@@ -165,7 +163,7 @@ export default function SharedChatConversationScreen({
       {/* Messages */}
       <KeyboardAvoidingView
         className="flex-1"
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         <FlatList

@@ -16,7 +16,7 @@ export const signUpSchema = z.object({
     .string()
     .min(1, 'Name is required')
     .max(50, 'Name is too long')
-    .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
+    .regex(/^[a-zA-ZÀ-ÖØ-öø-ÿĀ-žñÑ\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
   email: z
     .string()
     .min(1, 'Email is required')
@@ -34,7 +34,7 @@ export const editProfileSchema = z.object({
     .string()
     .min(1, 'Name cannot be empty')
     .max(50, 'Name is too long')
-    .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
+    .regex(/^[a-zA-ZÀ-ÖØ-öø-ÿĀ-žñÑ\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
   phone: z
     .string()
     .max(15, 'Phone number is too long')
