@@ -96,7 +96,7 @@ export default function SharedChatConversationScreen({
       <View>
         {showDate && (
           <View className="items-center my-3">
-            <Text className="text-[10px] text-grey bg-beige px-3 py-1 rounded-full">
+            <Text className="text-[10px] text-grey bg-white px-3 py-1 rounded-full shadow-sm">
               {formatDateSeparator(item.created_at)}
             </Text>
           </View>
@@ -155,8 +155,8 @@ export default function SharedChatConversationScreen({
           <Ionicons name={headerIcon} size={16} color="#71924F" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-dark">{participantName}</Text>
-          <Text className="text-[10px] text-grey">{subtitle}</Text>
+          <Text className="text-[15px] font-semibold text-dark">{participantName}</Text>
+          <Text className="text-[11px] text-grey">{subtitle}</Text>
         </View>
       </View>
 
@@ -176,7 +176,7 @@ export default function SharedChatConversationScreen({
           ListEmptyComponent={
             <View className="items-center pt-20">
               <Ionicons name="chatbubble-ellipses-outline" size={40} color="#D1D5DB" />
-              <Text className="text-sm text-grey mt-3">Start a conversation</Text>
+              <Text className="text-[13px] text-grey mt-3">Start a conversation</Text>
             </View>
           }
         />

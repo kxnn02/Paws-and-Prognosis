@@ -10,13 +10,13 @@ interface SearchBarProps {
 
 export default function SearchBar({ value, onChangeText, placeholder = 'Search' }: SearchBarProps) {
   return (
-    <View className="flex-row items-center bg-white border border-primary-light rounded-btn h-[52px] px-4">
+    <View className="flex-row items-center bg-white border border-primary-light rounded-btn h-[52px] px-4 shadow-sm">
       <TextInput
         className="flex-1 text-base text-dark"
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#A7A7A7"
+        placeholderTextColor="#9BA1A8"
         accessibilityRole="search"
         accessibilityLabel={placeholder}
         returnKeyType="search"

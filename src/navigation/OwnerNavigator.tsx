@@ -34,10 +34,17 @@ function OwnerTabs() {
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 0,
-          elevation: 8,
+          elevation: 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
           height: 80,
           paddingBottom: 16,
           paddingTop: 8,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          position: 'absolute' as const,
         },
         tabBarIcon: ({ color, size }) => {
           if (route.name === 'Chat') {

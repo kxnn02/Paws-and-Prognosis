@@ -14,7 +14,7 @@ export default function OfflineBanner({ onRetry }: OfflineBannerProps) {
       accessibilityLabel="No internet connection"
     >
       <Ionicons name="cloud-offline-outline" size={16} color="#FFF" />
-      <Text className="text-white text-xs font-medium ml-2">No Internet Connection</Text>
+      <Text className="text-white text-[12px] font-semibold ml-2">No Internet Connection</Text>
       {onRetry && (
         <TouchableOpacity
           onPress={onRetry}

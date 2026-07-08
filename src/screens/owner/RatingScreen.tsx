@@ -66,7 +66,7 @@ export default function RatingScreen() {
         <View className="w-[80px] h-[80px] rounded-full bg-primary/20 items-center justify-center mb-4">
           <Ionicons name="medical" size={36} color="#71924F" />
         </View>
-        <Text className="text-xl font-semibold text-heading text-center">{vetName}</Text>
+        <Text className="text-lg font-bold text-heading text-center">{vetName}</Text>
         <Text className="text-sm text-grey mt-2 text-center">
           How was your experience?
         </Text>

@@ -85,8 +85,8 @@ export default function DashboardScreen() {
       {/* Header */}
       <View className="px-5 pt-14 pb-2 flex-row items-center justify-between">
         <View>
-          <Text className="text-sm text-grey">Welcome back,</Text>
-          <Text className="text-2xl font-bold text-heading">
+          <Text className="text-[13px] text-grey">Welcome back,</Text>
+          <Text className="text-[22px] font-bold text-heading">
             {profile?.name || 'Doctor'} 👋
           </Text>
         </View>
@@ -135,7 +135,7 @@ export default function DashboardScreen() {
       {/* Reminders */}
       {upcomingReminders.length > 0 && (
         <View className="px-5 mt-6">
-          <Text className="text-lg font-semibold text-heading mb-3">Reminders</Text>
+          <Text className="text-[17px] font-bold text-heading mb-3">Reminders</Text>
           {upcomingReminders.slice(0, 3).map((reminder) => (
             <TouchableOpacity
               key={reminder.id}
@@ -171,7 +171,7 @@ export default function DashboardScreen() {
       {/* Today's Cases */}
       <View className="px-5 mt-6">
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-lg font-semibold text-heading">Today{"'"}s Cases</Text>
+          <Text className="text-[17px] font-bold text-heading">Today{"'"}s Cases</Text>
           <Text className="text-xs text-grey">{todayCases.length} appointments</Text>
         </View>
 
@@ -203,7 +203,7 @@ export default function DashboardScreen() {
       {/* Upcoming (next days) */}
       {upcomingCases.length > 0 && (
         <View className="px-5 mt-6">
-          <Text className="text-lg font-semibold text-heading mb-3">Coming Up</Text>
+          <Text className="text-[17px] font-bold text-heading mb-3">Coming Up</Text>
           {upcomingCases.slice(0, 3).map((appointment) => (
             <UpcomingCard key={appointment.id} appointment={appointment} />
           ))}

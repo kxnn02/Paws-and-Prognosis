@@ -89,8 +89,8 @@ export default function TipsScreen() {
                 <Ionicons name={tip.icon as keyof typeof Ionicons.glyphMap} size={20} color="#71924F" />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-semibold text-dark">{tip.title}</Text>
-                <Text className="text-xs text-grey mt-1 leading-4">{tip.body}</Text>
+                <Text className="text-[14px] font-bold text-dark">{tip.title}</Text>
+                <Text className="text-[12px] text-grey mt-1.5 leading-[18px]">{tip.body}</Text>
               </View>
             </View>
           </View>

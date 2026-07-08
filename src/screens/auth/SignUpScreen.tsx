@@ -89,14 +89,14 @@ export default function SignUpScreen({ navigation }: Props) {
             className="mx-[28px] mt-6 rounded-glass overflow-hidden border border-white/80"
           >
             <View className="px-[22px] pt-[24px] pb-[20px] bg-white/40">
-              <Text className="text-[24px] font-bold text-heading leading-[34px] mb-5">
+              <Text className="text-[22px] font-bold text-heading leading-[34px] mb-5">
                 Let{"'"}s get you and your fur baby started
               </Text>
 
               {/* Name */}
-              <Text className="text-sm text-dark mb-1">Your Name</Text>
+              <Text className="text-[13px] font-medium text-heading mb-1.5">Your Name</Text>
               <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
                 placeholder="What should we call you?"
                 placeholderTextColor="#AA865D"
                 value={name}
@@ -105,9 +105,9 @@ export default function SignUpScreen({ navigation }: Props) {
               />
 
               {/* Email */}
-              <Text className="text-sm text-dark mb-1">Email Address</Text>
+              <Text className="text-[13px] font-medium text-heading mb-1.5">Email Address</Text>
               <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
                 placeholder="We'll only use this for important updates."
                 placeholderTextColor="#AA865D"
                 value={email}
@@ -118,10 +118,10 @@ export default function SignUpScreen({ navigation }: Props) {
               />
 
               {/* Password */}
-              <Text className="text-sm text-dark mb-1">Create a Password</Text>
+              <Text className="text-[13px] font-medium text-heading mb-1.5">Create a Password</Text>
               <View className="relative mb-3">
                 <TextInput
-                  className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark pr-12 shadow-sm"
+                  className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
                   placeholder="Something secure, but easy to remember."
                   placeholderTextColor="#AA865D"
                   value={password}
@@ -138,9 +138,9 @@ export default function SignUpScreen({ navigation }: Props) {
               </View>
 
               {/* Confirm Password */}
-              <Text className="text-sm text-dark mb-1">Confirm Password</Text>
+              <Text className="text-[13px] font-medium text-heading mb-1.5">Confirm Password</Text>
               <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-3 shadow-sm"
+                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
                 placeholder="Type your password again."
                 placeholderTextColor="#AA865D"
                 value={confirmPassword}
@@ -150,7 +150,7 @@ export default function SignUpScreen({ navigation }: Props) {
               />
 
               {/* Role */}
-              <Text className="text-sm text-dark mb-2">I am a...</Text>
+              <Text className="text-[13px] font-medium text-heading mb-2">I am a...</Text>
               <View className="flex-row gap-2 mb-5">
                 <TouchableOpacity
                   className={`flex-1 py-3 rounded-btn items-center shadow-sm ${
@@ -158,7 +158,7 @@ export default function SignUpScreen({ navigation }: Props) {
                   }`}
                   onPress={() => setRole('pet_owner')}
                 >
-                  <Text className={`text-sm font-semibold ${role === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
+                  <Text className={`text-[13px] font-bold ${role === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
                     🐾 Pet Owner
                   </Text>
                 </TouchableOpacity>
@@ -168,7 +168,7 @@ export default function SignUpScreen({ navigation }: Props) {
                   }`}
                   onPress={() => setRole('veterinarian')}
                 >
-                  <Text className={`text-sm font-semibold ${role === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
+                  <Text className={`text-[13px] font-bold ${role === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
                     🩺 Veterinarian
                   </Text>
                 </TouchableOpacity>
@@ -180,7 +180,7 @@ export default function SignUpScreen({ navigation }: Props) {
                 onPress={handleSignUp}
                 disabled={loading}
               >
-                <Text className="text-sm font-semibold text-white">
+                <Text className="text-[15px] font-bold text-white">
                   {loading ? 'Creating account...' : 'Join the pack!'}
                 </Text>
               </TouchableOpacity>
