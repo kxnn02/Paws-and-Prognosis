@@ -67,7 +67,6 @@ export interface Message {
   receiver_id: string;
   appointment_id: string | null;
   content: string;
-  read_at: string | null;
   created_at: string;
 }
 

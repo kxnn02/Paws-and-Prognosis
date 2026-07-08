@@ -120,9 +120,9 @@ export default function SharedChatConversationScreen({
             </Text>
             {isMe && (
               <Ionicons
-                name={item.read_at ? 'checkmark-done' : 'checkmark'}
+                name="checkmark-done"
                 size={12}
-                color={item.read_at ? '#71924F' : '#9BA1A8'}
+                color="#9BA1A8"
                 style={{ marginLeft: 4 }}
               />
             )}

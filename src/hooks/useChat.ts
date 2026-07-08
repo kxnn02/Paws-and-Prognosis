@@ -69,9 +69,8 @@ export function useChatThreads() {
       const threadList: ChatThread[] = Array.from(threadMap.entries()).map(
         ([partnerId, { messages: msgs }]) => {
           const lastMsg = msgs[0];
-          const unread = msgs.filter(
-            (m) => m.receiver_id === user.id && m.sender_id === partnerId && !m.read_at
-          ).length;
+          // Note: read_at column doesn't exist in DB, unread tracking unavailable
+          const unread = 0;
 
           const partner = profileMap.get(partnerId);
 
@@ -149,23 +148,6 @@ export function useChatMessages(partnerId: string) {
   const lastSendRef = useRef<number>(0);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Mark incoming messages as read
-  const markMessagesAsRead = useCallback(async () => {
-    if (!user || !partnerId) return;
-
-    try {
-      await supabase
-        .from('messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('sender_id', partnerId)
-        .eq('receiver_id', user.id)
-        .is('read_at', null);
-    } catch (err) {
-      // Non-critical — don't block UX
-      console.error('Error marking messages as read:', err);
-    }
-  }, [user, partnerId]);
-
   const fetchMessages = useCallback(async () => {
     if (!user || !partnerId) {
       setMessages([]);
@@ -186,15 +168,12 @@ export function useChatMessages(partnerId: string) {
 
       if (error) throw error;
       setMessages((data as Message[]) || []);
-
-      // Mark received messages as read
-      markMessagesAsRead();
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
       setLoading(false);
     }
-  }, [user, partnerId, markMessagesAsRead]);
+  }, [user, partnerId]);
 
   useEffect(() => {
     fetchMessages();
@@ -224,11 +203,6 @@ export function useChatMessages(partnerId: string) {
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-
-            // Mark as read if it's from the partner
-            if (newMsg.sender_id === partnerId) {
-              markMessagesAsRead();
-            }
           }
         }
       )
