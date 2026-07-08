@@ -214,10 +214,16 @@ const VetCard = React.memo(function VetCard({ vet, isFav, onFavToggle, onPress }
 
       {/* Vet Image */}
       <View className="items-center pt-2">
-        <Image
-          source={{ uri: vet.image_url || undefined }}
-          className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
-        />
+        {vet.image_url ? (
+          <Image
+            source={{ uri: vet.image_url }}
+            className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
+          />
+        ) : (
+          <View className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border bg-primary-light items-center justify-center">
+            <Ionicons name="person" size={50} color="#FFF" />
+          </View>
+        )}
       </View>
 
       {/* Info */}

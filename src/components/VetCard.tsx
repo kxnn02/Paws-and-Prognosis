@@ -19,12 +19,18 @@ export default function VetCard({ vet, onPress }: VetCardProps) {
       accessibilityHint="Opens veterinarian details"
     >
       <View className="items-center pt-2">
-        <Image
-          source={{ uri: vet.image_url || undefined }}
-          className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
-          accessibilityRole="image"
-          accessibilityLabel={`Photo of ${vet.name}`}
-        />
+        {vet.image_url ? (
+          <Image
+            source={{ uri: vet.image_url }}
+            className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
+            accessibilityRole="image"
+            accessibilityLabel={`Photo of ${vet.name}`}
+          />
+        ) : (
+          <View className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border bg-primary-light items-center justify-center">
+            <Ionicons name="person" size={50} color="#FFF" />
+          </View>
+        )}
       </View>
       <View className="px-3 mt-2">
         <Text className="text-[13px] font-semibold text-white" numberOfLines={1}>
