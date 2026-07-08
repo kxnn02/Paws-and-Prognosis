@@ -31,7 +31,7 @@ export default function ProfileScreen() {
     <View className="flex-1 bg-beige">
       {/* Header */}
       <View className="px-5 pt-14 pb-6">
-        <Text className="text-2xl font-bold text-heading">Profile</Text>
+        <Text className="text-[22px] font-bold text-heading">Profile</Text>
       </View>
 
       {/* User Info */}
@@ -42,13 +42,13 @@ export default function ProfileScreen() {
             <Ionicons name="camera" size={12} color="#FFF" />
           </View>
         </TouchableOpacity>
-        <Text className="text-xl font-semibold text-dark mt-3">
+        <Text className="text-lg font-semibold text-dark mt-3">
           {profile?.name || 'User'}
         </Text>
         <Text className="text-sm text-grey mt-1">
           {profile?.email || ''}
         </Text>
-        <Text className="text-xs text-primary mt-1 font-medium">Pet Owner</Text>
+        <Text className="text-[11px] text-primary mt-1 font-semibold bg-primary/10 px-3 py-0.5 rounded-full">Pet Owner</Text>
       </View>
 
       {/* Menu Items */}

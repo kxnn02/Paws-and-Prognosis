@@ -114,7 +114,7 @@ export default function ChatListScreen() {
     return (
       <View className="flex-1 bg-beige">
         <View className="px-5 pt-14 pb-4">
-          <Text className="text-2xl font-bold text-heading">Messages</Text>
+          <Text className="text-[22px] font-bold text-heading">Messages</Text>
         </View>
         {[1, 2, 3, 4].map((i) => (
           <ChatThreadSkeleton key={i} />
@@ -127,8 +127,8 @@ export default function ChatListScreen() {
     <View className="flex-1 bg-beige">
       {/* Header */}
       <View className="px-5 pt-14 pb-2">
-        <Text className="text-2xl font-bold text-heading">Messages</Text>
-        <Text className="text-xs text-grey mt-1">Your conversations are end-to-end private</Text>
+        <Text className="text-[22px] font-bold text-heading">Messages</Text>
+        <Text className="text-[11px] text-grey mt-1">Your conversations are end-to-end private</Text>
       </View>
 
       {/* Search Bar */}

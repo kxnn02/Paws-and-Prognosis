@@ -55,7 +55,7 @@ export default function ForgotPasswordScreen() {
         <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-4">
           <Ionicons name="mail-outline" size={32} color="#71924F" />
         </View>
-        <Text className="text-xl font-bold text-heading text-center">Check Your Email</Text>
+        <Text className="text-[20px] font-bold text-heading text-center">Check Your Email</Text>
         <Text className="text-sm text-grey text-center mt-3 leading-5">
           We{"'"}ve sent a password reset link to{'\n'}
           <Text className="font-medium text-dark">{email.trim()}</Text>
@@ -106,7 +106,7 @@ export default function ForgotPasswordScreen() {
             className="w-[154px] h-[154px] self-center mb-4"
             resizeMode="contain"
           />
-          <Text className="text-2xl font-bold text-heading">Forgot Password</Text>
+          <Text className="text-[22px] font-bold text-heading">Forgot Password</Text>
           <Text className="text-sm text-grey mt-2 leading-5">
             Enter the email address associated with your account and we{"'"}ll send you a link to
             reset your password.
@@ -138,7 +138,7 @@ export default function ForgotPasswordScreen() {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text className="text-white text-base font-semibold">Send Reset Link</Text>
+              <Text className="text-white text-[15px] font-bold">Send Reset Link</Text>
             )}
           </TouchableOpacity>
 

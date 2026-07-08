@@ -49,7 +49,7 @@ export default function Button({
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? '#FFF' : '#71924F'} />
       ) : (
-        <Text className={`text-sm font-semibold ${textClasses[variant]}`}>{title}</Text>
+        <Text className={`${variant === 'primary' ? 'text-[15px] font-bold tracking-wide' : 'text-sm font-semibold'} ${textClasses[variant]}`}>{title}</Text>
       )}
     </TouchableOpacity>
   );

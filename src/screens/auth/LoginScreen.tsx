@@ -85,13 +85,13 @@ export default function LoginScreen({ navigation }: Props) {
             className="mx-[28px] rounded-glass overflow-hidden border border-white/80"
           >
             <View className="px-[22px] pt-[28px] pb-[20px] bg-white/40">
-              <Text className="text-[28px] font-bold text-heading text-center leading-[40px] mb-[20px]">
+              <Text className="text-[26px] font-bold text-heading text-center leading-[40px] mb-[20px]">
                 Take Care Of{'\n'}Your Pet
               </Text>
 
               {/* Email */}
               <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark mb-[10px] shadow-sm"
+                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-[10px] shadow-sm"
                 placeholder="Email Address"
                 placeholderTextColor="#AA865D"
                 value={email}
@@ -106,7 +106,7 @@ export default function LoginScreen({ navigation }: Props) {
               {/* Password */}
               <View className="relative mb-[10px]">
                 <TextInput
-                  className="bg-input-bg rounded-btn px-4 h-[42px] text-sm italic text-dark pr-12 shadow-sm"
+                  className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
                   placeholder="Password"
                   placeholderTextColor="#AA865D"
                   value={password}
@@ -135,7 +135,7 @@ export default function LoginScreen({ navigation }: Props) {
                 accessibilityLabel="Log in"
                 accessibilityState={{ disabled: loading }}
               >
-                <Text className="text-sm font-semibold text-white">
+                <Text className="text-[15px] font-bold text-white">
                   {loading ? 'Logging in...' : 'Log In'}
                 </Text>
               </TouchableOpacity>
@@ -147,7 +147,7 @@ export default function LoginScreen({ navigation }: Props) {
                 activeOpacity={0.7}
                 accessibilityRole="link"
               >
-                <Text className="text-xs text-grey">Forgot Password?</Text>
+                <Text className="text-[13px] text-grey font-medium">Forgot Password?</Text>
               </TouchableOpacity>
 
               {/* Google Button */}
@@ -168,9 +168,9 @@ export default function LoginScreen({ navigation }: Props) {
 
               {/* Footer */}
               <View className="flex-row justify-center mt-[16px]">
-                <Text className="text-sm text-dark">Don{"'"}t have an account? </Text>
+                <Text className="text-[13px] text-dark">Don{"'"}t have an account? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')} accessibilityRole="link">
-                  <Text className="text-sm font-semibold text-dark">Sign Up</Text>
+                  <Text className="text-[13px] font-bold text-primary">Sign Up</Text>
                 </TouchableOpacity>
               </View>
             </View>

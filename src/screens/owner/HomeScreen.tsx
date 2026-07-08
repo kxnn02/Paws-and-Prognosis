@@ -76,8 +76,8 @@ export default function HomeScreen() {
       {/* Header with Logo */}
       <View className="px-5 mt-14 mb-2 flex-row items-center justify-between">
         <View>
-          <Text className="text-sm text-grey">Hello,</Text>
-          <Text className="text-xl font-bold text-heading">{profile?.name || 'Pet Parent'} 👋</Text>
+          <Text className="text-[13px] text-grey">Hello,</Text>
+          <Text className="text-[22px] font-bold text-heading">{profile?.name || 'Pet Parent'} 👋</Text>
         </View>
         <Image
           source={require('../../../assets/logo-transparent.png')}
@@ -87,6 +87,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Banner */}
+      <View>
       <TouchableOpacity
         className="mx-5 mt-2 rounded-card overflow-hidden"
         activeOpacity={0.8}
@@ -94,7 +95,7 @@ export default function HomeScreen() {
       >
         <View className="bg-primary/80 p-5 flex-row items-center justify-between">
           <View className="flex-1 mr-3">
-            <Text className="text-white font-bold text-base">
+            <Text className="text-white font-bold text-[15px]">
               Take care of pet{"'"}s health
             </Text>
             <Text className="text-white/70 text-xs mt-1">
@@ -106,10 +107,11 @@ export default function HomeScreen() {
           </View>
         </View>
       </TouchableOpacity>
+      </View>
 
       {/* Categories */}
       <View className="mt-6 px-5">
-        <Text className="text-xl font-bold text-heading mb-4">Category</Text>
+        <Text className="text-lg font-bold text-heading mb-3">Category</Text>
         <View className="flex-row justify-between">
           {CATEGORIES.map((cat) => (
             <TouchableOpacity
@@ -125,7 +127,7 @@ export default function HomeScreen() {
               >
                 <Ionicons name={cat.icon} size={32} color="#FFF" />
               </View>
-              <Text className="text-xs font-medium text-heading mt-2">{cat.name}</Text>
+              <Text className="text-[11px] font-medium text-heading mt-2">{cat.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -146,7 +148,7 @@ export default function HomeScreen() {
 
       {/* Veterinary Grid */}
       <View className="px-5 mt-6 mb-6">
-        <Text className="text-xl font-bold text-heading mb-4">Veterinary</Text>
+        <Text className="text-lg font-bold text-heading mb-3">Veterinary</Text>
 
         {vetsLoading ? (
           <View className="flex-row flex-wrap justify-between">
@@ -227,16 +229,16 @@ const VetCard = React.memo(function VetCard({ vet, isFav, onFavToggle, onPress }
       </View>
 
       {/* Info */}
-      <View className="px-3 mt-2">
-        <Text className="text-[13px] font-semibold text-white" numberOfLines={1}>
+      <View className="px-3 mt-3">
+        <Text className="text-[14px] font-semibold text-white" numberOfLines={1}>
           {vet.name}
         </Text>
-        <Text className="text-[11px] text-dark mt-[2px]" numberOfLines={1}>
+        <Text className="text-[12px] text-white/80 mt-1" numberOfLines={1}>
           {vet.specialty}
         </Text>
         <View className="flex-row items-center mt-1">
           <Ionicons name="star" size={12} color="#7BBD38" />
-          <Text className="text-[11px] text-dark ml-1">{vet.rating}</Text>
+          <Text className="text-[12px] text-white/90 ml-1">{vet.rating}</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -11,11 +11,11 @@ const Input = forwardRef<TextInput, InputProps>(({ label, error, containerClassN
   return (
     <View className={`mb-4 ${containerClassName}`}>
       {label && (
-        <Text className="text-sm font-semibold text-dark mb-1">{label}</Text>
+        <Text className="text-[13px] font-semibold text-heading mb-1.5">{label}</Text>
       )}
       <TextInput
         ref={ref}
-        className={`bg-input-bg border rounded-btn px-4 py-3 text-sm text-dark ${
+        className={`bg-input-bg border rounded-btn px-4 py-3 text-[14px] text-dark h-[48px] ${
           error ? 'border-red-500' : 'border-gray-200'
         }`}
         placeholderTextColor="#AA865D"

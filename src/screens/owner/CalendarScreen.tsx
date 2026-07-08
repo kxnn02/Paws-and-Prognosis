@@ -239,7 +239,7 @@ export default function CalendarScreen() {
     <View className="flex-1 bg-beige">
       {/* Header */}
       <View className="px-5 pt-14 pb-2">
-        <Text className="text-2xl font-bold text-heading">Calendar</Text>
+        <Text className="text-[22px] font-bold text-heading">Calendar</Text>
       </View>
 
       {/* Calendar */}

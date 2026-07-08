@@ -58,7 +58,7 @@ export default function MyPetsScreen() {
 
         {/* Pet Info */}
         <View className="flex-1 ml-4">
-          <Text className="text-base font-semibold text-dark">{item.name}</Text>
+          <Text className="text-[15px] font-semibold text-dark">{item.name}</Text>
           <Text className="text-sm text-grey mt-1">
             {item.breed || item.species}
           </Text>

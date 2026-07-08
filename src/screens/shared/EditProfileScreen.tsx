@@ -89,7 +89,7 @@ export default function EditProfileScreen() {
           </View>
 
           {/* Name */}
-          <Text className="text-sm font-medium text-dark mb-2">Name</Text>
+          <Text className="text-[13px] font-semibold text-heading mb-1.5">Name</Text>
           <TextInput
             className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200 mb-4"
             value={name}
@@ -99,14 +99,14 @@ export default function EditProfileScreen() {
           />
 
           {/* Email (read-only) */}
-          <Text className="text-sm font-medium text-dark mb-2">Email</Text>
+          <Text className="text-[13px] font-semibold text-heading mb-1.5">Email</Text>
           <View className="bg-input-bg rounded-btn px-4 h-[46px] justify-center mb-4">
-            <Text className="text-sm text-grey">{profile?.email || ''}</Text>
+            <Text className="text-[14px] text-grey">{profile?.email || ''}</Text>
           </View>
           <Text className="text-xs text-grey -mt-3 mb-4">Email cannot be changed</Text>
 
           {/* Phone */}
-          <Text className="text-sm font-medium text-dark mb-2">Phone Number</Text>
+          <Text className="text-[13px] font-semibold text-heading mb-1.5">Phone Number</Text>
           <TextInput
             className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200 mb-4"
             value={phone}
@@ -117,9 +117,9 @@ export default function EditProfileScreen() {
           />
 
           {/* Role (read-only) */}
-          <Text className="text-sm font-medium text-dark mb-2">Role</Text>
+          <Text className="text-[13px] font-semibold text-heading mb-1.5">Role</Text>
           <View className="bg-input-bg rounded-btn px-4 h-[46px] justify-center mb-4">
-            <Text className="text-sm text-grey capitalize">
+            <Text className="text-[14px] text-grey capitalize">
               {profile?.role === 'pet_owner' ? 'Pet Owner' : 'Veterinarian'}
             </Text>
           </View>
@@ -137,7 +137,7 @@ export default function EditProfileScreen() {
           {saving ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text className="text-white text-base font-semibold">Save Changes</Text>
+            <Text className="text-white text-[15px] font-bold">Save Changes</Text>
           )}
         </TouchableOpacity>
       </View>

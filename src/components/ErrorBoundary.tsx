@@ -38,10 +38,10 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       return (
         <View className="flex-1 bg-beige items-center justify-center px-8">
-          <View className="w-16 h-16 rounded-full bg-red-50 items-center justify-center mb-4">
-            <Ionicons name="warning-outline" size={32} color="#EF4444" />
+          <View className="w-20 h-20 rounded-full bg-red-50 items-center justify-center mb-4">
+            <Ionicons name="warning-outline" size={36} color="#EF4444" />
           </View>
-          <Text className="text-xl font-bold text-heading text-center">Something Went Wrong</Text>
+          <Text className="text-[20px] font-bold text-heading text-center">Something Went Wrong</Text>
           <Text className="text-sm text-grey text-center mt-3 leading-5">
             An unexpected error occurred. Please try again.
           </Text>
@@ -52,10 +52,10 @@ export default class ErrorBoundary extends Component<Props, State> {
           )}
           <TouchableOpacity
             onPress={this.handleReset}
-            className="mt-6 bg-primary h-[44px] px-6 rounded-btn items-center justify-center"
+            className="mt-6 bg-primary h-[48px] px-6 rounded-btn items-center justify-center"
             activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold text-sm">Try Again</Text>
+            <Text className="text-white font-bold text-[15px]">Try Again</Text>
           </TouchableOpacity>
         </View>
       );

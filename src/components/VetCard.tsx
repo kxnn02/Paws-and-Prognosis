@@ -32,16 +32,16 @@ export default function VetCard({ vet, onPress }: VetCardProps) {
           </View>
         )}
       </View>
-      <View className="px-3 mt-2">
-        <Text className="text-[13px] font-semibold text-white" numberOfLines={1}>
+      <View className="px-3 mt-3">
+        <Text className="text-[14px] font-semibold text-white" numberOfLines={1}>
           {vet.name}
         </Text>
-        <Text className="text-[11px] text-dark mt-[2px]" numberOfLines={1}>
+        <Text className="text-[12px] text-white/80 mt-[2px]" numberOfLines={1}>
           {vet.specialty}
         </Text>
         <View className="flex-row items-center mt-1">
           <Ionicons name="star" size={12} color="#7BBD38" />
-          <Text className="text-[11px] text-dark ml-1">{vet.rating}</Text>
+          <Text className="text-[12px] text-white/90 ml-1">{vet.rating}</Text>
         </View>
       </View>
     </TouchableOpacity>
