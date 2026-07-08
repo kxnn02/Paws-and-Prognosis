@@ -76,13 +76,22 @@ export default function PetProfileScreen() {
             <Ionicons name="arrow-back" size={22} color="#343434" />
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-heading">Pet Profile</Text>
-          <TouchableOpacity
-            onPress={handleDelete}
-            className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
-            activeOpacity={0.7}
-          >
-            <Ionicons name="trash-outline" size={20} color="#EF4444" />
-          </TouchableOpacity>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              onPress={() => navigation.navigate('EditPet', { petId: pet.id })}
+              className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="create-outline" size={20} color="#71924F" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
+              activeOpacity={0.7}
+            >
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Pet Photo */}

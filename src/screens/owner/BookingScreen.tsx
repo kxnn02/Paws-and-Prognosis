@@ -133,7 +133,7 @@ export default function BookingScreen() {
       return;
     }
 
-    if (!selectedPetId && pets.length > 0) {
+    if (pets.length > 0 && !selectedPetId) {
       Alert.alert('Select a Pet', 'Please select which pet this appointment is for.');
       return;
     }

@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +26,14 @@ const CATEGORIES = [
   { id: '4', name: 'Boarding', icon: 'home' as const },
 ];
 
+// Map category IDs to specialty keywords for filtering
+const CATEGORY_FILTER: Record<string, string[]> = {
+  '1': ['health', 'general', 'behavioral', 'surgery', 'internal'],
+  '2': ['grooming', 'dermatology'],
+  '3': ['nutrition', 'diet'],
+  '4': ['boarding', 'hospitalization'],
+};
+
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { profile } = useAuth();
@@ -39,21 +46,13 @@ export default function HomeScreen() {
   // Use real vets from Supabase
   const allVets = supabaseVets;
 
-  // Map category names to specialty keywords
-  const categoryFilter: Record<string, string[]> = {
-    '1': ['health', 'general', 'behavioral', 'surgery', 'internal'],
-    '2': ['grooming', 'dermatology'],
-    '3': ['nutrition', 'diet'],
-    '4': ['boarding', 'hospitalization'],
-  };
-
   const filteredVets = useMemo(() => allVets.filter((v) => {
     const matchesSearch = !search ||
       v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.specialty.toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory = !activeCategory ||
-      categoryFilter[activeCategory]?.some((keyword) =>
+      CATEGORY_FILTER[activeCategory]?.some((keyword) =>
         v.specialty.toLowerCase().includes(keyword)
       );
 
@@ -96,7 +95,7 @@ export default function HomeScreen() {
         <View className="bg-primary/80 p-5 flex-row items-center justify-between">
           <View className="flex-1 mr-3">
             <Text className="text-white font-bold text-base">
-              Take care of pet's health
+              Take care of pet{"'"}s health
             </Text>
             <Text className="text-white/70 text-xs mt-1">
               Tips and tricks for your pet
@@ -216,7 +215,7 @@ const VetCard = React.memo(function VetCard({ vet, isFav, onFavToggle, onPress }
       {/* Vet Image */}
       <View className="items-center pt-2">
         <Image
-          source={{ uri: vet.image_url || '' }}
+          source={{ uri: vet.image_url || undefined }}
           className="w-[130px] h-[130px] rounded-full border-[3px] border-primary-border"
         />
       </View>
