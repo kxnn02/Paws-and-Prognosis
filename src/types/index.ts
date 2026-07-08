@@ -19,7 +19,6 @@ export interface Pet {
   species: string;
   breed: string;
   age: string | null;
-  birthdate: string | null;
   gender: string | null;
   weight: string | null;
   color: string | null;
