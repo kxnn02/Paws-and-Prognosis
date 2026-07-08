@@ -113,7 +113,6 @@ export default function AddPetScreen() {
         species: data.species,
         breed: data.breed,
         age: data.age || null,
-        birthdate: null,
         gender: data.gender || null,
         weight: data.weight || null,
         color: data.color || null,
