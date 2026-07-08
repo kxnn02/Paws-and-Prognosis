@@ -25,6 +25,10 @@ export default function AppNavigator() {
     prefixes: ['pawsandprognosis://', 'https://pawsandprognosis.app'],
     config: {
       screens: {
+        // Auth screens (deep links handled when not logged in)
+        Login: 'login',
+        ForgotPassword: 'reset-password',
+        // Owner screens
         OwnerTabs: {
           screens: {
             Home: 'home',
