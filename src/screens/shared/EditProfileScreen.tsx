@@ -8,43 +8,62 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Toast';
-import { editProfileSchema } from '../../lib/schemas';
+import { editProfileSchema, EditProfileFormData } from '../../lib/schemas';
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const { profile, user, refreshProfile } = useAuth();
   const { showToast } = useToast();
 
-  const [name, setName] = useState(profile?.name || '');
-  const [phone, setPhone] = useState(profile?.phone || '');
   const [saving, setSaving] = useState(false);
 
-  async function handleSave() {
-    const result = editProfileSchema.safeParse({ name: name.trim(), phone: phone.trim() });
-    if (!result.success) {
-      showToast(result.error.errors[0].message, 'warning');
-      return;
-    }
-    if (!user) return;
+  const { control, handleSubmit, formState: { errors, isDirty } } = useForm<EditProfileFormData>({
+    resolver: zodResolver(editProfileSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      name: profile?.name || '',
+      phone: profile?.phone || '',
+    },
+  });
 
+  // Unsaved changes warning
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      Alert.alert(
+        'Discard Changes?',
+        'You have unsaved changes. Are you sure you want to leave?',
+        [
+          { text: 'Stay', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [navigation, isDirty]);
+
+  async function onSubmit(data: EditProfileFormData) {
+    if (!user) return;
     setSaving(true);
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          name: name.trim(),
-          phone: phone.trim() || null,
+          name: data.name.trim(),
+          phone: data.phone?.trim() || null,
         })
         .eq('id', user.id);
-
       if (error) throw error;
-
       await refreshProfile();
       showToast('Profile updated successfully!', 'success');
       navigation.goBack();
@@ -90,13 +109,24 @@ export default function EditProfileScreen() {
 
           {/* Name */}
           <Text className="text-[13px] font-semibold text-heading mb-1.5">Name</Text>
-          <TextInput
-            className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200 mb-4"
-            value={name}
-            onChangeText={setName}
-            placeholder="Your name"
-            placeholderTextColor="#A7A7A7"
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                className={`bg-white rounded-btn px-4 h-[46px] text-sm text-dark border ${errors.name ? 'border-red-400' : 'border-gray-200'} mb-1`}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Your name"
+                placeholderTextColor="#A7A7A7"
+              />
+            )}
           />
+          {errors.name && (
+            <Text className="text-xs text-red-500 mb-3">{errors.name.message}</Text>
+          )}
+          {!errors.name && <View className="mb-3" />}
 
           {/* Email (read-only) */}
           <Text className="text-[13px] font-semibold text-heading mb-1.5">Email</Text>
@@ -107,14 +137,26 @@ export default function EditProfileScreen() {
 
           {/* Phone */}
           <Text className="text-[13px] font-semibold text-heading mb-1.5">Phone Number</Text>
-          <TextInput
-            className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200 mb-4"
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="+63 9XX XXX XXXX"
-            placeholderTextColor="#A7A7A7"
-            keyboardType="phone-pad"
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                className={`bg-white rounded-btn px-4 h-[46px] text-sm text-dark border ${errors.phone ? 'border-red-400' : 'border-gray-200'} mb-1`}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="+63 9XX XXX XXXX"
+                placeholderTextColor="#A7A7A7"
+                keyboardType="phone-pad"
+                maxLength={13}
+              />
+            )}
           />
+          {errors.phone && (
+            <Text className="text-xs text-red-500 mb-1">{errors.phone.message}</Text>
+          )}
+          <Text className="text-xs text-grey -mt-3 mb-4">Format: +63XXXXXXXXXX</Text>
 
           {/* Role (read-only) */}
           <Text className="text-[13px] font-semibold text-heading mb-1.5">Role</Text>
@@ -129,7 +171,7 @@ export default function EditProfileScreen() {
       {/* Save Button */}
       <View className="px-5 pb-8 pt-4">
         <TouchableOpacity
-          onPress={handleSave}
+          onPress={handleSubmit(onSubmit)}
           disabled={saving}
           className={`bg-primary h-[52px] rounded-btn items-center justify-center shadow-md ${saving ? 'opacity-60' : ''}`}
           activeOpacity={0.8}

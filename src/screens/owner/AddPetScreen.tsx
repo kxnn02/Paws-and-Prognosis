@@ -15,27 +15,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { petSchema, PetFormData, PET_SPECIES_OPTIONS, PET_GENDER_OPTIONS } from '../../lib/schemas';
 import { usePets } from '../../hooks/usePets';
 import type { OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
-
-const petSchema = z.object({
-  name: z.string().min(1, 'Pet name is required'),
-  species: z.string().min(1, 'Species is required'),
-  breed: z.string().min(1, 'Breed is required'),
-  age: z.string().optional(),
-  gender: z.string().optional(),
-  weight: z.string().optional(),
-  color: z.string().optional(),
-});
-
-type PetFormData = z.infer<typeof petSchema>;
-
-const SPECIES_OPTIONS = ['Dog', 'Cat', 'Bird', 'Rabbit', 'Hamster', 'Fish', 'Other'];
 
 export default function AddPetScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -46,7 +32,7 @@ export default function AddPetScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<PetFormData>({
     resolver: zodResolver(petSchema),
     defaultValues: {
@@ -59,6 +45,22 @@ export default function AddPetScreen() {
       color: '',
     },
   });
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!isDirty && !imageUri) return;
+      e.preventDefault();
+      Alert.alert(
+        'Discard Changes?',
+        'You have unsaved changes. Are you sure you want to leave?',
+        [
+          { text: 'Stay', style: 'cancel' },
+          { text: 'Discard', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+    return unsubscribe;
+  }, [navigation, isDirty, imageUri]);
 
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -173,6 +175,8 @@ export default function AddPetScreen() {
             onPress={showImageOptions}
             className="self-center mt-4 mb-6"
             activeOpacity={0.8}
+            accessibilityLabel="Add pet photo"
+            accessibilityRole="button"
           >
             <View className="w-[120px] h-[120px] rounded-full overflow-hidden bg-input-bg border-[3px] border-primary-border items-center justify-center">
               {imageUri ? (
@@ -211,7 +215,7 @@ export default function AddPetScreen() {
             name="species"
             render={({ field: { onChange, value } }) => (
               <View className="flex-row flex-wrap gap-2 mb-1">
-                {SPECIES_OPTIONS.map((sp) => (
+                {PET_SPECIES_OPTIONS.map((sp) => (
                   <TouchableOpacity
                     key={sp}
                     onPress={() => onChange(sp)}
@@ -219,6 +223,8 @@ export default function AddPetScreen() {
                       value === sp ? 'bg-primary' : 'bg-white border border-gray-200'
                     }`}
                     activeOpacity={0.7}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: value === sp }}
                   >
                     <Text
                       className={`text-sm ${value === sp ? 'text-white font-medium' : 'text-dark'}`}
@@ -244,45 +250,98 @@ export default function AddPetScreen() {
 
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <FormField
-                label="Age"
-                name="age"
-                control={control}
-                placeholder="e.g. 2 years"
-                error={errors.age?.message}
-              />
+              <View className="mt-4">
+                <Text className="text-sm font-medium text-dark mb-2">Age (years)</Text>
+                <Controller
+                  control={control}
+                  name="age"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200"
+                      placeholder="e.g. 3"
+                      placeholderTextColor="#A7A7A7"
+                      value={value}
+                      onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ''))}
+                      onBlur={onBlur}
+                      keyboardType="number-pad"
+                      maxLength={2}
+                    />
+                  )}
+                />
+                {errors.age && <Text className="text-xs text-red-500 mt-1">{errors.age.message}</Text>}
+              </View>
             </View>
             <View className="flex-1">
-              <FormField
-                label="Gender"
-                name="gender"
-                control={control}
-                placeholder="Male / Female"
-                error={errors.gender?.message}
-              />
+              <View className="mt-4">
+                <Text className="text-sm font-medium text-dark mb-2">Weight (kg)</Text>
+                <Controller
+                  control={control}
+                  name="weight"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200"
+                      placeholder="e.g. 5.2"
+                      placeholderTextColor="#A7A7A7"
+                      value={value}
+                      onChangeText={(text) => {
+                        // Allow only digits and one decimal point
+                        const cleaned = text.replace(/[^0-9.]/g, '');
+                        // Prevent multiple decimal points
+                        const parts = cleaned.split('.');
+                        const formatted = parts.length > 2
+                          ? parts[0] + '.' + parts.slice(1).join('')
+                          : cleaned;
+                        onChange(formatted);
+                      }}
+                      onBlur={onBlur}
+                      keyboardType="decimal-pad"
+                      maxLength={5}
+                    />
+                  )}
+                />
+                {errors.weight && <Text className="text-xs text-red-500 mt-1">{errors.weight.message}</Text>}
+              </View>
             </View>
           </View>
 
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <FormField
-                label="Weight"
-                name="weight"
-                control={control}
-                placeholder="e.g. 12 kg"
-                error={errors.weight?.message}
-              />
-            </View>
-            <View className="flex-1">
-              <FormField
-                label="Color"
-                name="color"
-                control={control}
-                placeholder="e.g. Golden"
-                error={errors.color?.message}
-              />
-            </View>
+          {/* Gender Segmented Control */}
+          <View className="mt-4">
+            <Text className="text-sm font-medium text-dark mb-2">Gender</Text>
+            <Controller
+              control={control}
+              name="gender"
+              render={({ field: { onChange, value } }) => (
+                <View className="flex-row gap-2">
+                  {PET_GENDER_OPTIONS.map((option) => (
+                    <TouchableOpacity
+                      key={option}
+                      onPress={() => onChange(value === option ? '' : option)}
+                      className={`flex-1 py-2.5 rounded-btn items-center ${
+                        value === option ? 'bg-primary' : 'bg-white border border-gray-200'
+                      }`}
+                      activeOpacity={0.7}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: value === option }}
+                      accessibilityLabel={option}
+                    >
+                      <Text className={`text-sm font-medium ${value === option ? 'text-white' : 'text-dark'}`}>
+                        {option}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            />
+            {errors.gender && <Text className="text-xs text-red-500 mt-1">{errors.gender.message}</Text>}
           </View>
+
+          <FormField
+            label="Color"
+            name="color"
+            control={control}
+            placeholder="e.g. Golden"
+            error={errors.color?.message}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -309,7 +368,8 @@ export default function AddPetScreen() {
 interface FormFieldProps {
   label: string;
   name: string;
-  control: ReturnType<typeof useForm<PetFormData>>['control'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: Control<PetFormData, any, any>;
   placeholder: string;
   error?: string;
 }

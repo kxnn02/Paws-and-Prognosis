@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useVets } from '../../hooks/useVets';
@@ -42,6 +43,18 @@ export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [tipsDismissed, setTipsDismissed] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('tips_banner_dismissed').then((val) => {
+      if (val === 'true') setTipsDismissed(true);
+    });
+  }, []);
+
+  function handleDismissTips() {
+    setTipsDismissed(true);
+    AsyncStorage.setItem('tips_banner_dismissed', 'true');
+  }
 
   // Use real vets from Supabase
   const allVets = supabaseVets;
@@ -87,13 +100,14 @@ export default function HomeScreen() {
       </View>
 
       {/* Banner */}
+      {!tipsDismissed && (
       <View>
       <TouchableOpacity
         className="mx-5 mt-2 rounded-card overflow-hidden"
         activeOpacity={0.8}
         onPress={() => navigation.navigate('TipsScreen')}
       >
-        <View className="bg-primary/80 p-5 flex-row items-center justify-between">
+        <View className="bg-primary/80 p-5 flex-row items-center justify-between relative">
           <View className="flex-1 mr-3">
             <Text className="text-white font-bold text-[15px]">
               Take care of pet{"'"}s health
@@ -105,32 +119,39 @@ export default function HomeScreen() {
           <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
             <Ionicons name="arrow-forward" size={20} color="#FFF" />
           </View>
+          <TouchableOpacity
+            onPress={(e) => { e.stopPropagation(); handleDismissTips(); }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/30 items-center justify-center"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="close" size={14} color="#FFF" />
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
       </View>
+      )}
 
       {/* Categories */}
-      <View className="mt-6 px-5">
-        <Text className="text-lg font-bold text-heading mb-3">Category</Text>
-        <View className="flex-row justify-between">
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              className="items-center"
-              onPress={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-              activeOpacity={0.7}
-            >
-              <View
-                className={`w-[70px] h-[70px] rounded-full items-center justify-center shadow-sm ${
-                  activeCategory === cat.id ? 'bg-primary' : 'bg-primary-light'
-                }`}
+      <View className="mt-4 px-5">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row gap-2 py-1">
+            {CATEGORIES.map((cat) => (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                className={`flex-row items-center px-4 py-2.5 rounded-full ${activeCategory === cat.id ? 'bg-primary' : 'bg-white border border-gray-200'}`}
+                activeOpacity={0.7}
+                accessibilityLabel={cat.name}
+                accessibilityRole="button"
               >
-                <Ionicons name={cat.icon} size={32} color="#FFF" />
-              </View>
-              <Text className="text-[11px] font-medium text-heading mt-2">{cat.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Ionicons name={cat.icon} size={16} color={activeCategory === cat.id ? '#FFF' : '#71924F'} />
+                <Text className={`text-sm font-medium ml-2 ${activeCategory === cat.id ? 'text-white' : 'text-dark'}`}>
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
       {/* Search Bar */}
@@ -141,6 +162,7 @@ export default function HomeScreen() {
           placeholderTextColor="#A7A7A7"
           value={search}
           onChangeText={setSearch}
+          accessibilityLabel="Search veterinarians"
         />
         <View className="w-[1px] h-6 bg-gray-200 mx-3" />
         <Ionicons name="search" size={22} color="#A7A7A7" />
@@ -206,6 +228,8 @@ const VetCard = React.memo(function VetCard({ vet, isFav, onFavToggle, onPress }
         onPress={onFavToggle}
         className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/30 items-center justify-center"
         activeOpacity={0.7}
+        accessibilityLabel={isFav ? 'Remove from favorites' : 'Add to favorites'}
+        accessibilityRole="button"
       >
         <Ionicons
           name={isFav ? 'heart' : 'heart-outline'}

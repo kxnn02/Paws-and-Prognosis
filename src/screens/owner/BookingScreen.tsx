@@ -7,6 +7,8 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
@@ -14,6 +16,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { usePets } from '../../hooks/usePets';
 import { useAppointments } from '../../hooks/useAppointments';
+import { useVetWorkingHours } from '../../hooks/useVetWorkingHours';
 import { supabase } from '../../lib/supabase';
 import { formatOwnerNotes } from '../../lib/notesHelper';
 import type { OwnerStackParamList } from '../../types';
@@ -67,6 +70,7 @@ export default function BookingScreen() {
 
   const { pets, fetchPets } = usePets();
   const { bookAppointment } = useAppointments();
+  const { hours: vetHours } = useVetWorkingHours(vetId);
 
   // Refetch pets when screen regains focus (e.g., after adding a pet)
   useFocusEffect(
@@ -83,6 +87,7 @@ export default function BookingScreen() {
   const [notes, setNotes] = useState('');
   const [booking, setBooking] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [slotsError, setSlotsError] = useState(false);
   const bookingCompleteRef = useRef(false);
 
   // Warn before leaving with unsaved booking selections
@@ -107,15 +112,22 @@ export default function BookingScreen() {
   // Fetch booked slots for the selected date and this vet
   useEffect(() => {
     async function fetchBookedSlots() {
-      const { data } = await supabase
-        .from('appointments')
-        .select('time')
-        .eq('vet_id', vetId)
-        .eq('date', selectedDate)
-        .neq('status', 'cancelled');
+      try {
+        setSlotsError(false);
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('time')
+          .eq('vet_id', vetId)
+          .eq('date', selectedDate)
+          .neq('status', 'cancelled');
 
-      if (data) {
-        setBookedSlots(data.map((a: { time: string }) => a.time));
+        if (error) throw error;
+
+        if (data) {
+          setBookedSlots(data.map((a: { time: string }) => a.time));
+        }
+      } catch {
+        setSlotsError(true);
       }
     }
     fetchBookedSlots();
@@ -124,6 +136,34 @@ export default function BookingScreen() {
   function isSlotBooked(slot: string): boolean {
     const time24 = convertTo24Hour(slot);
     return bookedSlots.some((b) => b.startsWith(time24.slice(0, 5)));
+  }
+
+  function getAvailableSlots(): string[] {
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+    const dayIndex = new Date(selectedDate).getDay();
+    const dayName = dayNames[dayIndex];
+    const hoursForDay = vetHours[dayName];
+
+    if (!hoursForDay) return []; // Closed
+
+    // Parse "9:00 AM - 4:00 PM" format
+    const [startStr, endStr] = hoursForDay.split(' - ');
+    const startMinutes = parseTimeToMinutes(startStr);
+    const endMinutes = parseTimeToMinutes(endStr);
+
+    return TIME_SLOTS.filter((slot) => {
+      const slotMinutes = parseTimeToMinutes(slot);
+      return slotMinutes >= startMinutes && slotMinutes < endMinutes;
+    });
+  }
+
+  function parseTimeToMinutes(time12: string): number {
+    const [time, modifier] = time12.split(' ');
+    const [hoursStr, minutes] = time.split(':');
+    let hours = parseInt(hoursStr, 10);
+    if (modifier === 'PM' && hours !== 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + parseInt(minutes, 10);
   }
 
   const selectedDayData = scheduleDays.find((d) => d.date === selectedDate);
@@ -185,7 +225,11 @@ export default function BookingScreen() {
 
   return (
     <View className="flex-1 bg-beige">
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View className="px-5 pt-14 pb-2 flex-row items-center">
           <TouchableOpacity
@@ -198,6 +242,27 @@ export default function BookingScreen() {
           <Text className="flex-1 text-center text-lg font-semibold text-heading mr-10">
             Book Appointment
           </Text>
+        </View>
+
+        {/* Step Progress */}
+        <View className="mx-5 mt-3 mb-1 flex-row items-center justify-center">
+          <View className="flex-row items-center">
+            <View className={`w-7 h-7 rounded-full items-center justify-center ${selectedDate ? 'bg-primary' : 'bg-primary/30'}`}>
+              <Text className="text-xs font-bold text-white">1</Text>
+            </View>
+            <View className={`w-8 h-[2px] ${selectedTime ? 'bg-primary' : 'bg-gray-200'}`} />
+            <View className={`w-7 h-7 rounded-full items-center justify-center ${selectedTime ? 'bg-primary' : 'bg-gray-200'}`}>
+              <Text className={`text-xs font-bold ${selectedTime ? 'text-white' : 'text-grey'}`}>2</Text>
+            </View>
+            <View className={`w-8 h-[2px] ${selectedPetId || pets.length === 0 ? 'bg-primary' : 'bg-gray-200'}`} />
+            <View className={`w-7 h-7 rounded-full items-center justify-center ${selectedPetId || pets.length === 0 ? 'bg-primary' : 'bg-gray-200'}`}>
+              <Text className={`text-xs font-bold ${selectedPetId || pets.length === 0 ? 'text-white' : 'text-grey'}`}>3</Text>
+            </View>
+            <View className={`w-8 h-[2px] ${selectedTime ? 'bg-primary' : 'bg-gray-200'}`} />
+            <View className={`w-7 h-7 rounded-full items-center justify-center ${selectedTime && selectedDate ? 'bg-primary/30' : 'bg-gray-200'}`}>
+              <Ionicons name="checkmark" size={14} color={selectedTime && selectedDate ? '#71924F' : '#9BA1A8'} />
+            </View>
+          </View>
         </View>
 
         {/* Vet name context */}
@@ -224,6 +289,7 @@ export default function BookingScreen() {
                   key={day.date}
                   onPress={() => !isSunday && setSelectedDate(day.date)}
                   disabled={isSunday}
+                  accessibilityLabel={`${day.dayName} ${day.month} ${day.dayNumber}${isSunday ? ', clinic closed' : isSelected ? ', selected' : ''}`}
                   className={`w-[56px] h-[72px] rounded-btn items-center justify-center mr-2 ${
                     isSunday
                       ? 'bg-gray-100 opacity-50'
@@ -265,13 +331,25 @@ export default function BookingScreen() {
               );
             })}
           </ScrollView>
+          <Text className="text-xs text-grey mt-2 italic">The clinic is closed on Sundays.</Text>
         </View>
 
         {/* Step 2: Select Time */}
         <View className="mx-5 mt-5">
           <Text className="text-lg font-semibold text-heading mb-3">Select Time</Text>
+          {slotsError ? (
+            <View className="items-center py-4">
+              <Text className="text-sm text-red-500 mb-2">Could not verify availability. Please try again.</Text>
+              <TouchableOpacity
+                onPress={() => { setSlotsError(false); setBookedSlots([]); }}
+                className="bg-primary px-4 py-2 rounded-btn"
+              >
+                <Text className="text-white text-sm font-medium">Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
           <View className="flex-row flex-wrap gap-3">
-            {TIME_SLOTS.map((time) => {
+            {getAvailableSlots().map((time) => {
               const isSelected = selectedTime === time;
               const booked = isSlotBooked(time);
               return (
@@ -279,6 +357,7 @@ export default function BookingScreen() {
                   key={time}
                   onPress={() => !booked && setSelectedTime(time)}
                   disabled={booked}
+                  accessibilityLabel={`${time}${booked ? ', already booked' : isSelected ? ', selected' : ''}`}
                   className={`px-5 py-3 rounded-btn ${
                     booked
                       ? 'bg-gray-100 opacity-50'
@@ -303,6 +382,7 @@ export default function BookingScreen() {
               );
             })}
           </View>
+          )}
         </View>
 
         {/* Step 3: Select Pet */}
@@ -411,6 +491,7 @@ export default function BookingScreen() {
         {/* Bottom spacing */}
         <View className="h-[120px]" />
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Confirm Button */}
       <View className="absolute bottom-0 left-0 right-0 px-5 pb-8 pt-4 bg-beige">

@@ -72,6 +72,8 @@ export default function PetProfileScreen() {
             onPress={() => navigation.goBack()}
             className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
             activeOpacity={0.7}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
           >
             <Ionicons name="arrow-back" size={22} color="#343434" />
           </TouchableOpacity>
@@ -81,6 +83,8 @@ export default function PetProfileScreen() {
               onPress={() => navigation.navigate('EditPet', { petId: pet.id })}
               className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
               activeOpacity={0.7}
+              accessibilityLabel="Edit pet"
+              accessibilityRole="button"
             >
               <Ionicons name="create-outline" size={20} color="#71924F" />
             </TouchableOpacity>
@@ -88,6 +92,8 @@ export default function PetProfileScreen() {
               onPress={handleDelete}
               className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
               activeOpacity={0.7}
+              accessibilityLabel="Delete pet"
+              accessibilityRole="button"
             >
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
             </TouchableOpacity>
@@ -117,11 +123,11 @@ export default function PetProfileScreen() {
         <View className="mx-5 mt-6">
           <View className="flex-row flex-wrap gap-3">
             <InfoCard icon="paw" label="Species" value={pet.species} />
-            <InfoCard icon="male-female" label="Gender" value={pet.gender || 'N/A'} />
-            <InfoCard icon="calendar" label="Age" value={pet.age || 'N/A'} />
-            <InfoCard icon="fitness" label="Weight" value={pet.weight || 'N/A'} />
-            <InfoCard icon="color-palette" label="Color" value={pet.color || 'N/A'} />
-            <InfoCard icon="flag" label="Country" value={pet.country || 'N/A'} />
+            {pet.gender && <InfoCard icon="male-female" label="Gender" value={pet.gender} />}
+            {pet.age && <InfoCard icon="calendar" label="Age" value={pet.age} />}
+            {pet.weight && <InfoCard icon="fitness" label="Weight" value={pet.weight} />}
+            {pet.color && <InfoCard icon="color-palette" label="Color" value={pet.color} />}
+            {pet.country && <InfoCard icon="flag" label="Country" value={pet.country} />}
           </View>
         </View>
 

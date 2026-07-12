@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../context/AuthContext';
-import { loginSchema } from '../../lib/schemas';
+import { loginSchema, LoginFormData } from '../../lib/schemas';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../types';
 
@@ -23,20 +25,19 @@ interface Props {
 
 export default function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  async function handleLogin() {
-    const result = loginSchema.safeParse({ email: email.trim(), password });
-    if (!result.success) {
-      Alert.alert('Error', result.error.errors[0].message);
-      return;
-    }
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
+    defaultValues: { email: '', password: '' },
+  });
+
+  async function onSubmit(data: LoginFormData) {
     setLoading(true);
     try {
-      const { error } = await signIn(email.trim(), password);
+      const { error } = await signIn(data.email.trim(), data.password);
       if (error) {
         Alert.alert('Login Failed', error.message);
       }
@@ -70,7 +71,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View className="pt-[50px] items-center">
             <Image
               source={require('../../../assets/logo-transparent.png')}
-              className="w-[270px] h-[270px]"
+              className="w-[200px] h-[200px]"
               resizeMode="contain"
             />
           </View>
@@ -85,35 +86,50 @@ export default function LoginScreen({ navigation }: Props) {
             className="mx-[28px] rounded-glass overflow-hidden border border-white/80"
           >
             <View className="px-[22px] pt-[28px] pb-[20px] bg-white/40">
-              <Text className="text-[26px] font-bold text-heading text-center leading-[40px] mb-[20px]">
-                Take Care Of{'\n'}Your Pet
+              <Text className="text-[22px] font-bold text-heading text-center mb-[16px]">
+                Welcome Back
               </Text>
 
               {/* Email */}
-              <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-[10px] shadow-sm"
-                placeholder="Email Address"
-                placeholderTextColor="#AA865D"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                maxLength={100}
-                accessibilityLabel="Email address"
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-[10px] shadow-sm"
+                    placeholder="Email Address"
+                    placeholderTextColor="#AA865D"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    maxLength={100}
+                    accessibilityLabel="Email address"
+                  />
+                )}
               />
+              {errors.email && <Text className="text-red-500 text-xs mb-2 -mt-1">{errors.email.message}</Text>}
 
               {/* Password */}
               <View className="relative mb-[10px]">
-                <TextInput
-                  className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
-                  placeholder="Password"
-                  placeholderTextColor="#AA865D"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  maxLength={72}
-                  accessibilityLabel="Password"
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
+                      placeholder="Password"
+                      placeholderTextColor="#AA865D"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry={!showPassword}
+                      maxLength={72}
+                      accessibilityLabel="Password"
+                    />
+                  )}
                 />
                 <TouchableOpacity
                   className="absolute right-3 top-[10px]"
@@ -124,11 +140,12 @@ export default function LoginScreen({ navigation }: Props) {
                   <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
                 </TouchableOpacity>
               </View>
+              {errors.password && <Text className="text-red-500 text-xs mb-2 -mt-1">{errors.password.message}</Text>}
 
               {/* Log In Button */}
               <TouchableOpacity
                 className={`bg-primary rounded-btn h-[52px] items-center justify-center mt-[6px] border border-primary-border shadow-md ${loading ? 'opacity-60' : ''}`}
-                onPress={handleLogin}
+                onPress={handleSubmit(onSubmit)}
                 disabled={loading}
                 activeOpacity={0.8}
                 accessibilityRole="button"
@@ -143,28 +160,14 @@ export default function LoginScreen({ navigation }: Props) {
               {/* Forgot Password */}
               <TouchableOpacity
                 onPress={() => navigation.navigate('ForgotPassword')}
-                className="self-end mt-2"
+                className="self-end mt-2 py-2 px-3"
                 activeOpacity={0.7}
                 accessibilityRole="link"
               >
                 <Text className="text-[13px] text-grey font-medium">Forgot Password?</Text>
               </TouchableOpacity>
 
-              {/* Google Button */}
-              <TouchableOpacity
-                className="bg-input-bg rounded-btn h-[52px] flex-row items-center justify-center mt-[10px] shadow-md opacity-70"
-                activeOpacity={0.8}
-                onPress={() => Alert.alert('Coming Soon', 'Google Sign-In requires a development build and will be available in the production version.')}
-                accessibilityRole="button"
-                accessibilityLabel="Log in with Google"
-              >
-                <Image
-                  source={require('../../../assets/google-logo.png')}
-                  className="w-5 h-5 mr-[10px]"
-                  resizeMode="contain"
-                />
-                <Text className="text-sm font-semibold text-dark">Log In With Google</Text>
-              </TouchableOpacity>
+
 
               {/* Footer */}
               <View className="flex-row justify-center mt-[16px]">

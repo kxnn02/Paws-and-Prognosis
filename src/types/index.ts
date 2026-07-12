@@ -143,6 +143,7 @@ export type VetStackParamList = {
   VetTabs: undefined;
   VetChatConversation: { threadId: string; participantName: string };
   EditProfile: undefined;
+  VetAppointmentDetail: { appointmentId: string };
 };
 
 // Category type for home screen

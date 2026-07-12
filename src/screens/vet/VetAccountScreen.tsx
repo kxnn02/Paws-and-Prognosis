@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,7 +28,7 @@ export default function VetAccountScreen() {
   }
 
   return (
-    <View className="flex-1 bg-beige">
+    <ScrollView className="flex-1 bg-beige" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View className="px-5 pt-14 pb-6">
         <Text className="text-[22px] font-bold text-heading">Account</Text>
@@ -52,9 +52,9 @@ export default function VetAccountScreen() {
       {/* Menu */}
       <View className="px-5">
         <MenuItem icon="person-circle-outline" label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
-        <MenuItem icon="notifications-outline" label="Notifications" onPress={() => Alert.alert('Coming Soon', 'Notifications will be available in a future update.')} />
-        <MenuItem icon="time-outline" label="Working Hours" onPress={() => Alert.alert('Coming Soon', 'Working hours settings will be available in a future update.')} />
-        <MenuItem icon="shield-checkmark-outline" label="Privacy & Security" onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available in a future update.')} />
+        <MenuItem icon="notifications-outline" label="Notifications (coming soon)" onPress={() => Alert.alert('Coming Soon', 'Notifications will be available in a future update.')} />
+        <MenuItem icon="time-outline" label="Working Hours (coming soon)" onPress={() => Alert.alert('Coming Soon', 'Working hours settings will be available in a future update.')} />
+        <MenuItem icon="shield-checkmark-outline" label="Privacy & Security (coming soon)" onPress={() => Alert.alert('Coming Soon', 'Privacy settings will be available in a future update.')} />
         <MenuItem icon="help-circle-outline" label="Help & Support" onPress={() => Alert.alert('Help & Support', 'For assistance, email support@pawsandprognosis.com')} />
       </View>
 
@@ -69,6 +69,6 @@ export default function VetAccountScreen() {
           <Text className="text-sm font-semibold text-red-500 ml-2">Log Out</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }

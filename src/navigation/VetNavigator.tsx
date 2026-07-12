@@ -7,6 +7,7 @@ import VetAppointmentsScreen from '../screens/vet/VetAppointmentsScreen';
 import VetChatListScreen from '../screens/vet/VetChatListScreen';
 import VetAccountScreen from '../screens/vet/VetAccountScreen';
 import VetChatConversationScreen from '../screens/vet/VetChatConversationScreen';
+import VetAppointmentDetailScreen from '../screens/vet/VetAppointmentDetailScreen';
 import EditProfileScreen from '../screens/shared/EditProfileScreen';
 import { Colors } from '../lib/constants';
 import type { VetTabParamList, VetStackParamList } from '../types';
@@ -59,6 +60,7 @@ export default function VetNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="VetTabs" component={VetTabs} />
       <Stack.Screen name="VetChatConversation" component={VetChatConversationScreen} />
+      <Stack.Screen name="VetAppointmentDetail" component={VetAppointmentDetailScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );

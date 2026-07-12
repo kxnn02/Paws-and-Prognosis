@@ -40,6 +40,8 @@ export default function MyPetsScreen() {
         onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
         className="bg-white rounded-card mx-5 mb-4 p-4 flex-row items-center shadow-sm"
         activeOpacity={0.8}
+        accessibilityLabel={item.name + ', ' + item.species}
+        accessibilityRole="button"
       >
         {/* Pet Image */}
         <View className="w-[64px] h-[64px] rounded-full overflow-hidden bg-input-bg">
@@ -133,6 +135,8 @@ export default function MyPetsScreen() {
           onPress={() => navigation.navigate('AddPet')}
           className="absolute bottom-8 right-6 w-[56px] h-[56px] rounded-full bg-primary items-center justify-center shadow-lg"
           activeOpacity={0.8}
+          accessibilityLabel="Add a new pet"
+          accessibilityRole="button"
         >
           <Ionicons name="add" size={28} color="#FFF" />
         </TouchableOpacity>

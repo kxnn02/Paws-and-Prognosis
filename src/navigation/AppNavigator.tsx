@@ -25,10 +25,11 @@ export default function AppNavigator() {
     prefixes: ['pawsandprognosis://', 'https://pawsandprognosis.app'],
     config: {
       screens: {
-        // Auth screens (deep links handled when not logged in)
+        // Auth stack screens
         Login: 'login',
+        SignUp: 'signup',
         ForgotPassword: 'reset-password',
-        // Owner screens
+        // Owner stack screens
         OwnerTabs: {
           screens: {
             Home: 'home',
@@ -38,8 +39,22 @@ export default function AppNavigator() {
           },
         },
         VetDetails: 'vet/:vetId',
-        Booking: 'book/:vetId',
-        ChatConversation: 'chat/:threadId',
+        Booking: 'book/:vetId/:vetName',
+        ChatConversation: 'conversation/:threadId/:participantName',
+        Rating: 'rate/:appointmentId/:vetId/:vetName',
+        Reschedule: 'reschedule/:appointmentId/:vetName',
+        EditProfile: 'edit-profile',
+        MyPets: 'pets',
+        // Vet stack screens
+        VetTabs: {
+          screens: {
+            Dashboard: 'dashboard',
+            Appointments: 'appointments',
+            VetChat: 'vet-chat',
+            VetAccount: 'vet-account',
+          },
+        },
+        VetChatConversation: 'vet-conversation/:threadId/:participantName',
       },
     },
   } as const;
@@ -50,6 +65,8 @@ export default function AppNavigator() {
       <NavigationContainer linking={linking as any}>
         {!session ? (
           <AuthNavigator />
+        ) : !role ? (
+          <SplashScreen />
         ) : role === 'veterinarian' ? (
           <VetNavigator />
         ) : (

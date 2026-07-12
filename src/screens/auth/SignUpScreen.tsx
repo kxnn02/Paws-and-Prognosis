@@ -12,10 +12,12 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../context/AuthContext';
-import { signUpSchema } from '../../lib/schemas';
+import { signUpFormSchema, type SignUpFormSchemaData } from '../../lib/schemas';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { AuthStackParamList, UserRole } from '../../types';
+import type { AuthStackParamList } from '../../types';
 
 interface Props {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
@@ -23,26 +25,20 @@ interface Props {
 
 export default function SignUpScreen({ navigation }: Props) {
   const { signUp } = useAuth();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<UserRole>('pet_owner');
   const [loading, setLoading] = useState(false);
 
-  async function handleSignUp() {
-    const result = signUpSchema.safeParse({ name, email, password, role });
-    if (!result.success) {
-      Alert.alert('Error', result.error.errors[0].message);
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
+  const { control, handleSubmit, formState: { errors }, watch, setValue } = useForm<SignUpFormSchemaData>({
+    resolver: zodResolver(signUpFormSchema),
+    mode: 'onBlur',
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '', role: 'pet_owner' },
+  });
+
+  const watchRole = watch('role');
+
+  async function onSubmit(data: SignUpFormSchemaData) {
     setLoading(true);
-    const { error, needsConfirmation } = await signUp(email, password, name, role);
+    const { error, needsConfirmation } = await signUp(data.email, data.password, data.name, data.role);
     if (error) {
       Alert.alert('Sign Up Failed', error.message);
     } else if (needsConfirmation) {
@@ -95,39 +91,62 @@ export default function SignUpScreen({ navigation }: Props) {
 
               {/* Name */}
               <Text className="text-[13px] font-medium text-heading mb-1.5">Your Name</Text>
-              <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
-                placeholder="What should we call you?"
-                placeholderTextColor="#AA865D"
-                value={name}
-                onChangeText={setName}
-                maxLength={50}
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
+                    placeholder="What should we call you?"
+                    placeholderTextColor="#AA865D"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    maxLength={50}
+                  />
+                )}
               />
+              {errors.name && <Text className="text-red-500 text-xs mb-1 -mt-2 px-1">{errors.name.message}</Text>}
 
               {/* Email */}
               <Text className="text-[13px] font-medium text-heading mb-1.5">Email Address</Text>
-              <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
-                placeholder="We'll only use this for important updates."
-                placeholderTextColor="#AA865D"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                maxLength={100}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
+                    placeholder="We'll only use this for important updates."
+                    placeholderTextColor="#AA865D"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    maxLength={100}
+                  />
+                )}
               />
+              {errors.email && <Text className="text-red-500 text-xs mb-1 -mt-2 px-1">{errors.email.message}</Text>}
 
               {/* Password */}
               <Text className="text-[13px] font-medium text-heading mb-1.5">Create a Password</Text>
               <View className="relative mb-3">
-                <TextInput
-                  className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
-                  placeholder="Something secure, but easy to remember."
-                  placeholderTextColor="#AA865D"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  maxLength={72}
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark pr-12 shadow-sm"
+                      placeholder="Something secure, but easy to remember."
+                      placeholderTextColor="#AA865D"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry={!showPassword}
+                      maxLength={72}
+                    />
+                  )}
                 />
                 <TouchableOpacity
                   className="absolute right-3 top-[10px]"
@@ -136,39 +155,48 @@ export default function SignUpScreen({ navigation }: Props) {
                   <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#808080" />
                 </TouchableOpacity>
               </View>
+              {errors.password && <Text className="text-red-500 text-xs mb-1 -mt-2 px-1">{errors.password.message}</Text>}
 
               {/* Confirm Password */}
               <Text className="text-[13px] font-medium text-heading mb-1.5">Confirm Password</Text>
-              <TextInput
-                className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
-                placeholder="Type your password again."
-                placeholderTextColor="#AA865D"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showPassword}
-                maxLength={72}
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-input-bg rounded-btn px-4 h-[46px] text-sm italic text-dark mb-3 shadow-sm"
+                    placeholder="Type your password again."
+                    placeholderTextColor="#AA865D"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    secureTextEntry={!showPassword}
+                    maxLength={72}
+                  />
+                )}
               />
+              {errors.confirmPassword && <Text className="text-red-500 text-xs mb-1 -mt-2 px-1">{errors.confirmPassword.message}</Text>}
 
               {/* Role */}
               <Text className="text-[13px] font-medium text-heading mb-2">I am a...</Text>
               <View className="flex-row gap-2 mb-5">
                 <TouchableOpacity
                   className={`flex-1 py-3 rounded-btn items-center shadow-sm ${
-                    role === 'pet_owner' ? 'bg-primary' : 'bg-input-bg'
+                    watchRole === 'pet_owner' ? 'bg-primary' : 'bg-input-bg'
                   }`}
-                  onPress={() => setRole('pet_owner')}
+                  onPress={() => setValue('role', 'pet_owner')}
                 >
-                  <Text className={`text-[13px] font-bold ${role === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
+                  <Text className={`text-[13px] font-bold ${watchRole === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
                     🐾 Pet Owner
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   className={`flex-1 py-3 rounded-btn items-center shadow-sm ${
-                    role === 'veterinarian' ? 'bg-primary' : 'bg-input-bg'
+                    watchRole === 'veterinarian' ? 'bg-primary' : 'bg-input-bg'
                   }`}
-                  onPress={() => setRole('veterinarian')}
+                  onPress={() => setValue('role', 'veterinarian')}
                 >
-                  <Text className={`text-[13px] font-bold ${role === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
+                  <Text className={`text-[13px] font-bold ${watchRole === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
                     🩺 Veterinarian
                   </Text>
                 </TouchableOpacity>
@@ -177,7 +205,7 @@ export default function SignUpScreen({ navigation }: Props) {
               {/* Submit */}
               <TouchableOpacity
                 className={`bg-primary rounded-btn h-[52px] items-center justify-center border border-primary-border shadow-md ${loading ? 'opacity-60' : ''}`}
-                onPress={handleSignUp}
+                onPress={handleSubmit(onSubmit)}
                 disabled={loading}
               >
                 <Text className="text-[15px] font-bold text-white">
@@ -191,7 +219,7 @@ export default function SignUpScreen({ navigation }: Props) {
           <View className="flex-row justify-center mt-4 mb-8">
             <Text className="text-sm text-dark">Already a furparent here? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text className="text-sm font-semibold text-dark">Log in</Text>
+              <Text className="text-sm font-semibold text-primary">Log in</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

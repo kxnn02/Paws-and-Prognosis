@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { formatVetNotes } from '../lib/notesHelper';
@@ -10,6 +10,7 @@ export function useVetAppointments() {
   const [vetId, setVetId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const vetIdRef = useRef<string | null>(null);
 
   // First, resolve the vet record for the logged-in user
   const resolveVetId = useCallback(async () => {
@@ -65,11 +66,15 @@ export function useVetAppointments() {
       setLoading(true);
       setError(null);
 
-      const resolvedVetId = await resolveVetId();
+      let resolvedVetId = vetIdRef.current;
       if (!resolvedVetId) {
-        setLoading(false);
-        setError('Vet profile not found');
-        return;
+        resolvedVetId = await resolveVetId();
+        if (!resolvedVetId) {
+          setLoading(false);
+          setError('Vet profile not found');
+          return;
+        }
+        vetIdRef.current = resolvedVetId;
       }
       setVetId(resolvedVetId);
 

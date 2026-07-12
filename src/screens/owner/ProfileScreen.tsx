@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,7 +28,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View className="flex-1 bg-beige">
+    <ScrollView className="flex-1 bg-beige" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
       <View className="px-5 pt-14 pb-6">
         <Text className="text-[22px] font-bold text-heading">Profile</Text>
@@ -65,12 +65,12 @@ export default function ProfileScreen() {
         />
         <MenuItem
           icon="notifications-outline"
-          label="Notifications"
+          label="Notifications (coming soon)"
           onPress={() => Alert.alert('Coming Soon', 'Notifications will be available in a future update.')}
         />
         <MenuItem
           icon="help-circle-outline"
-          label="Help & Support"
+          label="Help & Support (coming soon)"
           onPress={() => Alert.alert('Help & Support', 'For assistance, email support@pawsandprognosis.com')}
         />
       </View>
@@ -86,6 +86,6 @@ export default function ProfileScreen() {
           <Text className="text-sm font-semibold text-red-500 ml-2">Log Out</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }

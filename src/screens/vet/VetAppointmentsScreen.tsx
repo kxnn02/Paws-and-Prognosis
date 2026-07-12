@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
+  SectionList,
   ActivityIndicator,
   Alert,
   RefreshControl,
@@ -24,6 +25,7 @@ import type { Appointment, VetStackParamList } from '../../types';
 type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
 
 type FilterTab = 'all' | 'upcoming' | 'in_progress' | 'completed';
+type ViewMode = 'calendar' | 'byStatus';
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -35,6 +37,7 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 export default function VetAppointmentsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const {
+    appointments,
     loading,
     getMarkedDates,
     getAppointmentsForDate,
@@ -46,6 +49,7 @@ export default function VetAppointmentsScreen() {
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [refreshing, setRefreshing] = useState(false);
   const [notesModal, setNotesModal] = useState<{ visible: boolean; appointmentId: string; currentNotes: string }>({
     visible: false,
@@ -53,6 +57,29 @@ export default function VetAppointmentsScreen() {
     currentNotes: '',
   });
   const [notesInput, setNotesInput] = useState('');
+
+  const statusSections = useMemo(() => {
+    const dueToday = appointments.filter(
+      (a) => a.date === today && a.status !== 'cancelled'
+    );
+    const upcoming = appointments
+      .filter((a) => a.date > today && a.status !== 'cancelled')
+      .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+    const completed = appointments
+      .filter(
+        (a) =>
+          (a.date < today || a.status === 'completed') &&
+          a.status !== 'cancelled' &&
+          a.date !== today
+      )
+      .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+
+    return [
+      { title: 'Due Today', data: dueToday },
+      { title: 'Upcoming', data: upcoming },
+      { title: 'Completed', data: completed },
+    ];
+  }, [appointments, today]);
 
   const markedDates = getMarkedDates();
   const allDayAppointments = getAppointmentsForDate(selectedDate);
@@ -176,14 +203,14 @@ export default function VetAppointmentsScreen() {
             <>
               <TouchableOpacity
                 onPress={() => handleStatusChange(item, 'in_progress')}
-                className="bg-primary/10 px-3 py-1.5 rounded-btn"
+                className="bg-primary/10 px-4 py-2 rounded-btn"
                 activeOpacity={0.7}
               >
                 <Text className="text-xs font-medium text-primary">Start</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleStatusChange(item, 'cancelled')}
-                className="bg-red-50 px-3 py-1.5 rounded-btn"
+                className="bg-red-50 px-4 py-2 rounded-btn"
                 activeOpacity={0.7}
               >
                 <Text className="text-xs font-medium text-red-500">Cancel</Text>
@@ -193,7 +220,7 @@ export default function VetAppointmentsScreen() {
           {item.status === 'in_progress' && (
             <TouchableOpacity
               onPress={() => handleStatusChange(item, 'completed')}
-              className="bg-green-50 px-3 py-1.5 rounded-btn"
+              className="bg-green-50 px-4 py-2 rounded-btn"
               activeOpacity={0.7}
             >
               <Text className="text-xs font-medium text-green-700">Mark Complete</Text>
@@ -206,14 +233,14 @@ export default function VetAppointmentsScreen() {
                 participantName: (item.owner as unknown as { name: string })?.name || 'Patient',
               })
             }
-            className="bg-white px-3 py-1.5 rounded-btn border border-gray-200"
+            className="bg-white px-4 py-2 rounded-btn border border-gray-200"
             activeOpacity={0.7}
           >
             <Text className="text-xs font-medium text-dark">Message</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleAddNotes(item)}
-            className="bg-white px-3 py-1.5 rounded-btn border border-gray-200"
+            className="bg-white px-4 py-2 rounded-btn border border-gray-200"
             activeOpacity={0.7}
           >
             <Text className="text-xs font-medium text-dark">
@@ -246,6 +273,23 @@ export default function VetAppointmentsScreen() {
     );
   }
 
+  function renderSectionHeader({ section }: { section: { title: string; data: Appointment[] } }) {
+    return (
+      <View className="flex-row items-center px-5 pt-4 pb-2">
+        <Text className="text-[15px] font-semibold text-heading">{section.title}</Text>
+        <View className="ml-2 bg-primary/10 px-2 py-0.5 rounded-full">
+          <Text className="text-xs font-medium text-primary">{section.data.length}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  function renderSectionEmpty() {
+    return (
+      <Text className="text-xs italic text-grey px-5 pb-2">No appointments</Text>
+    );
+  }
+
   return (
     <View className="flex-1 bg-beige">
       {/* Header */}
@@ -253,58 +297,100 @@ export default function VetAppointmentsScreen() {
         <Text className="text-2xl font-bold text-heading">Appointments</Text>
       </View>
 
-      {/* Calendar */}
-      <Calendar
-        current={selectedDate}
-        onDayPress={(day: { dateString: string }) => setSelectedDate(day.dateString)}
-        markedDates={calendarMarks}
-        theme={calendarTheme}
-        style={{ marginHorizontal: 12 }}
-      />
-
-      {/* Filter Tabs */}
-      <View className="flex-row px-5 mt-3 mb-2 gap-2">
-        {FILTER_TABS.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            onPress={() => setActiveFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-btn ${
-              activeFilter === tab.key ? 'bg-primary' : 'bg-white border border-gray-200'
-            }`}
-            activeOpacity={0.7}
-          >
-            <Text className={`text-xs font-medium ${
-              activeFilter === tab.key ? 'text-white' : 'text-dark'
-            }`}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      {/* View Toggle */}
+      <View className="flex-row px-5 mb-3 gap-2">
+        <TouchableOpacity
+          onPress={() => setViewMode('calendar')}
+          className={`px-4 py-2 rounded-btn ${viewMode === 'calendar' ? 'bg-primary' : 'bg-white border border-gray-200'}`}
+          activeOpacity={0.7}
+        >
+          <Text className={`text-sm font-medium ${viewMode === 'calendar' ? 'text-white' : 'text-dark'}`}>
+            Calendar
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setViewMode('byStatus')}
+          className={`px-4 py-2 rounded-btn ${viewMode === 'byStatus' ? 'bg-primary' : 'bg-white border border-gray-200'}`}
+          activeOpacity={0.7}
+        >
+          <Text className={`text-sm font-medium ${viewMode === 'byStatus' ? 'text-white' : 'text-dark'}`}>
+            By Status
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Day appointments */}
-      <View className="flex-1">
-        <View className="px-5 mb-2 flex-row items-center justify-between">
-          <Text className="text-base font-semibold text-heading">
-            {selectedDate === today ? "Today's Schedule" : 'Schedule'}
-          </Text>
-          <Text className="text-xs text-grey">
-            {dayAppointments.length} {dayAppointments.length === 1 ? 'appointment' : 'appointments'}
-          </Text>
-        </View>
+      {viewMode === 'calendar' ? (
+        <>
+          {/* Calendar */}
+          <Calendar
+            current={selectedDate}
+            onDayPress={(day: { dateString: string }) => setSelectedDate(day.dateString)}
+            markedDates={calendarMarks}
+            theme={calendarTheme}
+            style={{ marginHorizontal: 12 }}
+          />
 
-        <FlatList
-          data={dayAppointments}
+          {/* Filter Tabs */}
+          <View className="flex-row px-5 mt-3 mb-2 gap-2">
+            {FILTER_TABS.map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => setActiveFilter(tab.key)}
+                className={`px-3 py-1.5 rounded-btn ${
+                  activeFilter === tab.key ? 'bg-primary' : 'bg-white border border-gray-200'
+                }`}
+                activeOpacity={0.7}
+              >
+                <Text className={`text-xs font-medium ${
+                  activeFilter === tab.key ? 'text-white' : 'text-dark'
+                }`}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Day appointments */}
+          <View className="flex-1">
+            <View className="px-5 mb-2 flex-row items-center justify-between">
+              <Text className="text-base font-semibold text-heading">
+                {selectedDate === today ? "Today's Schedule" : 'Schedule'}
+              </Text>
+              <Text className="text-xs text-grey">
+                {dayAppointments.length} {dayAppointments.length === 1 ? 'appointment' : 'appointments'}
+              </Text>
+            </View>
+
+            <FlatList
+              data={dayAppointments}
+              keyExtractor={(item) => item.id}
+              renderItem={renderAppointment}
+              ListEmptyComponent={renderEmpty}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
+              }
+            />
+          </View>
+        </>
+      ) : (
+        <SectionList
+          sections={statusSections}
           keyExtractor={(item) => item.id}
           renderItem={renderAppointment}
-          ListEmptyComponent={renderEmpty}
+          renderSectionHeader={renderSectionHeader}
+          renderSectionFooter={({ section }) =>
+            section.data.length === 0 ? renderSectionEmpty() : null
+          }
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />
           }
         />
-      </View>
+      )}
 
       {/* Notes Modal */}
       <Modal

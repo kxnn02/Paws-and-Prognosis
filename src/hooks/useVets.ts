@@ -49,6 +49,7 @@ export function useVets() {
 
       if (reset) {
         setVets(newVets);
+        pageRef.current = 1;
         // Update cache with fresh data
         await cache.set('vets_all', newVets);
       } else {

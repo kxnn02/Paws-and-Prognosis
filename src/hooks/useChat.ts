@@ -20,6 +20,7 @@ export function useChatThreads() {
   const { user } = useAuth();
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchThreads = useCallback(async () => {
     if (!user) {
@@ -30,6 +31,7 @@ export function useChatThreads() {
 
     try {
       setLoading(true);
+      setError(null);
 
       const { data: messages, error } = await supabase
         .from('messages')
@@ -99,6 +101,7 @@ export function useChatThreads() {
       setThreads(threadList);
     } catch (err) {
       console.error('Error fetching chat threads:', err);
+      setError('Failed to load conversations');
     } finally {
       setLoading(false);
     }
@@ -135,7 +138,7 @@ export function useChatThreads() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  return { threads, loading, fetchThreads };
+  return { threads, loading, error, fetchThreads };
 }
 
 export function useChatMessages(partnerId: string) {
@@ -237,6 +240,10 @@ export function useChatMessages(partnerId: string) {
     channelRef.current = channel;
 
     return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
