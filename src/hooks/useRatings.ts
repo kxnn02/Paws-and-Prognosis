@@ -64,7 +64,10 @@ export function useRatings() {
       setRatings((prev) => [...prev, data as Rating]);
 
       // Update vet's average rating
-      await updateVetAverageRating(params.vetId);
+      const { error: avgError } = await updateVetAverageRating(params.vetId);
+      if (avgError) {
+        console.error('Rating saved but average update failed:', avgError);
+      }
 
       return { error: null };
     } catch (err) {
@@ -73,25 +76,34 @@ export function useRatings() {
     }
   }
 
-  async function updateVetAverageRating(vetId: string) {
+  async function updateVetAverageRating(vetId: string): Promise<{ error: Error | null }> {
     try {
       // Calculate new average
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('ratings')
         .select('score')
         .eq('vet_id', vetId);
 
-      if (error || !data || data.length === 0) return;
+      if (fetchError) throw fetchError;
+      if (!data || data.length === 0) return { error: null };
 
       const avg = data.reduce((sum, r) => sum + r.score, 0) / data.length;
       const rounded = Math.round(avg * 10) / 10;
 
-      await supabase
+      // Conditional update — only apply if rating differs
+      const { error: updateError } = await supabase
         .from('vets')
         .update({ rating: rounded })
-        .eq('id', vetId);
+        .eq('id', vetId)
+        .neq('rating', rounded);
+
+      if (updateError) throw updateError;
+
+      return { error: null };
     } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error updating vet rating';
       console.error('Error updating vet rating:', err);
+      return { error: new Error(message) };
     }
   }
 

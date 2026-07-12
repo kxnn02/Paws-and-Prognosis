@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
+import { forgotPasswordSchema } from '../../lib/schemas';
 
 export default function ForgotPasswordScreen() {
   const navigation = useNavigation();
@@ -21,17 +22,13 @@ export default function ForgotPasswordScreen() {
   const [sent, setSent] = useState(false);
 
   async function handleReset() {
-    const trimmed = email.trim();
-    if (!trimmed) {
-      Alert.alert('Error', 'Please enter your email address.');
+    const result = forgotPasswordSchema.safeParse({ email: email.trim() });
+    if (!result.success) {
+      Alert.alert('Error', result.error.errors[0].message);
       return;
     }
 
-    // Basic email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      Alert.alert('Error', 'Please enter a valid email address.');
-      return;
-    }
+    const trimmed = email.trim();
 
     setLoading(true);
     try {

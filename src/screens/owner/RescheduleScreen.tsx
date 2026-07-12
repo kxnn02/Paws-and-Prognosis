@@ -13,6 +13,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { supabase } from '../../lib/supabase';
 import { useAppointments } from '../../hooks/useAppointments';
+import { useVetWorkingHours } from '../../hooks/useVetWorkingHours';
 import type { OwnerStackParamList } from '../../types';
 
 type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
@@ -64,10 +65,31 @@ export default function RescheduleScreen() {
   const { appointments, fetchAppointments } = useAppointments();
   const appointment = appointments.find((a) => a.id === appointmentId);
 
+  const { hours: vetHours } = useVetWorkingHours(appointment?.vet_id);
+
   const days = useMemo(() => generateDays(14), []);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Warn before leaving with unsaved changes
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (!selectedDate && !selectedTime) return;
+
+      e.preventDefault();
+      Alert.alert(
+        'Discard Changes?',
+        'You have unsaved reschedule selections. Are you sure you want to leave?',
+        [
+          { text: 'Stay', style: 'cancel' },
+          { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, selectedDate, selectedTime]);
 
   // Find booked time slots for the selected date
   const bookedSlots = useMemo(() => {
@@ -88,11 +110,59 @@ export default function RescheduleScreen() {
     return bookedSlots.some((b) => b.startsWith(time24.slice(0, 5)));
   }
 
+  function getAvailableSlots(): string[] {
+    if (!selectedDate) return TIME_SLOTS;
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+    const dayIndex = new Date(selectedDate).getDay();
+    const dayName = dayNames[dayIndex];
+    const hoursForDay = vetHours[dayName];
+
+    if (!hoursForDay) return []; // Closed
+
+    const [startStr, endStr] = hoursForDay.split(' - ');
+    const startMinutes = parseTimeToMinutes(startStr);
+    const endMinutes = parseTimeToMinutes(endStr);
+
+    return TIME_SLOTS.filter((slot) => {
+      const slotMinutes = parseTimeToMinutes(slot);
+      return slotMinutes >= startMinutes && slotMinutes < endMinutes;
+    });
+  }
+
+  function parseTimeToMinutes(time12: string): number {
+    const [time, modifier] = time12.split(' ');
+    const [hoursStr, minutes] = time.split(':');
+    let hours = parseInt(hoursStr, 10);
+    if (modifier === 'PM' && hours !== 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + parseInt(minutes, 10);
+  }
+
   async function handleReschedule() {
     if (!selectedDate || !selectedTime) {
       Alert.alert('Error', 'Please select a new date and time.');
       return;
     }
+
+    // Same-slot check
+    const time24 = convertTo24Hour(selectedTime);
+    if (appointment && appointment.date === selectedDate && appointment.time.startsWith(time24.slice(0, 5))) {
+      Alert.alert('Same Time Selected', 'This is the same as your current appointment time. Please select a different slot.');
+      return;
+    }
+
+    Alert.alert(
+      'Confirm Reschedule',
+      `Move your appointment to ${selectedDate} at ${selectedTime}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Confirm', onPress: actuallyReschedule },
+      ]
+    );
+  }
+
+  async function actuallyReschedule() {
+    if (!selectedDate || !selectedTime) return;
 
     const time24 = convertTo24Hour(selectedTime);
 
@@ -148,7 +218,7 @@ export default function RescheduleScreen() {
 
         {/* Date Picker */}
         <Text className="text-base font-semibold text-heading mb-3">Select New Date</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
           {days.map((day) => {
             const isSelected = selectedDate === day.date;
             // Skip Sundays
@@ -160,6 +230,7 @@ export default function RescheduleScreen() {
                   setSelectedDate(day.date);
                   setSelectedTime(null);
                 }}
+                accessibilityLabel={`${day.dayName} ${day.month} ${day.dayNumber}${isSelected ? ', selected' : ''}`}
                 className={`w-[60px] h-[80px] rounded-card items-center justify-center mr-3 ${
                   isSelected ? 'bg-primary' : 'bg-white border border-gray-200'
                 }`}
@@ -178,13 +249,14 @@ export default function RescheduleScreen() {
             );
           })}
         </ScrollView>
+        <Text className="text-xs text-grey mt-2 italic">The clinic is closed on Sundays.</Text>
 
         {/* Time Slots */}
         {selectedDate && (
           <>
             <Text className="text-base font-semibold text-heading mb-3">Select New Time</Text>
             <View className="flex-row flex-wrap gap-3 mb-6">
-              {TIME_SLOTS.map((slot) => {
+              {getAvailableSlots().map((slot) => {
                 const booked = isSlotBooked(slot);
                 const isSelected = selectedTime === slot;
                 return (
@@ -192,6 +264,7 @@ export default function RescheduleScreen() {
                     key={slot}
                     onPress={() => !booked && setSelectedTime(slot)}
                     disabled={booked}
+                    accessibilityLabel={`${slot}${booked ? ', already booked' : isSelected ? ', selected' : ''}`}
                     className={`px-4 py-3 rounded-btn ${
                       booked
                         ? 'bg-gray-100 opacity-50'

@@ -8,6 +8,8 @@ import {
   Modal,
   Linking,
   Alert,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -27,12 +29,27 @@ export default function VetDetailsScreen() {
   const route = useRoute<VetDetailsRouteProp>();
   const { vetId } = route.params;
 
-  const { vets: supabaseVets } = useVets();
+  const { vets: supabaseVets, loading, fetchVets } = useVets();
   const vet = supabaseVets.find((v) => v.id === vetId);
   const { isFavorite, toggleFavorite } = useFavoriteVets();
   const { hours } = useVetWorkingHours(vetId);
 
   const [showContact, setShowContact] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function onRefresh() {
+    setRefreshing(true);
+    await fetchVets();
+    setRefreshing(false);
+  }
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-beige items-center justify-center">
+        <ActivityIndicator size="large" color="#71924F" />
+      </View>
+    );
+  }
 
   if (!vet) {
     return (
@@ -66,13 +83,15 @@ export default function VetDetailsScreen() {
 
   return (
     <View className="flex-1 bg-beige">
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#71924F" />}>
         {/* Header */}
         <View className="px-5 pt-14 pb-4 flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
             activeOpacity={0.7}
+            accessibilityLabel="Go back"
+            accessibilityRole="button"
           >
             <Ionicons name="arrow-back" size={22} color="#343434" />
           </TouchableOpacity>
@@ -83,6 +102,8 @@ export default function VetDetailsScreen() {
             onPress={() => toggleFavorite(vetId)}
             className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm"
             activeOpacity={0.7}
+            accessibilityLabel={isFavorite(vetId) ? 'Remove from favorites' : 'Add to favorites'}
+            accessibilityRole="button"
           >
             <Ionicons
               name={isFavorite(vetId) ? 'heart' : 'heart-outline'}
@@ -94,10 +115,16 @@ export default function VetDetailsScreen() {
 
         {/* Vet Profile Card */}
         <View className="mx-5 bg-primary rounded-card p-5 items-center">
-          <Image
-            source={{ uri: vet.image_url || 'https://via.placeholder.com/120' }}
-            className="w-[120px] h-[120px] rounded-full border-[3px] border-primary-border"
-          />
+          {vet.image_url ? (
+            <Image
+              source={{ uri: vet.image_url }}
+              className="w-[120px] h-[120px] rounded-full border-[3px] border-primary-border"
+            />
+          ) : (
+            <View className="w-[120px] h-[120px] rounded-full border-[3px] border-primary-border bg-white/20 items-center justify-center">
+              <Ionicons name="medical" size={48} color="#FFFFFF" />
+            </View>
+          )}
           <Text className="text-white text-xl font-bold mt-3">{vet.name}</Text>
           <Text className="text-white/70 text-sm mt-1">{vet.specialty}</Text>
 
@@ -138,7 +165,7 @@ export default function VetDetailsScreen() {
               return (
                 <View key={day} className="flex-row justify-between mb-2">
                   <Text className="text-sm text-dark">{label}</Text>
-                  <Text className={`text-sm font-medium ${value ? 'text-primary' : 'text-grey'}`}>
+                  <Text className={`text-sm font-medium ${value ? 'text-primary' : 'text-red-400'}`}>
                     {value || 'Closed'}
                   </Text>
                 </View>

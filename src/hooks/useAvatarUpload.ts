@@ -55,7 +55,8 @@ export function useAvatarUpload() {
       if (updateError) throw updateError;
 
       await refreshProfile();
-    } catch {
+    } catch (err) {
+      console.error('Avatar upload error:', err);
       Alert.alert('Error', 'Failed to upload photo.');
     } finally {
       setUploading(false);

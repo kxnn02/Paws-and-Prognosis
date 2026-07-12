@@ -44,6 +44,7 @@ export function useFavoriteVets() {
   async function toggleFavorite(vetId: string) {
     if (!storageKey) return;
 
+    const previous = [...favoriteIds];
     const updated = favoriteIds.includes(vetId)
       ? favoriteIds.filter((id) => id !== vetId)
       : [...favoriteIds, vetId];
@@ -53,6 +54,7 @@ export function useFavoriteVets() {
       await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
     } catch (err) {
       console.error('Error saving favorites:', err);
+      setFavoriteIds(previous);
     }
   }
 

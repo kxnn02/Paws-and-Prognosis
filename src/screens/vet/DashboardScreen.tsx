@@ -187,6 +187,7 @@ export default function DashboardScreen() {
             <DashboardAppointmentCard
               key={appointment.id}
               appointment={appointment}
+              onPress={() => navigation.navigate('VetAppointmentDetail', { appointmentId: appointment.id })}
               onStart={() => handleStatusChange(appointment, 'in_progress')}
               onComplete={() => handleStatusChange(appointment, 'completed')}
               onMessage={() =>
@@ -205,12 +206,22 @@ export default function DashboardScreen() {
         <View className="px-5 mt-6">
           <Text className="text-[17px] font-bold text-heading mb-3">Coming Up</Text>
           {upcomingCases.slice(0, 3).map((appointment) => (
-            <UpcomingCard key={appointment.id} appointment={appointment} />
+            <UpcomingCard
+              key={appointment.id}
+              appointment={appointment}
+              onPress={() => navigation.navigate('VetAppointmentDetail', { appointmentId: appointment.id })}
+            />
           ))}
           {upcomingCases.length > 3 && (
-            <Text className="text-xs text-grey text-center mt-2">
-              +{upcomingCases.length - 3} more in Appointments tab
-            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.getParent()?.navigate('Appointments')}
+              activeOpacity={0.7}
+              className="mt-2"
+            >
+              <Text className="text-xs text-primary text-center font-medium">
+                +{upcomingCases.length - 3} more → View All
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       )}
@@ -241,11 +252,13 @@ function DashboardAppointmentCard({
   onStart,
   onComplete,
   onMessage,
+  onPress,
 }: {
   appointment: Appointment;
   onStart: () => void;
   onComplete: () => void;
   onMessage: () => void;
+  onPress: () => void;
 }) {
   function formatTime(time: string): string {
     const [hoursStr, minutes] = time.split(':');
@@ -257,7 +270,7 @@ function DashboardAppointmentCard({
   }
 
   return (
-    <View className="bg-white rounded-card p-4 mb-3 shadow-sm">
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="bg-white rounded-card p-4 mb-3 shadow-sm">
       {/* Top row */}
       <View className="flex-row items-center justify-between mb-2">
         <View className="flex-row items-center">
@@ -329,11 +342,11 @@ function DashboardAppointmentCard({
           <Text className="text-xs font-medium text-dark">Message</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
-function UpcomingCard({ appointment }: { appointment: Appointment }) {
+function UpcomingCard({ appointment, onPress }: { appointment: Appointment; onPress: () => void }) {
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   }
@@ -347,7 +360,7 @@ function UpcomingCard({ appointment }: { appointment: Appointment }) {
   }
 
   return (
-    <View className="bg-white rounded-btn px-4 py-3 mb-2 flex-row items-center shadow-sm">
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="bg-white rounded-btn px-4 py-3 mb-2 flex-row items-center shadow-sm">
       <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
         <Ionicons name="calendar-outline" size={16} color="#71924F" />
       </View>
@@ -362,6 +375,6 @@ function UpcomingCard({ appointment }: { appointment: Appointment }) {
       {appointment.pet && (
         <Text className="text-xs text-grey">{appointment.pet.name}</Text>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }

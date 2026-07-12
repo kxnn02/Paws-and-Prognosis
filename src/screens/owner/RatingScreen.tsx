@@ -72,16 +72,19 @@ export default function RatingScreen() {
         </Text>
 
         {/* Stars */}
-        <View className="flex-row mt-8 gap-3">
+        <View className="flex-row mt-8 gap-4">
           {[1, 2, 3, 4, 5].map((star) => (
             <TouchableOpacity
               key={star}
               onPress={() => setScore(star)}
               activeOpacity={0.7}
+              accessibilityLabel={`Rate ${star} out of 5 stars`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: score >= star }}
             >
               <Ionicons
                 name={star <= score ? 'star' : 'star-outline'}
-                size={44}
+                size={48}
                 color={star <= score ? '#F59E0B' : '#D1D5DB'}
               />
             </TouchableOpacity>

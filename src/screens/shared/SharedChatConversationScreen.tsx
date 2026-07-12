@@ -148,6 +148,8 @@ export default function SharedChatConversationScreen({
           onPress={() => navigation.goBack()}
           className="w-10 h-10 rounded-full bg-white items-center justify-center shadow-sm mr-3"
           activeOpacity={0.7}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
         >
           <Ionicons name="arrow-back" size={22} color="#343434" />
         </TouchableOpacity>
@@ -173,6 +175,13 @@ export default function SharedChatConversationScreen({
           renderItem={renderMessage}
           contentContainerStyle={{ paddingVertical: 12 }}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            messages.length >= 50 ? (
+              <View className="items-center py-3">
+                <Text className="text-[10px] text-grey italic">Only showing recent messages</Text>
+              </View>
+            ) : undefined
+          }
           ListEmptyComponent={
             <View className="items-center pt-20">
               <Ionicons name="chatbubble-ellipses-outline" size={40} color="#D1D5DB" />
@@ -207,14 +216,17 @@ export default function SharedChatConversationScreen({
               multiline
               maxLength={2000}
               returnKeyType="default"
+              accessibilityLabel="Message input"
             />
             <TouchableOpacity
               onPress={handleSend}
               disabled={!input.trim() || sending}
-              className={`ml-3 w-10 h-10 rounded-full items-center justify-center ${
+              className={`ml-3 w-11 h-11 rounded-full items-center justify-center ${
                 input.trim() ? 'bg-primary' : 'bg-gray-200'
               }`}
               activeOpacity={0.7}
+              accessibilityLabel="Send message"
+              accessibilityRole="button"
             >
               {sending ? (
                 <ActivityIndicator size="small" color="#FFF" />

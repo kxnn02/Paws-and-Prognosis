@@ -20,7 +20,7 @@ type NavigationProp = NativeStackNavigationProp<VetStackParamList>;
 
 export default function VetChatListScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { threads, loading, fetchThreads } = useChatThreads();
+  const { threads, loading, error, fetchThreads } = useChatThreads();
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -110,6 +110,23 @@ export default function VetChatListScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <View className="flex-1 bg-beige items-center justify-center px-8">
+        <Ionicons name="cloud-offline-outline" size={48} color="#9BA1A8" />
+        <Text className="text-base font-medium text-heading mt-4">Couldn{"'"}t load conversations</Text>
+        <Text className="text-sm text-grey text-center mt-2">{error}</Text>
+        <TouchableOpacity
+          onPress={fetchThreads}
+          className="mt-6 bg-primary px-6 py-3 rounded-btn"
+          activeOpacity={0.8}
+        >
+          <Text className="text-sm font-medium text-white">Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-beige">
       {/* Header */}
@@ -131,7 +148,7 @@ export default function VetChatListScreen() {
             maxLength={50}
           />
           {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')}>
+            <TouchableOpacity onPress={() => setSearch('')} accessibilityLabel="Clear search" accessibilityRole="button">
               <Ionicons name="close-circle" size={18} color="#9BA1A8" />
             </TouchableOpacity>
           )}

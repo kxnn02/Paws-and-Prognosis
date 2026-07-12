@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import type { Appointment } from '../types';
@@ -59,6 +59,32 @@ export function useAppointments() {
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  // Realtime subscription for appointment changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`appointments-${user.id}-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `owner_id=eq.${user.id}`,
+        },
+        () => {
+          fetchAppointments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   async function bookAppointment(params: {
     vetId: string;
