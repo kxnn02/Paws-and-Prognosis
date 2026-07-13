@@ -194,12 +194,11 @@ export function useChatMessages(partnerId: string) {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
+          filter: `receiver_id=eq.${user.id}`,
         },
         (payload) => {
           const newMsg = payload.new as Message;
-          const isRelevant =
-            (newMsg.sender_id === user.id && newMsg.receiver_id === partnerId) ||
-            (newMsg.sender_id === partnerId && newMsg.receiver_id === user.id);
+          const isRelevant = newMsg.sender_id === partnerId;
 
           if (isRelevant) {
             setMessages((prev) => {

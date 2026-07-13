@@ -102,7 +102,7 @@ export default function ChatListScreen() {
           Start a conversation by messaging a vet from their profile page.
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.getParent()?.navigate('Home')}
+          onPress={() => navigation.navigate('OwnerTabs' as never)}
           className="mt-4 bg-primary px-5 py-2.5 rounded-btn"
           activeOpacity={0.8}
         >

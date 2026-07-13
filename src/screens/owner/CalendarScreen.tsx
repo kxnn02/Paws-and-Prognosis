@@ -204,8 +204,8 @@ export default function CalendarScreen() {
               <TouchableOpacity
                 onPress={() =>
                   navigation.navigate('ChatConversation', {
-                    threadId: item.vet!.user_id,
-                    participantName: item.vet!.name,
+                    threadId: item.vet?.user_id || '',
+                    participantName: item.vet?.name || 'Veterinarian',
                   })
                 }
                 className="bg-primary/10 px-3 py-1.5 rounded-btn"

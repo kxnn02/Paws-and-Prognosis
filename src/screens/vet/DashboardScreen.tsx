@@ -214,7 +214,10 @@ export default function DashboardScreen() {
           ))}
           {upcomingCases.length > 3 && (
             <TouchableOpacity
-              onPress={() => navigation.getParent()?.navigate('Appointments')}
+              onPress={() => {
+                // Navigate to the Appointments tab (sibling tab)
+                (navigation as any).navigate('Appointments');
+              }}
               activeOpacity={0.7}
               className="mt-2"
             >
