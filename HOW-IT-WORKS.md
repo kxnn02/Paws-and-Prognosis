@@ -1,609 +1,320 @@
-# 📖 How Our App Works — Explained Like You're 5 (Almost)
+# 🐾 How Paws & Prognosis Works
 
-This guide explains every concept in our app using **real-world analogies** and **plain language**. No prior React Native knowledge needed.
+## What Is Paws & Prognosis?
 
----
+Paws & Prognosis is a **veterinary clinic mobile app** that connects pet owners with veterinarians. It allows pet owners to find vets, book appointments, manage their pet profiles, and communicate in real-time through chat. Veterinarians use the same app to manage their schedules, update appointment statuses, and respond to pet owners.
 
-## 🏠 Think of the App Like a Building
-
-```
-🏢 Our App = A building with rooms
-├── 🚪 Front Door = Login Screen (you need a key/password to get in)
-├── 🏬 Lobby = Home Screen (see what's available)
-├── 📋 Reception = Booking Screen (schedule an appointment)
-├── 🐕 Pet Room = My Pets Screen (your pet's info)
-├── 💬 Phone Booth = Chat Screen (talk to the vet)
-└── 📅 Calendar = Calendar Screen (see your schedule)
-```
-
-Different people see different rooms:
-- **Pet Owners** see: Home, Calendar, Chat, Profile
-- **Vets** see: Dashboard, Appointments, Chat, Account
+The app is built for the **Philippines market** and targets both Android and iOS through a single React Native codebase running on Expo.
 
 ---
 
-## 🧱 Building Blocks (React Native Components)
+## Two User Roles, One App
 
-React Native gives us **LEGO pieces** to build screens. Here's each piece in plain English:
+When a user signs up, they choose one of two roles. Each role sees a completely different interface:
 
-### `View` = An invisible box
-Think of it like a **cardboard box** that holds other things inside it.
+### 🐕 Pet Owner Experience
+
+| Screen | What It Does |
+|--------|-------------|
+| **Home** | Displays a grid of available veterinarians with their photo, name, specialty, and star rating. Includes a search bar to filter vets by name or specialty. |
+| **Vet Details** | Shows a vet's full profile — bio, specialty, rating, and a "Book Appointment" button. |
+| **Booking** | A multi-step form: select a date (14-day range calendar), pick an available time slot, add notes, then confirm. |
+| **Calendar** | Shows all the pet owner's appointments on a calendar with colored dot markers. Tapping a date reveals that day's appointments with status indicators. |
+| **My Pets** | Lists all registered pets with photo, name, species, and breed. Tap to view full profile or edit. |
+| **Add/Edit Pet** | Form to register a new pet or update existing info — name, species, breed, age, weight, gender, color, and photo (camera or gallery via expo-image-picker). |
+| **Pet Profile** | Detailed view of a single pet's information and photo. |
+| **Chat List** | Lists all active chat conversations with vets, showing the last message and timestamp. |
+| **Chat Conversation** | Real-time messaging with a veterinarian. Messages appear instantly for both parties using Supabase Realtime. Includes typing indicators. |
+| **Rating** | After a completed appointment, the pet owner can rate their experience with 1–5 stars. |
+| **Reschedule** | Change the date/time of an existing upcoming appointment. |
+| **Tips** | Pet care tips and educational content for pet owners. |
+| **Profile** | View/edit personal info, upload avatar photo, and log out. |
+
+### 🩺 Veterinarian Experience
+
+| Screen | What It Does |
+|--------|-------------|
+| **Dashboard** | Overview of the vet's day — total appointments, today's cases listed with pet/owner info, and reminders (vaccinations due, follow-ups). |
+| **Appointments** | Full list of all appointments across all dates, filterable by status (upcoming, in-progress, completed, cancelled). Vets can update status and add clinical notes. |
+| **Appointment Detail** | Deep view of a single appointment — pet info, owner info, date/time, status controls, and a notes modal for writing medical observations. |
+| **Chat List** | All conversations with pet owners. |
+| **Chat Conversation** | Same real-time messaging as the owner side. |
+| **Account** | Profile management, avatar upload, and logout. |
+
+---
+
+## How the App Flows (User Journey)
+
+### Pet Owner: Booking an Appointment
+
+```
+1. Opens app → Login Screen → enters email + password
+2. Lands on Home → sees grid of vets with photos and ratings
+3. Taps a vet → Vet Details screen → reads bio and specialty
+4. Taps "Book Appointment" → Booking Screen
+5. Selects a date on the calendar (next 14 days only)
+6. Picks a time slot from available options
+7. Adds optional notes (e.g. "my dog has been limping")
+8. Taps "Confirm Booking" → appointment created in database
+9. Receives confirmation → appointment appears in Calendar
+10. Can chat with the vet before the appointment date
+```
+
+### Veterinarian: Managing Their Day
+
+```
+1. Opens app → Login Screen → enters credentials
+2. Lands on Dashboard → sees today's appointment count and case list
+3. Reviews reminders (vaccine due dates, follow-ups)
+4. Taps an appointment → Detail Screen
+5. Updates status: upcoming → in_progress → completed
+6. Adds clinical notes (diagnosis, treatment given)
+7. Can chat with pet owner for follow-up questions
+8. Owner rates the visit after completion
+```
+
+### Real-Time Chat Flow
+
+```
+Owner sends message → Supabase inserts row in messages table
+                    → Realtime pushes new message to vet's device instantly
+Vet sees message appear without refreshing
+Vet types reply → typing indicator shows on owner's screen
+Vet sends reply → appears on owner's screen instantly
+```
+
+---
+
+## Technical Architecture
+
+### High-Level Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    MOBILE APP                            │
+│            (React Native + Expo SDK 54)                  │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
+│  │  Screens │  │  Hooks   │  │Components│             │
+│  │  (UI)    │──│ (Logic)  │──│(Reusable)│             │
+│  └──────────┘  └──────────┘  └──────────┘             │
+│        │              │                                  │
+│        └──────────────┘                                  │
+│                │                                         │
+└────────────────┼─────────────────────────────────────────┘
+                 │ HTTPS / WebSocket
+                 ▼
+┌─────────────────────────────────────────────────────────┐
+│                    SUPABASE (Cloud Backend)              │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐│
+│  │   Auth   │  │ Database │  │ Realtime │  │Storage ││
+│  │(Login/   │  │(Postgres)│  │(WebSocket│  │(Images)││
+│  │ Signup)  │  │          │  │  Push)   │  │        ││
+│  └──────────┘  └──────────┘  └──────────┘  └────────┘│
+│                                                         │
+│  Row Level Security ensures users only see their data   │
+└─────────────────────────────────────────────────────────┘
+```
+
+### What Each Supabase Service Does
+
+| Service | Purpose in Our App |
+|---------|-------------------|
+| **Auth** | Email/password signup and login. Manages sessions. Identifies who is making each request. |
+| **Database (PostgreSQL)** | Stores all structured data — profiles, pets, vets, appointments, messages, ratings, reminders. |
+| **Realtime** | Powers live chat. When a message is inserted into the database, all subscribed clients receive it instantly via WebSocket. |
+| **Storage** | Stores uploaded images — pet photos and user avatars. Files are organized in folders by user ID. |
+| **Row Level Security (RLS)** | Database-level access control. Even if someone intercepts API calls, they cannot read other users' data. |
+
+### Database Tables and Their Relationships
+
+```
+profiles ──────┐
+  (all users)  │
+               ├── pets (a pet owner has many pets)
+               │
+               ├── appointments (an owner books appointments)
+               │      │
+               │      ├── linked to a pet
+               │      ├── linked to a vet
+               │      └── can have a rating
+               │
+               ├── messages (users send/receive messages)
+               │
+               └── vets (a vet profile extends the base profile)
+                     │
+                     ├── appointments (vets are assigned appointments)
+                     ├── ratings (vets receive ratings)
+                     └── reminders (vets have clinical reminders)
+```
+
+---
+
+## Key Technical Concepts Used
+
+### Custom Hooks — Separating Logic from UI
+
+Every data operation is wrapped in a reusable hook so screens stay clean:
+
+| Hook | What It Manages |
+|------|----------------|
+| `useAuth()` | Login state, user profile, sign in/out |
+| `usePets()` | Fetching, adding, deleting pets + image upload |
+| `useVets()` | Fetching vet list with pagination |
+| `useAppointments()` | Booking, cancelling, rescheduling appointments |
+| `useChat()` | Messages, sending, real-time subscription, typing indicators |
+| `useRatings()` | Submitting and fetching star ratings |
+| `useReminders()` | Vet-side clinical reminders |
+| `useFavoriteVets()` | Saving/removing favorite vets |
+| `useNetworkStatus()` | Detecting offline state |
+
+**How it works in practice:**
 ```tsx
-<View>
-  {/* stuff goes inside here */}
+// A screen just "uses" the hook — all database logic is hidden inside
+function MyPetsScreen() {
+  const { pets, loading, fetchPets, deletePet } = usePets();
+
+  // pets = array of pet data from Supabase
+  // loading = true while fetching
+  // fetchPets = call to refresh data
+  // deletePet = call to remove a pet
+}
+```
+
+### Navigation — Screen Flow
+
+The app uses **React Navigation** with this structure:
+
+```
+AppNavigator (decides which stack to show based on login state)
+│
+├── AuthNavigator (shown when NOT logged in)
+│   ├── Splash Screen
+│   ├── Login Screen
+│   ├── Sign Up Screen
+│   └── Forgot Password Screen
+│
+├── OwnerNavigator (shown when logged in as pet_owner)
+│   ├── Bottom Tab Bar
+│   │   ├── Home Tab → HomeScreen
+│   │   ├── Calendar Tab → CalendarScreen
+│   │   ├── Chat Tab → ChatListScreen
+│   │   └── Profile Tab → ProfileScreen
+│   │
+│   └── Stack Screens (pushed on top of tabs)
+│       ├── VetDetails, Booking, Reschedule
+│       ├── MyPets, AddPet, EditPet, PetProfile
+│       ├── ChatConversation, Rating
+│       └── EditProfile, TipsScreen
+│
+└── VetNavigator (shown when logged in as veterinarian)
+    ├── Bottom Tab Bar
+    │   ├── Dashboard Tab → DashboardScreen
+    │   ├── Appointments Tab → VetAppointmentsScreen
+    │   ├── Chat Tab → VetChatListScreen
+    │   └── Account Tab → VetAccountScreen
+    │
+    └── Stack Screens
+        ├── VetAppointmentDetail
+        ├── VetChatConversation
+        └── EditProfile
+```
+
+### Real-Time Chat — How Messages Work Instantly
+
+```
+1. Owner types a message and taps Send
+2. App inserts a row into the `messages` table in Supabase
+3. Supabase Realtime detects the INSERT
+4. Supabase pushes the new message via WebSocket to ALL subscribers on that channel
+5. Vet's app receives the push and adds the message to the chat screen
+6. No polling, no manual refresh — it just appears
+```
+
+The typing indicator works similarly — when a user is typing, a lightweight signal is broadcast on the channel so the other party sees "is typing..." in real-time.
+
+### Image Upload — How Pet Photos Get Saved
+
+```
+1. User taps the camera icon on a pet or profile screen
+2. expo-image-picker opens the device gallery (or camera)
+3. User selects a photo → picker returns the image as base64 data
+4. App decodes base64 → ArrayBuffer (using base64-arraybuffer library)
+5. App uploads ArrayBuffer to Supabase Storage bucket "pet-images"
+6. Supabase returns a public URL for the stored file
+7. App saves that URL in the database (pets.image_url or profiles.avatar_url)
+8. Image component loads the URL and displays the photo
+```
+
+### Styling — NativeWind (Tailwind CSS for React Native)
+
+Instead of writing verbose style objects, we use utility classes:
+
+```tsx
+// Every screen uses className for styling — clean and consistent
+<View className="flex-1 bg-beige px-5 pt-14">
+  <Text className="text-xl font-bold text-heading">My Pets</Text>
+  <TouchableOpacity className="bg-primary rounded-btn h-12 items-center justify-center">
+    <Text className="text-white font-semibold">Add Pet</Text>
+  </TouchableOpacity>
 </View>
 ```
 
-### `Text` = Words on screen
-You CANNOT just type words. You MUST put them inside `<Text>`:
-```tsx
-// ❌ WRONG - this crashes
-Hello world
+Design tokens (colors, border radii, etc.) are defined in `tailwind.config.js` so the entire app uses consistent values from the Figma design.
 
-// ✅ RIGHT
-<Text>Hello world</Text>
-```
+### Security — How User Data Is Protected
 
-### `TextInput` = A text field you can type into
-Like the blank line on a form where you write your name:
-```tsx
-<TextInput placeholder="Type your name..." />
-```
-
-### `TouchableOpacity` = A button
-Anything you can TAP. It fades a little when pressed so the user knows they tapped it:
-```tsx
-<TouchableOpacity onPress={() => doSomething()}>
-  <Text>Tap Me!</Text>
-</TouchableOpacity>
-```
-
-### `ScrollView` = A scrollable page
-When your content is too long to fit on one screen (like scrolling on Instagram):
-```tsx
-<ScrollView>
-  {/* lots of content that scrolls */}
-</ScrollView>
-```
-
-### `Image` = A picture
-```tsx
-<Image source={{ uri: 'https://example.com/dog.jpg' }} />
-```
-
-### `ActivityIndicator` = Loading spinner
-The spinning circle you see when something is loading:
-```tsx
-<ActivityIndicator />  {/* Shows a spinner */}
-```
-
-### `Alert` = A popup message
-Like those "Are you sure?" popups:
-```tsx
-Alert.alert('Delete Pet?', 'This cannot be undone', [
-  { text: 'Cancel' },
-  { text: 'Delete', onPress: () => deletePet() }
-]);
-```
+1. **Authentication** — Users must log in with email/password. Supabase Auth issues a JWT token that identifies who they are.
+2. **Row Level Security (RLS)** — Every database table has policies like:
+   - "Users can only SELECT their own pets" (`owner_id = auth.uid()`)
+   - "Users can only UPDATE their own profile" (`id = auth.uid()`)
+   - "Messages can only be read by sender or receiver"
+3. **Storage Policies** — Users can only upload files to their own folder (`user_id/filename`)
+4. **Input Validation** — All forms use Zod schemas to validate data before sending to the database
+5. **No Secrets in Code** — Supabase URL and key are in `.env` (gitignored), never hardcoded
 
 ---
 
-## 📦 State = Data That Can Change
+## Form Validation with Zod + React Hook Form
 
-### The Restaurant Analogy
-
-Imagine a restaurant order board:
+Every form in the app validates user input before submission:
 
 ```
-ORDER BOARD (State)
-┌──────────────────────┐
-│ Table 1: Burger      │  ← This can CHANGE (they might order more)
-│ Table 2: Pizza       │  ← This can CHANGE
-│ Table 3: (waiting)   │  ← This can CHANGE
-└──────────────────────┘
+User fills form → react-hook-form tracks all field values
+User taps Submit → zod schema validates (name required, species required, etc.)
+                 → If invalid: shows red error text below the field
+                 → If valid: sends data to Supabase
 ```
 
-When the board CHANGES, the kitchen (screen) REACTS and updates what it shows.
-
-### `useState` = Creating a slot on the board
-
-```tsx
-const [name, setName] = useState('');
-//     ↑       ↑              ↑
-//  current  function to    starting
-//  value    change it      value
-```
-
-**Real example — a search bar:**
-```tsx
-const [search, setSearch] = useState('');  // Start with empty text
-
-<TextInput
-  value={search}                    // Show whatever is in `search`
-  onChangeText={setSearch}          // When user types, update `search`
-/>
-// User types "D" → search becomes "D" → screen re-renders → shows "D"
-// User types "o" → search becomes "Do" → screen re-renders → shows "Do"
-// User types "g" → search becomes "Dog" → screen re-renders → shows "Dog"
-```
-
-### `useEffect` = "When X happens, do Y"
-
-```tsx
-// "When the screen first opens, load my pets from the database"
-useEffect(() => {
-  loadPets();
-}, []);
-//  ↑ empty [] means "only run once when screen opens"
-
-// "Whenever selectedDate changes, load appointments for that date"
-useEffect(() => {
-  loadAppointments(selectedDate);
-}, [selectedDate]);
-//  ↑ [selectedDate] means "run again whenever selectedDate changes"
-```
-
-**Analogy:** It's like setting an alarm:
-- `[]` = alarm that rings once (when you wake up)
-- `[selectedDate]` = alarm that rings every time you flip the calendar page
-
-### `useMemo` = A smart calculator that remembers answers
-
-```tsx
-// WITHOUT useMemo: filters ALL vets every time ANYTHING on screen changes (wasteful)
-const filtered = vets.filter(v => v.name.includes(search));
-
-// WITH useMemo: only re-filters when vets or search actually change (smart)
-const filtered = useMemo(() => {
-  return vets.filter(v => v.name.includes(search));
-}, [vets, search]);
-```
-
-**Analogy:** Imagine you asked "What's 847 × 293?" and someone calculated it. If you ask the exact same question again 5 seconds later, they just give you the saved answer instead of recalculating. That's `useMemo`.
+This prevents empty pet names, invalid emails, and other bad data from reaching the database.
 
 ---
 
-## 🪝 Custom Hooks = Pre-made Tool Kits
+## Offline Awareness
 
-### The Toolbox Analogy
-
-Imagine you're building furniture. Instead of finding a hammer, screws, and drill separately every time, you put them in a labeled **toolbox**:
-
-```
-🧰 "Pet Toolbox" (usePets hook)
-├── 🐕 pets         → list of all your pets
-├── ⏳ loading      → are we still loading?
-├── 📥 fetchPets    → reload the list
-├── ➕ addPet       → add a new pet
-└── 🗑️ deletePet   → remove a pet
-```
-
-### In code:
-
-```tsx
-// The toolbox (src/hooks/usePets.ts)
-export function usePets() {
-  const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchPets() {
-    setLoading(true);
-    const { data } = await supabase.from('pets').select('*');
-    setPets(data);
-    setLoading(false);
-  }
-
-  async function addPet(petData) {
-    await supabase.from('pets').insert(petData);
-    fetchPets(); // refresh the list
-  }
-
-  return { pets, loading, fetchPets, addPet };
-}
-```
-
-```tsx
-// Using the toolbox in a screen (ONE LINE to get everything!)
-export default function MyPetsScreen() {
-  const { pets, loading, fetchPets, addPet } = usePets();
-  //       ↑      ↑        ↑          ↑
-  //    the data  is it   refresh    add new
-  //             loading?  button    function
-}
-```
-
-### Our toolboxes:
-
-| Toolbox | Tools inside |
-|---------|-------------|
-| `usePets()` | pets list, add/delete/upload photo |
-| `useAppointments()` | appointments, book/cancel/reschedule |
-| `useVets()` | vet list, load more, search |
-| `useChat()` | messages, send message, typing indicator |
-| `useRatings()` | star ratings, submit rating |
-| `useAuth()` | login, logout, who am I? |
+The app uses `useNetworkStatus()` to detect when the device loses internet connection. When offline:
+- An `OfflineBanner` component shows at the top of the screen
+- Operations that require network (booking, chat) show appropriate messages
+- Cached data (from previous fetches) remains visible
 
 ---
 
-## 🌍 Context = Shared Bulletin Board
-
-### The Problem
-
-Imagine 10 classrooms in a school. They ALL need to know: "Is it a holiday today?"
-
-**Bad approach:** Walk to each classroom and tell them individually.
-**Good approach:** Put it on a **bulletin board in the hallway** — everyone can read it.
-
-### In our app:
-
-```
-📌 BULLETIN BOARD (AuthContext)
-┌──────────────────────────────────┐
-│ Logged in: YES                   │
-│ User: Juan (juan@email.com)      │
-│ Role: pet_owner                  │
-│ Avatar: https://...photo.jpg     │
-└──────────────────────────────────┘
-```
-
-**Every screen** can read this board:
-
-```tsx
-// ANY screen can do this:
-const { profile, signOut } = useAuth();
-
-// Now you know:
-// profile.name → "Juan"
-// profile.role → "pet_owner"
-// profile.email → "juan@email.com"
-```
-
-### How it wraps the app:
-
-```tsx
-// App.tsx
-<AuthProvider>          {/* ← The bulletin board is set up HERE */}
-  <AppNavigator />      {/* ← Everything inside can read it */}
-</AuthProvider>
-```
-
----
-
-## 🗺️ Navigation = Moving Between Rooms
-
-### Think of it like a stack of papers
-
-When you go to a new screen, it's placed ON TOP:
-
-```
-Screen Stack:
-┌─────────────┐
-│  Booking    │  ← You're here now (on top)
-├─────────────┤
-│  VetDetails │  ← Behind it
-├─────────────┤
-│  Home       │  ← Bottom (root)
-└─────────────┘
-```
-
-`goBack()` = remove the top paper (go back to previous screen)
-
-### Code:
-
-```tsx
-// GO FORWARD (add a screen on top)
-navigation.navigate('VetDetails', { vetId: '123' });
-
-// GO BACK (remove current screen, show previous)
-navigation.goBack();
-```
-
-### Tab Bar = Multiple stacks side by side
-
-```
-[🏠 Home]  [📅 Calendar]  [💬 Chat]  [👤 Profile]
-    ↑           ↑              ↑          ↑
- Each tab    Each tab      Each tab   Each tab
- is its      is its        is its     is its
- own stack   own stack     own stack  own stack
-```
-
-Tapping a tab switches which stack is visible. They don't destroy each other.
-
-### Passing data between screens:
-
-```tsx
-// SENDING data (from Home → VetDetails)
-navigation.navigate('VetDetails', { vetId: '123' });
-
-// RECEIVING data (in VetDetails screen)
-const route = useRoute();
-const { vetId } = route.params;  // vetId = '123'
-```
-
----
-
-## ☁️ Supabase = Our Database in the Cloud
-
-### Think of it like Google Sheets (but secure)
-
-```
-📊 Table: "pets"
-┌────────┬──────────┬─────────┬─────────┬────────┐
-│ id     │ name     │ species │ breed   │ owner  │
-├────────┼──────────┼─────────┼─────────┼────────┤
-│ abc123 │ Bantay   │ Dog     │ Aspin   │ juan01 │
-│ def456 │ Mingming │ Cat     │ Persian │ juan01 │
-│ ghi789 │ Rocky    │ Dog     │ Poodle  │ maria1 │
-└────────┴──────────┴─────────┴─────────┴────────┘
-```
-
-### The 4 operations (CRUD):
-
-```tsx
-// 📖 READ — "Show me all my pets"
-const { data } = await supabase
-  .from('pets')           // from the "pets" table
-  .select('*')            // get all columns
-  .eq('owner_id', myId);  // where owner is me
-
-// ✏️ CREATE — "Add a new pet"
-await supabase
-  .from('pets')
-  .insert({ name: 'Bantay', species: 'Dog', owner_id: myId });
-
-// 🔄 UPDATE — "Change appointment to cancelled"
-await supabase
-  .from('appointments')
-  .update({ status: 'cancelled' })
-  .eq('id', appointmentId);
-
-// 🗑️ DELETE — "Remove my pet"
-await supabase
-  .from('pets')
-  .delete()
-  .eq('id', petId);
-```
-
-### Real-time Chat (messages appear instantly):
-
-```tsx
-// "Hey Supabase, tell me whenever someone sends me a message"
-supabase
-  .channel('my-messages')
-  .on('postgres_changes', {
-    event: 'INSERT',           // when a new row appears
-    table: 'messages',         // in the messages table
-    filter: `receiver_id=eq.${myId}`,  // addressed to me
-  }, (payload) => {
-    // This runs INSTANTLY when a new message arrives!
-    addMessageToScreen(payload.new);
-  })
-  .subscribe();
-```
-
-**Analogy:** It's like subscribing to notifications. Instead of refreshing the page every second, Supabase TELLS you when something new arrives.
-
-### Security (Row Level Security):
-
-Even if a hacker knows the database URL, they can't see other people's data:
-
-```
-Juan logs in → Can only see Juan's pets
-Maria logs in → Can only see Maria's pets
-                (even though they're in the same table!)
-```
-
-This is enforced at the DATABASE level, not in our app code. So even if our app had a bug, the data is still protected.
-
----
-
-## 🎨 NativeWind = Easy Styling
-
-### The old way (ugly and long):
-
-```tsx
-<View style={{ flex: 1, backgroundColor: '#FEF9F4', paddingHorizontal: 20, marginTop: 16 }}>
-  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#544864' }}>Hello</Text>
-</View>
-```
-
-### Our way (short and readable):
-
-```tsx
-<View className="flex-1 bg-beige px-5 mt-4">
-  <Text className="text-2xl font-bold text-heading">Hello</Text>
-</View>
-```
-
-### Cheat sheet of classes we use:
-
-| What you want | Class to use | What it does |
-|---------------|-------------|--------------|
-| Full width/height | `flex-1` | Fills all available space |
-| Horizontal layout | `flex-row` | Items side by side |
-| Center stuff | `items-center justify-center` | Centers both ways |
-| Spacing (outside) | `mt-4` `mb-2` `mx-5` | Margin (top/bottom/horizontal) |
-| Spacing (inside) | `pt-4` `pb-2` `px-5` | Padding (top/bottom/horizontal) |
-| Round corners | `rounded-card` `rounded-btn` `rounded-full` | Cards / buttons / circles |
-| Background color | `bg-beige` `bg-primary` `bg-white` | Fill color |
-| Text color | `text-heading` `text-primary` `text-grey` | Font color |
-| Text size | `text-xs` `text-sm` `text-lg` `text-2xl` | Small → big |
-| Bold text | `font-bold` `font-semibold` `font-medium` | Weight |
-
-### Making it dynamic (change style based on condition):
-
-```tsx
-// If button is active → green background + white text
-// If button is inactive → white background + dark text
-<TouchableOpacity className={`px-4 py-2 rounded-btn ${
-  isActive ? 'bg-primary' : 'bg-white'
-}`}>
-  <Text className={isActive ? 'text-white' : 'text-dark'}>
-    {label}
-  </Text>
-</TouchableOpacity>
-```
-
----
-
-## 🏷️ TypeScript = Spell-checker for Code
-
-### The Problem
-
-JavaScript doesn't catch typos until the app CRASHES:
-```js
-const pet = { name: 'Bantay', species: 'Dog' };
-console.log(pet.naem);  // undefined — no error, just silent bug 😱
-```
-
-### TypeScript catches it BEFORE you run the app:
-
-```tsx
-interface Pet {
-  name: string;
-  species: string;
-}
-
-const pet: Pet = { name: 'Bantay', species: 'Dog' };
-console.log(pet.naem);  // ❌ RED UNDERLINE: "Did you mean 'name'?"
-```
-
-### Our types = a "recipe" for data shapes:
-
-```tsx
-// "A pet MUST have these fields"
-interface Pet {
-  id: string;          // every pet has a unique ID
-  name: string;        // name is required text
-  species: string;     // species is required text
-  age: string | null;  // age might be empty (null)
-  image_url: string | null;  // photo might not exist
-}
-
-// "User role can ONLY be one of these two values"
-type UserRole = 'pet_owner' | 'veterinarian';
-// trying to set role = 'admin' → ❌ ERROR
-```
-
----
-
-## 🧩 Full Example — How a Screen Works
-
-Here's a complete screen broken down line by line:
-
-```tsx
-// ═══════════════════════════════════════════════
-// STEP 1: IMPORTS (what tools do we need?)
-// ═══════════════════════════════════════════════
-import React, { useState } from 'react';           // React + state
-import { View, Text, TouchableOpacity } from 'react-native';  // UI pieces
-import { useNavigation } from '@react-navigation/native';      // Navigate between screens
-import { usePets } from '../../hooks/usePets';     // Our pet toolbox
-import { useAuth } from '../../context/AuthContext'; // Bulletin board (who am I?)
-
-// ═══════════════════════════════════════════════
-// STEP 2: THE SCREEN COMPONENT
-// ═══════════════════════════════════════════════
-export default function MyPetsScreen() {
-
-  // ─────────────────────────────────────────────
-  // STEP 3: GET TOOLS & DATA
-  // ─────────────────────────────────────────────
-  const navigation = useNavigation();         // Tool to move between screens
-  const { profile } = useAuth();              // Read the bulletin board
-  const { pets, loading } = usePets();        // Open the pets toolbox
-
-  // ─────────────────────────────────────────────
-  // STEP 4: WHAT HAPPENS WHEN USER TAPS THINGS
-  // ─────────────────────────────────────────────
-  function handlePetPress(petId: string) {
-    navigation.navigate('PetProfile', { petId });  // Go to pet detail
-  }
-
-  // ─────────────────────────────────────────────
-  // STEP 5: WHAT THE USER SEES (the return)
-  // ─────────────────────────────────────────────
-  if (loading) {
-    return <ActivityIndicator />;  // Show spinner while loading
-  }
-
-  return (
-    <View className="flex-1 bg-beige">
-      {/* Header */}
-      <Text className="text-xl font-bold text-heading px-5 mt-14">
-        {profile?.name}'s Pets
-      </Text>
-
-      {/* Pet List */}
-      {pets.map((pet) => (
-        <TouchableOpacity
-          key={pet.id}
-          onPress={() => handlePetPress(pet.id)}
-          className="bg-white mx-5 mt-3 p-4 rounded-card"
-        >
-          <Text className="text-dark font-semibold">{pet.name}</Text>
-          <Text className="text-grey text-sm">{pet.species} • {pet.breed}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
-```
-
----
-
-## 🔄 The Data Flow (Most Important Concept!)
-
-```
-┌────────────────────────────────────────────────────────────┐
-│                                                            │
-│  ☁️ SUPABASE (database in the cloud)                       │
-│     │                                                      │
-│     │ data flows DOWN                                      │
-│     ▼                                                      │
-│  🪝 HOOK (usePets, useAppointments, etc.)                  │
-│     │  - fetches data                                      │
-│     │  - stores in useState                                │
-│     │  - provides functions (add, delete, etc.)            │
-│     ▼                                                      │
-│  📱 SCREEN (MyPetsScreen, BookingScreen, etc.)             │
-│     │  - reads data from hook                              │
-│     │  - renders it with View/Text/Image                   │
-│     │  - shows buttons for user actions                    │
-│     ▼                                                      │
-│  👤 USER sees it and taps something                        │
-│     │                                                      │
-│     │ action flows UP                                      │
-│     ▼                                                      │
-│  📱 SCREEN calls a function (e.g. addPet())               │
-│     │                                                      │
-│     ▼                                                      │
-│  🪝 HOOK sends the change to Supabase                     │
-│     │                                                      │
-│     ▼                                                      │
-│  ☁️ SUPABASE saves it → hook re-fetches → screen updates  │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
-```
-
-**In one sentence:** Data comes DOWN from the database through hooks to the screen. User actions go UP from the screen through hooks back to the database.
-
----
-
-## ❓ Quick Answers to Professor Questions
-
-| Question | Answer |
-|----------|--------|
-| "What is useState?" | A way to store data that can change. When it changes, the screen automatically re-renders. |
-| "What is useEffect?" | A way to run code at specific moments — like "when the screen loads" or "when a value changes." |
-| "What is a custom hook?" | A reusable function that bundles related logic (state + effects + functions) so screens stay clean. |
-| "What is Context?" | A shared data store that any screen can access without passing data through every component. |
-| "What is Supabase?" | Our backend — it stores data in PostgreSQL, handles login, enables real-time chat, and stores images. |
-| "What is NativeWind?" | Tailwind CSS for React Native — lets us style with className instead of StyleSheet. |
-| "What is TypeScript?" | JavaScript with type checking — catches typos and wrong data shapes before the app runs. |
-| "How does navigation work?" | Screens stack on top of each other. Navigate forward adds a screen. Go back removes the top one. |
-| "How does real-time chat work?" | We subscribe to database changes. When a new message row is inserted, Supabase pushes it to us instantly. |
-| "How is data secured?" | Row Level Security (RLS) in Supabase — users can only read/write their own data, enforced at database level. |
-| "What's the Expo feature?" | expo-image-picker — opens camera or photo gallery, handles permissions, returns the selected image. |
-| "Does data persist after restart?" | Yes — all data is in Supabase (cloud). Session is in AsyncStorage (local). Nothing is lost on restart. |
+## Summary
+
+| Concept | What It Does in Our App |
+|---------|------------------------|
+| React Native + Expo | Single codebase runs on both Android and iOS phones via Expo Go |
+| TypeScript | Catches bugs before runtime by enforcing data types |
+| NativeWind | Consistent, Figma-matched styling with utility classes |
+| React Navigation | Manages screen flow — tabs for main sections, stack for drill-down |
+| Supabase Auth | Handles user registration, login, password reset, and session management |
+| Supabase Database | Stores all app data (pets, appointments, messages, ratings) with RLS |
+| Supabase Realtime | Powers instant chat messaging and typing indicators via WebSocket |
+| Supabase Storage | Stores pet photos and user avatars, served via public URLs |
+| Custom Hooks | Encapsulate all data-fetching logic so screens stay simple and focused |
+| Context (AuthContext) | Shares login state and user profile across all screens without prop drilling |
+| expo-image-picker | Opens camera/gallery for photo upload — a required grading integration |
+| react-native-calendars | Renders the appointment calendar with date markers |
+| Zod + react-hook-form | Validates form input before submission, shows inline error messages |
+| Row Level Security | Database-level access control — users cannot access each other's data |
