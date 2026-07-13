@@ -106,24 +106,20 @@ export function usePets() {
     }
   }
 
-  async function uploadPetImage(petId: string, uri: string): Promise<string | null> {
+  async function uploadPetImage(petId: string, imageBase64: string, fileExt: string): Promise<string | null> {
     if (!user) return null;
 
     try {
-      const fileExt = uri.split('.').pop() || 'jpg';
+      const { decode } = await import('base64-arraybuffer');
       const fileName = `${user.id}/${petId}.${fileExt}`;
 
-      // Fetch the image as blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      // Convert blob to ArrayBuffer
-      const arrayBuffer = await new Response(blob).arrayBuffer();
+      // Decode base64 to ArrayBuffer — the only reliable method on React Native
+      const arrayBuffer = decode(imageBase64);
 
       const { error: uploadError } = await supabase.storage
         .from('pet-images')
         .upload(fileName, arrayBuffer, {
-          contentType: `image/${fileExt}`,
+          contentType: `image/${fileExt === 'jpg' ? 'jpeg' : fileExt}`,
           upsert: true,
         });
 
@@ -133,18 +129,21 @@ export function usePets() {
         .from('pet-images')
         .getPublicUrl(fileName);
 
+      // Append cache-busting timestamp so RN image cache shows the new file
+      const publicUrlWithCacheBust = `${urlData.publicUrl}?t=${Date.now()}`;
+
       // Update pet record with image URL
       await supabase
         .from('pets')
-        .update({ image_url: urlData.publicUrl })
+        .update({ image_url: publicUrlWithCacheBust })
         .eq('id', petId);
 
       // Update local state
       setPets((prev) =>
-        prev.map((p) => (p.id === petId ? { ...p, image_url: urlData.publicUrl } : p))
+        prev.map((p) => (p.id === petId ? { ...p, image_url: publicUrlWithCacheBust } : p))
       );
 
-      return urlData.publicUrl;
+      return publicUrlWithCacheBust;
     } catch (err) {
       console.error('Error uploading pet image:', err);
       return null;

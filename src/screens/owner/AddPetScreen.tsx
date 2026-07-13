@@ -27,6 +27,8 @@ export default function AddPetScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { addPet, uploadPetImage } = usePets();
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imageExt, setImageExt] = useState<string>('jpg');
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -71,13 +73,16 @@ export default function AddPetScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
       quality: 0.8,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 || null);
+      const ext = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg';
+      setImageExt(ext);
     }
   }
 
@@ -89,13 +94,16 @@ export default function AddPetScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
       quality: 0.8,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 || null);
+      const ext = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg';
+      setImageExt(ext);
     }
   }
 
@@ -130,8 +138,8 @@ export default function AddPetScreen() {
       }
 
       // Upload image if selected
-      if (imageUri && pet) {
-        await uploadPetImage(pet.id, imageUri);
+      if (imageBase64 && pet) {
+        await uploadPetImage(pet.id, imageBase64, imageExt);
       }
 
       Alert.alert('Success', `${data.name} has been added!`, [

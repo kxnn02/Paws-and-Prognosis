@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,7 +14,7 @@ type NavigationProp = NativeStackNavigationProp<OwnerStackParamList>;
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { profile, signOut } = useAuth();
-  const { pickAndUploadAvatar } = useAvatarUpload();
+  const { pickAndUploadAvatar, uploading } = useAvatarUpload();
 
   function handleLogout() {
     Alert.alert(
@@ -36,12 +36,19 @@ export default function ProfileScreen() {
 
       {/* User Info */}
       <View className="items-center px-5 mb-6">
-        <TouchableOpacity onPress={pickAndUploadAvatar} activeOpacity={0.8}>
+        <TouchableOpacity onPress={pickAndUploadAvatar} activeOpacity={0.8} disabled={uploading}>
           <Avatar uri={profile?.avatar_url} name={profile?.name} size={80} />
           <View className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary items-center justify-center border-2 border-white">
-            <Ionicons name="camera" size={12} color="#FFF" />
+            {uploading ? (
+              <ActivityIndicator size={10} color="#FFF" />
+            ) : (
+              <Ionicons name="camera" size={12} color="#FFF" />
+            )}
           </View>
         </TouchableOpacity>
+        {uploading && (
+          <Text className="text-xs text-grey mt-2">Uploading...</Text>
+        )}
         <Text className="text-lg font-semibold text-dark mt-3">
           {profile?.name || 'User'}
         </Text>

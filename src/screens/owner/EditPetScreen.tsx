@@ -35,6 +35,8 @@ export default function EditPetScreen() {
   const pet = pets.find((p) => p.id === petId);
 
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imageExt, setImageExt] = useState<string>('jpg');
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -91,13 +93,16 @@ export default function EditPetScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
       quality: 0.8,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 || null);
+      const ext = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg';
+      setImageExt(ext);
     }
   }
 
@@ -109,13 +114,16 @@ export default function EditPetScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
+      allowsEditing: false,
       quality: 0.8,
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 || null);
+      const ext = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg';
+      setImageExt(ext);
     }
   }
 
@@ -146,8 +154,8 @@ export default function EditPetScreen() {
       if (error) throw error;
 
       // Upload new image if selected
-      if (imageUri) {
-        await uploadPetImage(petId, imageUri);
+      if (imageBase64) {
+        await uploadPetImage(petId, imageBase64, imageExt);
       }
 
       await fetchPets();
