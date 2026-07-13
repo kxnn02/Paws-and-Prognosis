@@ -104,6 +104,32 @@ export function useVetAppointments() {
     fetchAppointments();
   }, [fetchAppointments]);
 
+  // Realtime subscription for appointment changes (new bookings, cancellations)
+  useEffect(() => {
+    if (!user || !vetIdRef.current) return;
+
+    const channel = supabase
+      .channel(`vet-appointments-${user.id}-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `vet_id=eq.${vetIdRef.current}`,
+        },
+        () => {
+          fetchAppointments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, vetId]);
+
   async function updateAppointmentStatus(appointmentId: string, status: string) {
     try {
       const { error: updateError } = await supabase

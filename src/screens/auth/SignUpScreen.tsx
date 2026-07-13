@@ -103,6 +103,7 @@ export default function SignUpScreen({ navigation }: Props) {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     maxLength={50}
+                    accessibilityLabel="Your name"
                   />
                 )}
               />
@@ -124,6 +125,7 @@ export default function SignUpScreen({ navigation }: Props) {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     maxLength={100}
+                    accessibilityLabel="Email address"
                   />
                 )}
               />
@@ -185,6 +187,9 @@ export default function SignUpScreen({ navigation }: Props) {
                     watchRole === 'pet_owner' ? 'bg-primary' : 'bg-input-bg'
                   }`}
                   onPress={() => setValue('role', 'pet_owner')}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: watchRole === 'pet_owner' }}
+                  accessibilityLabel="Pet Owner"
                 >
                   <Text className={`text-[13px] font-bold ${watchRole === 'pet_owner' ? 'text-white' : 'text-dark'}`}>
                     🐾 Pet Owner
@@ -195,6 +200,9 @@ export default function SignUpScreen({ navigation }: Props) {
                     watchRole === 'veterinarian' ? 'bg-primary' : 'bg-input-bg'
                   }`}
                   onPress={() => setValue('role', 'veterinarian')}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: watchRole === 'veterinarian' }}
+                  accessibilityLabel="Veterinarian"
                 >
                   <Text className={`text-[13px] font-bold ${watchRole === 'veterinarian' ? 'text-white' : 'text-dark'}`}>
                     🩺 Veterinarian
