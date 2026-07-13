@@ -7,6 +7,8 @@ import {
   FlatList,
   KeyboardAvoidingView,
   ActivityIndicator,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -164,7 +166,7 @@ export default function SharedChatConversationScreen({
       {/* Messages */}
       <KeyboardAvoidingView
         className="flex-1"
-        behavior='padding'
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
         <FlatList
@@ -204,7 +206,7 @@ export default function SharedChatConversationScreen({
         )}
 
         {/* Input */}
-        <View className="px-4 pb-6 pt-3 bg-white border-t border-gray-100">
+        <View className="px-4 pb-2 pt-3 bg-white border-t border-gray-100">
           <View className="flex-row items-end">
             <TextInput
               className="flex-1 bg-input-bg rounded-btn px-4 py-3 text-sm text-dark max-h-[100px]"
