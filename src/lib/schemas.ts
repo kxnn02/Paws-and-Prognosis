@@ -21,7 +21,10 @@ export const signUpSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
-    .max(100, 'Email is too long'),
+    .max(100, 'Email is too long')
+    .refine((val) => val.endsWith('@gmail.com'), {
+      message: 'Only @gmail.com email addresses are accepted',
+    }),
   password: z
     .string()
     .min(6, 'Password must be at least 6 characters')
@@ -50,6 +53,11 @@ export const editProfileSchema = z.object({
     .string()
     .max(13, 'Phone number is too long')
     .regex(/^(\+63[0-9]{10})?$/, 'Phone must be in +63XXXXXXXXXX format (PH mobile)')
+    .optional()
+    .or(z.literal('')),
+  specialty: z
+    .string()
+    .max(50, 'Specialty is too long')
     .optional()
     .or(z.literal('')),
 });

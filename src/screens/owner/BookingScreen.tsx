@@ -428,6 +428,15 @@ export default function BookingScreen() {
                   </TouchableOpacity>
                 );
               })}
+              {/* Add More Pet button */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('AddPet')}
+                className="px-4 py-3 rounded-btn flex-row items-center border border-dashed border-primary"
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add" size={16} color="#71924F" />
+                <Text className="text-sm font-medium text-primary ml-1">Add Pet</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity

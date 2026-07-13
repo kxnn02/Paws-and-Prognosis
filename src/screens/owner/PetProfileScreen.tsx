@@ -124,10 +124,9 @@ export default function PetProfileScreen() {
           <View className="flex-row flex-wrap gap-3">
             <InfoCard icon="paw" label="Species" value={pet.species} />
             {pet.gender && <InfoCard icon="male-female" label="Gender" value={pet.gender} />}
-            {pet.age && <InfoCard icon="calendar" label="Age" value={pet.age} />}
-            {pet.weight && <InfoCard icon="fitness" label="Weight" value={pet.weight} />}
+            {pet.age && <InfoCard icon="calendar" label="Age" value={`${pet.age} ${Number(pet.age) === 1 ? 'year' : 'years'}`} />}
+            {pet.weight && <InfoCard icon="fitness" label="Weight" value={`${pet.weight} kg`} />}
             {pet.color && <InfoCard icon="color-palette" label="Color" value={pet.color} />}
-            {pet.country && <InfoCard icon="flag" label="Country" value={pet.country} />}
           </View>
         </View>
 

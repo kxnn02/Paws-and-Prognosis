@@ -32,6 +32,7 @@ export default function EditProfileScreen() {
     defaultValues: {
       name: profile?.name || '',
       phone: profile?.phone || '',
+      specialty: '',
     },
   });
 
@@ -64,6 +65,15 @@ export default function EditProfileScreen() {
         })
         .eq('id', user.id);
       if (error) throw error;
+
+      // Update vet specialty if applicable
+      if (profile?.role === 'veterinarian' && data.specialty?.trim()) {
+        await supabase
+          .from('vets')
+          .update({ specialty: data.specialty.trim() })
+          .eq('user_id', user.id);
+      }
+
       await refreshProfile();
       showToast('Profile updated successfully!', 'success');
       navigation.goBack();
@@ -141,22 +151,30 @@ export default function EditProfileScreen() {
             control={control}
             name="phone"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                className={`bg-white rounded-btn px-4 h-[46px] text-sm text-dark border ${errors.phone ? 'border-red-400' : 'border-gray-200'} mb-1`}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="+63 9XX XXX XXXX"
-                placeholderTextColor="#A7A7A7"
-                keyboardType="phone-pad"
-                maxLength={13}
-              />
+              <View className="flex-row items-center mb-1">
+                <View className="bg-input-bg rounded-l-btn px-3 h-[46px] justify-center border border-r-0 border-gray-200">
+                  <Text className="text-sm text-grey">+63</Text>
+                </View>
+                <TextInput
+                  className={`flex-1 bg-white rounded-r-btn px-4 h-[46px] text-sm text-dark border ${errors.phone ? 'border-red-400' : 'border-gray-200'}`}
+                  value={value?.replace('+63', '')}
+                  onChangeText={(text) => {
+                    const digits = text.replace(/[^0-9]/g, '').slice(0, 10);
+                    onChange(digits ? `+63${digits}` : '');
+                  }}
+                  onBlur={onBlur}
+                  placeholder="9XX XXX XXXX"
+                  placeholderTextColor="#A7A7A7"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                />
+              </View>
             )}
           />
           {errors.phone && (
             <Text className="text-xs text-red-500 mb-1">{errors.phone.message}</Text>
           )}
-          <Text className="text-xs text-grey -mt-3 mb-4">Format: +63XXXXXXXXXX</Text>
+          {!errors.phone && <View className="mb-3" />}
 
           {/* Role (read-only) */}
           <Text className="text-[13px] font-semibold text-heading mb-1.5">Role</Text>
@@ -165,6 +183,27 @@ export default function EditProfileScreen() {
               {profile?.role === 'pet_owner' ? 'Pet Owner' : 'Veterinarian'}
             </Text>
           </View>
+
+          {/* Specialty (vet only) */}
+          {profile?.role === 'veterinarian' && (
+            <>
+              <Text className="text-[13px] font-semibold text-heading mb-1.5">Specialty / Expertise</Text>
+              <Controller
+                control={control}
+                name="specialty"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    className="bg-white rounded-btn px-4 h-[46px] text-sm text-dark border border-gray-200 mb-4"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    placeholder="e.g. Surgery & Emergency"
+                    placeholderTextColor="#A7A7A7"
+                  />
+                )}
+              />
+            </>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
