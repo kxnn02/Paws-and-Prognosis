@@ -39,13 +39,18 @@ export function useVets() {
 
       const { data, error: fetchError } = await supabase
         .from('vets')
-        .select('*')
+        .select('*, profiles:user_id(avatar_url)')
         .order('rating', { ascending: false })
         .range(from, to);
 
       if (fetchError) throw fetchError;
 
-      const newVets = (data as Vet[]) || [];
+      // Merge profile avatar_url into vet image_url if vet has no image
+      const newVets = ((data as Array<Vet & { profiles: { avatar_url: string | null } | null }>) || []).map((v) => ({
+        ...v,
+        image_url: v.image_url || v.profiles?.avatar_url || null,
+        profiles: undefined,
+      })) as Vet[];
 
       if (reset) {
         setVets(newVets);
