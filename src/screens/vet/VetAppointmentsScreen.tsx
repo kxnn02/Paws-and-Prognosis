@@ -11,7 +11,6 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
@@ -401,7 +400,7 @@ export default function VetAppointmentsScreen() {
       >
         <KeyboardAvoidingView
           className="flex-1"
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior='padding'
         >
           <TouchableOpacity
             className="flex-1 bg-black/40"

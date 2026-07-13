@@ -8,7 +8,6 @@ import {
   Image,
   Alert,
   KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -190,7 +189,7 @@ export default function EditPetScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
       >
         <ScrollView
           className="flex-1 px-5"

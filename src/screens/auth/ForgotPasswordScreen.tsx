@@ -8,7 +8,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -95,7 +94,7 @@ export default function ForgotPasswordScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
       >
         <View className="flex-1 px-7 pt-6">
           <Image

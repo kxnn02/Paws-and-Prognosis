@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -103,7 +102,7 @@ export default function EditProfileScreen() {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
       >
         <ScrollView className="flex-1 px-5" keyboardShouldPersistTaps="handled">
           {/* Avatar placeholder */}

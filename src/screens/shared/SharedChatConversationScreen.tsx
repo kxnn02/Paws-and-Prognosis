@@ -7,7 +7,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -165,7 +164,7 @@ export default function SharedChatConversationScreen({
       {/* Messages */}
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
         keyboardVerticalOffset={0}
       >
         <FlatList

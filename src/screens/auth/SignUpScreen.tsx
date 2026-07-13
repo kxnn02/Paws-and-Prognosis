@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Image,
-  Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -62,7 +61,7 @@ export default function SignUpScreen({ navigation }: Props) {
 
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior='padding'
       >
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
