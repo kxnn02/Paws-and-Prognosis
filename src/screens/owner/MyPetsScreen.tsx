@@ -101,13 +101,7 @@ export default function MyPetsScreen() {
           <Ionicons name="arrow-back" size={22} color="#343434" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-heading">My Pets</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AddPet')}
-          className="w-10 h-10 rounded-full bg-primary items-center justify-center"
-          activeOpacity={0.7}
-        >
-          <Ionicons name="add" size={24} color="#FFF" />
-        </TouchableOpacity>
+        <View className="w-10" />
       </View>
 
       {/* Content */}
@@ -129,8 +123,8 @@ export default function MyPetsScreen() {
         />
       )}
 
-      {/* Floating Add Button (visible when pets exist) */}
-      {!loading && pets.length > 0 && (
+      {/* Floating Add Button */}
+      {!loading && (
         <TouchableOpacity
           onPress={() => navigation.navigate('AddPet')}
           className="absolute bottom-8 right-6 w-[56px] h-[56px] rounded-full bg-primary items-center justify-center shadow-lg"
